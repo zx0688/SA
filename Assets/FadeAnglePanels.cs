@@ -13,7 +13,7 @@ namespace UI
         [SerializeField] private Image _bottomLeft;
         [SerializeField] private Image _bottomRight;
 
-        protected virtual void OnServicesInited()
+        protected override void OnServicesInited()
         {
             base.OnServicesInited();
             FadeIn();
@@ -21,10 +21,10 @@ namespace UI
 
         private void FadeIn()
         {
-            _topLeft.transform.DOMove(new Vector3(0f, 0f, 0f), 0.2f, true);
-            _topRight.transform.DOMove(new Vector3(0f, 0f, 0f), 0.2f, true);
-            _bottomLeft.transform.DOMove(new Vector3(0f, 0f, 0f), 0.2f, true);
-            _bottomRight.transform.DOMove(new Vector3(0f, 0f, 0f), 0.2f, true);
+            _topLeft.GetComponent<RectTransform>().DOAnchorPos(new Vector2(194f, 766f), 0.3f, true);
+            _topRight.GetComponent<RectTransform>().DOAnchorPos(new Vector2(-194f, 766f), 0.3f, true);
+            _bottomLeft.GetComponent<RectTransform>().DOAnchorPos(new Vector2(178f, -1001f), 0.3f, true);
+            _bottomRight.GetComponent<RectTransform>().DOAnchorPos(new Vector2(-178f, -1001f), 0.3f, true);
         }
     }
 }

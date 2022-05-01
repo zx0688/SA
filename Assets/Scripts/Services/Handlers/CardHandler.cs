@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Meta;
 using UnityEngine;
 
 
@@ -11,13 +12,13 @@ public class CardHandler
     private PlayerVO player;
     private DataService dataManager;
 
-    delegate bool ActionTrigger(TriggerVO trigger, ActionData data, int startTime, int timestamp);
-    private ActionTrigger actionTrigger;
+    //delegate bool ActionTrigger(TriggerVO trigger, ActionData data, int startTime, int timestamp);
+    //private ActionTrigger actionTrigger;
     public CardHandler(PlayerVO playerVO)
     {
         this.player = playerVO;
         dataManager = Services.Data;
-        actionTrigger = dataManager.ActionTrigger;
+        //  actionTrigger = dataManager.ActionTrigger;
     }
     public int AvailableItem(int id, int type)
     {
@@ -83,7 +84,7 @@ public class CardHandler
             queue.Add(cardData);
     }
 
-    public void Trigger(List<CardData> queue, TriggerVO trigger, List<RewardData> reward, int time)
+    /*public void Trigger(List<CardData> queue, TriggerVO trigger, List<RewardData> reward, int time)
     {
 
         ItemVO action = null;
@@ -129,7 +130,7 @@ public class CardHandler
                 {
                     Utils.RemoveAt(ref dataManager.Game.cards, Array.IndexOf(dataManager.Game.cards, cardData));
                 }
-            }*/
+            }
         }
 
         List<CardData> candidates = new List<CardData>();
@@ -160,7 +161,7 @@ public class CardHandler
             queue.Add(firstPriorList[UnityEngine.Random.Range(0, firstPriorList.Count)]);
         }
 
-    }
+    }*/
 
     public CardVO GetVO(int id, int type)
     {

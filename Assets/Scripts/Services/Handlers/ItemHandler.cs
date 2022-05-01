@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Meta;
 using UnityEngine;
 
 public class ItemHandler
@@ -10,13 +11,14 @@ public class ItemHandler
     private PlayerVO player;
     private DataService dataManager;
 
-    delegate bool ActionTrigger(TriggerVO trigger, ActionData data, int startTime, int timestamp);
-    private ActionTrigger actionTrigger;
+    //delegate bool ActionTrigger(TriggerVO trigger, ActionData data, int startTime, int timestamp);
+
+    //private ActionTrigger actionTrigger;
     public ItemHandler(PlayerVO playerVO)
     {
         this.player = playerVO;
         dataManager = Services.Data;
-        actionTrigger = Services.Data.ActionTrigger;
+        //  actionTrigger = Services.Data.ActionTrigger;
     }
 
     public int AvailableItem(int id, int type = -1)
@@ -52,9 +54,8 @@ public class ItemHandler
         return r;
     }
 
-    public void Trigger(List<CardData> queue, TriggerVO trigger, List<RewardData> reward, int time)
+    /*public void Trigger(List<CardData> queue, TriggerVO trigger, List<RewardData> reward, int time)
     {
-
 
         if (trigger.tp == TriggerData.ITEM)
         {
@@ -73,14 +74,14 @@ public class ItemHandler
                         rd.count = 1;
                         Services.Data.ApplyReward (reward, new List<RewardData> () { rd }, 1f);
                         queue.Add (CardCreator.NewLevel (expd));
-                    }*/
+                    }
 
                 }
 
             }
         }
 
-    }
+    }*/
 
     public InventoryVO GetVO(int id, int type)
     {

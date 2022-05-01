@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Assets.SimpleLocalization;
 using Cysharp.Threading.Tasks;
-
+using Meta;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements;

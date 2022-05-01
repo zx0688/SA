@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Meta;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -39,7 +40,7 @@ public class UI_Map : ServiceBehaviour
         {
             int id = int.Parse(b.name.Split('_')[1]);
             Image i = b.gameObject.GetComponent<Image>();
-            LocationData location = Services.Data.Game.Locations.Find(l => l.id == id);
+            LocationData location = Services.Data.Meta.Locations.Find(l => l.id == id);
 
             if (location == null)
                 throw new Exception("Нет локации к кнопке N" + id);
@@ -74,9 +75,9 @@ public class UI_Map : ServiceBehaviour
         {
             int id = int.Parse(b.name.Split('_')[1]);
 
-            LocationData location = Services.Data.Game.Locations.Find(l => l.id == id);
+            //LocationData location = Services.Data.Locations.Find(l => l.id == id);
 
-            if (Services.Player.playerVO.locationId == location.id)
+            /*if (Services.Player.playerVO.locationId == location.id)
             {
                 SetState(b.image, 0);
             }
@@ -94,7 +95,7 @@ public class UI_Map : ServiceBehaviour
             {
                 //lock
                 SetState(b.image, 1);
-            }
+            }*/
         }
     }
 

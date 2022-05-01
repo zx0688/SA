@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Cards;
+using Meta;
 using UnityEngine;
 
 public class SkillHandler
@@ -10,16 +12,16 @@ public class SkillHandler
     private PlayerVO player;
     private DataService dataManager;
 
-    delegate bool ActionTrigger(TriggerVO trigger, ActionData data, int startTime, int timestamp);
-    private ActionTrigger actionTrigger;
+    //delegate bool ActionTrigger(TriggerVO trigger, ActionData data, int startTime, int timestamp);
+    //private ActionTrigger actionTrigger;
     public SkillHandler(PlayerVO playerVO)
     {
         this.player = playerVO;
         dataManager = Services.Data;
-        actionTrigger = Services.Data.ActionTrigger;
+        //  actionTrigger = Services.Data.ActionTrigger;
     }
 
-    public void ApplyCardSkill(SwipeData cardParams, TriggerVO trigger, int time)
+    /*public void ApplyCardSkill(SwipeData cardParams, TriggerVO trigger, int time)
     {
         int left_chance = 0;
         int right_chance = 0;
@@ -40,7 +42,7 @@ public class SkillHandler
                        float random = UnityEngine.Random.Range (0, 100f);
                        if (random > skillData.act.chance)
                            continue;
-                   }*/
+                   }
                 Services.Data.ApplyReward(drop, GetDrop(skillVO, skillData), 1f);
                 has = true;
             }
@@ -80,7 +82,7 @@ public class SkillHandler
         if (right_chance > 0)
             cardParams.Right.Chance = cardParams.Right.action.Chance + right_chance;
 
-    }
+    }*/
 
     public SkillVO Add(SkillData data, int count, int time)
     {
@@ -107,7 +109,7 @@ public class SkillHandler
         return current;
     }
 
-    public void Trigger(List<CardData> queue, TriggerVO trigger, List<RewardData> reward, int time)
+    /*public void Trigger(List<CardData> queue, TriggerVO trigger, List<RewardData> reward, int time)
     {
 
         if (trigger.tp == TriggerData.CARD)
@@ -124,13 +126,13 @@ public class SkillHandler
                     if (s.time == 0)
                         _remove.Add(s);
                 }
-            }*/
+            }
 
             foreach (SkillVO s in _remove)
                 player.skills.Remove(s);
         }
 
-    }
+    }*/
 
     public SkillVO GetVO(int id, int type)
     {

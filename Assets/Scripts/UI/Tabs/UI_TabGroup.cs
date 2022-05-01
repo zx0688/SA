@@ -1,83 +1,53 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-
 using UnityEngine;
 using UnityEngine.Events;
 
 public class UI_TabGroup : ServiceBehaviour
 {
-    // Start is called before the first frame update
-    public List<UI_TabButton> tabs;
+    [SerializeField] private List<UI_TabButton> _tabs;
+    [SerializeField] private List<GameObject> _pages;
 
-    public Sprite tabIdle;
-    public Sprite tabHover;
-    public Sprite tabActive;
+    public Action OnPageChanged;
 
-    private UI_TabButton selectedTab;
-    public List<GameObject> pages;
-
-    public UnityEvent OnPageChanged;
-
-    public UI_TabButton defaultTab;
+    [SerializeField] private UI_TabButton _defaultTab;
+    private UI_TabButton _selectedTab;
 
     protected override void OnServicesInited()
     {
         base.OnServicesInited();
 
-        if (defaultTab != null)
-            OnTabSelector(defaultTab);
-    }
-    public void Add(UI_TabButton tab)
-    {
-        if (tabs == null)
+        foreach (UI_TabButton tab in _tabs)
         {
-            tabs = new List<UI_TabButton>();
+            tab.TabGroup = this;
         }
 
-        tabs.Add(tab);
-
-    }
-
-    public void OnTabEnter(UI_TabButton tab)
-    {
-        if (selectedTab == null || selectedTab != tab)
+        for (int i = 0; i < _pages.Count; i++)
         {
-            //tab.backgroud.sprite = tabHover;
-        }
-    }
-    public void OnTabExit(UI_TabButton tab)
-    {
-        Reset();
-    }
-    public void OnTabSelector(UI_TabButton tab)
-    {
-        if (selectedTab != null) { selectedTab.Deselect(); }
-
-        selectedTab = tab;
-
-        Reset();
-        selectedTab.gameObject.GetComponent<RectTransform>().localScale = new Vector3(1.3f, 1.3f, 1.3f);
-        //selectedTab.backgroud.sprite = tabActive;
-
-        int index = tabs.IndexOf(tab);//tab.transform.GetSiblingIndex ();
-        for (int i = 0; i < pages.Count; i++)
-        {
-            pages[i].SetActive(i == index);
+            _pages[i].SetActive(false);
         }
 
-        selectedTab.Select();
+        OnTabSelect(_defaultTab);
+    }
+
+    public void OnTabSelect(UI_TabButton tab)
+    {
+        if (_selectedTab == tab) return;
+
+        if (_selectedTab != null)
+        {
+            _selectedTab.Deselect();
+        }
+
+        _selectedTab = tab;
+        int index = _tabs.IndexOf(tab);
+        for (int i = 0; i < _pages.Count; i++)
+        {
+            _pages[i].SetActive(i == index);
+        }
+
+        _selectedTab.Select();
         OnPageChanged?.Invoke();
-    }
-
-    public void Reset()
-    {
-        foreach (UI_TabButton tab in tabs)
-        {
-            if (selectedTab != null && selectedTab == tab)
-                continue;
-
-            // tab.gameObject.GetComponent<RectTransform>().localScale = new Vector3(1f, 1f, 1f);
-            // tab.backgroud.sprite = tabIdle;
-        }
     }
 }

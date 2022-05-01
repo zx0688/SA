@@ -5,8 +5,7 @@ using Assets.SimpleLocalization;
 using Cysharp.Threading.Tasks;
 
 using DG.Tweening;
-
-
+using Meta;
 using UnityEngine;
 using UnityEngine.UI;
 

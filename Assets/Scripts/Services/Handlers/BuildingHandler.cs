@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Meta;
 using UnityEngine;
 
 public class BuildingHandler
@@ -45,7 +46,7 @@ public class BuildingHandler
         return r;
     }
 
-    public void Trigger(List<CardData> queue, TriggerVO trigger, List<RewardData> reward, int time)
+    /*public void Trigger(List<CardData> queue, TriggerVO trigger, List<RewardData> reward, int time)
     {
 
         if (trigger.tp == TriggerData.BUILD && trigger.choice == TriggerData.CHOICE_PRODUCTION)
@@ -72,7 +73,7 @@ public class BuildingHandler
             }
         }
 
-    }
+    }*/
 
     public BuildingVO GetVO(int id, int type)
     {

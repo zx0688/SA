@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Assets.SimpleLocalization;
+using Cards;
 using Cysharp.Threading.Tasks;
-
+using Meta;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -84,7 +85,7 @@ public class PlayerService : IService
 
         // foreach (PlayerData p in Services.Data.game.profiles) {
         playerVO = await Services.Assets.GetProfile();
-        playerVO = playerVO == null ? Services.Data.Game.Profile : playerVO;
+        playerVO = playerVO == null ? Services.Data.Meta.Profile : playerVO;
 
         /*if (playerVO.quests == null)
             playerVO.quests = new List<QuestVO>();
@@ -142,7 +143,7 @@ public class PlayerService : IService
 
     public CardVO OpenCard(SwipeData param, int time)
     {
-        CardData cardData = param.CardData;
+        CardData cardData = param.Data;
         if (true)
         {
             return null;//questHandler.Add(Services.Data.QuestInfo(cardData.id), 1, time);
@@ -163,7 +164,7 @@ public class PlayerService : IService
 
             if (cardVO.left == 0)
             {
-                param.Left.action = null;
+                param.Left.Action = null;
             }
             else
             {
@@ -217,7 +218,7 @@ public class PlayerService : IService
         Services.Data.ApplyReward(reward, _reward, 1f);
 
     }*/
-    public void Trigger(List<CardData> queue, TriggerVO trigger, List<RewardData> reward, int time)
+    /*public void Trigger(List<CardData> queue, TriggerVO trigger, List<RewardData> reward, int time)
     {
 
         //ExecuteTrigger(queue, trigger, reward, time);
@@ -235,7 +236,7 @@ public class PlayerService : IService
         foreach (RewardData r in reward) {
             if (r.tp == DataManager.ITEM_ID || r.tp == DataManager.BUILDING_ID)
                 items.Add (new ItemVO (r.id, r.count));
-        }*/
+        }
 
         if (reward.Count > 0)
             OnItemReceived?.Invoke(reward);
@@ -251,11 +252,11 @@ public class PlayerService : IService
         Services.Assets.SetProfile(JsonUtility.ToJson(playerVO)).Forget();
         /*if (this == Services.Player) {
             Services.network.AddRequestToPool (new RequestVO ("choise"));
-        }*/
-    }
+        }
+    }*/
     public void Buy(int timestamp)
     {
-        List<RewardData> priceData = Services.Data.Game.Config.Price;
+        List<RewardData> priceData = Services.Data.Meta.Config.Price;
         List<RewardData> items = new List<RewardData>();
         //ItemVO i = (ItemVO) itemHandler.Add(Services.Data.ItemInfo(ItemData.ACCELERATE_ID), priceData[0].id, timestamp);
         RewardData r = new RewardData();
@@ -270,7 +271,7 @@ public class PlayerService : IService
     public void Accelerate(int timestamp, int count)
     {
 
-        int timeAccelerate = Services.Data.Game.Config.Accelerate * count;
+        int timeAccelerate = Services.Data.Meta.Config.Accelerate * count;
 
         /*if (Deck.instance.waitingTimeLeft - timeAccelerate < 0)
             timeAccelerate = Deck.instance.waitingTimeLeft;

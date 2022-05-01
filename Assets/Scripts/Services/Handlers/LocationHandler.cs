@@ -1,9 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-
-
+using Meta;
 using UnityEngine;
-
 
 
 public class LocationHandler
@@ -42,10 +40,8 @@ public class LocationHandler
         return data.id;
     }
 
-    public void Trigger(List<CardData> queue, TriggerVO trigger, List<RewardData> reward, int time)
-    {
-        //nothing
-    }
+    //public void Trigger(List<CardData> queue, TriggerVO trigger, List<RewardData> reward, int time)
+
 
     public int GetVO(int id, int type)
     {

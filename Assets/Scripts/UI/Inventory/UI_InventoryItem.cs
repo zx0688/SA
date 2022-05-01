@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-
+using Meta;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -83,7 +83,7 @@ public class UI_InventoryItem : MonoBehaviour, ITick
     protected virtual void Awake()
     {
 
-        count = transform.Find("Count").GetComponent<Text>();
+        count = transform.Find("Value").GetComponent<Text>();
 
         //isEmpty = true;
         // Clear ();

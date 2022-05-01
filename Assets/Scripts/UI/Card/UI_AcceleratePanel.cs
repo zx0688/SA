@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Assets.SimpleLocalization;
+using Meta;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -65,13 +66,13 @@ public class UI_AcceleratePanel : ServiceBehaviour
     protected override void OnServicesInited()
     {
         base.OnServicesInited();
-
+        return;
         iconItemVO = new ItemVO(ItemData.ACCELERATE_ID, 0);
 
         Services.Player.OnProfileUpdated += OnProfileUpdated;
-        timePerItem = Services.Data.Game.Config.Accelerate;
+        timePerItem = Services.Data.Meta.Config.Accelerate;
 
-        List<RewardData> priceData = Services.Data.Game.Config.Price;
+        List<RewardData> priceData = new List<RewardData>();//Services.Data.GameData.Config.Price;
         ItemVO ivo = new ItemVO(ItemData.ACCELERATE_ID, priceData[0].Id);
         buyBtn.transform.Find("Price").GetComponent<Text>().text = priceData[0].Count.ToString();
         buyBtn.GetComponent<UI_InventoryItem>().SetItem(ivo);

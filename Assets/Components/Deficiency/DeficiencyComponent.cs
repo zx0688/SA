@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Controllers;
-using Meta;
+using Data;
 using UnityEngine;
 
 public class DeficiencyComponent : MonoBehaviour
@@ -35,8 +35,8 @@ public class DeficiencyComponent : MonoBehaviour
 
     private void show(ConditionData c)
     {
-        if (c.Tp != DataService.ITEM_ID || c.Id != id)
-            return;
+        //if (c.Tp != DataService.ITEM_ID || c.Id != id)
+        //    return;
 
         deficiency.SetActive(true);
 

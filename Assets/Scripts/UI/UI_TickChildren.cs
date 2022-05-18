@@ -34,9 +34,13 @@ public class UI_TickChildren : MonoBehaviour
     void TickAll()
     {
         int timestamp = GameTime.Current;
-        /*        foreach (ITick t in tickList)
-                    if (t.IsTickble())
-                        t.Tick(timestamp);*/
+        for (int i = 0; i < tickList.Length; i++)
+        {
+            ITick tick = tickList[i];
+            if (tick.IsTickble())
+                tick.Tick(timestamp);
+
+        }
     }
 
     IEnumerator Tick()

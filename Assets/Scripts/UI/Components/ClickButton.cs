@@ -10,11 +10,13 @@ public class ClickButton : MonoBehaviour, IPointerClickHandler
     public Action OnClick;
 
     [SerializeField] private Sprite _default;
-    [SerializeField] private Sprite _down;
+    //[SerializeField] private Sprite _down;
     private Image _image;
+    private Color32 _downColor;
 
     private void Awake()
     {
+        _downColor = new Color32(155, 155, 155, 255);
         _image = GetComponent<Image>();
     }
 
@@ -33,8 +35,8 @@ public class ClickButton : MonoBehaviour, IPointerClickHandler
 
     IEnumerator Click()
     {
-        _image.sprite = _down;
+        _image.color = _downColor;
         yield return new WaitForSeconds(0.1f);
-        _image.sprite = _default;
+        _image.color = Color.white;
     }
 }

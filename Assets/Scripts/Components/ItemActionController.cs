@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Meta;
+using Data;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -78,7 +78,7 @@ namespace Controllers
                 }
                 else
                 {
-                    ItemData res = Services.Data.ItemInfo(data.Id);
+                    ItemMeta res = Services.Data.ItemInfo(data.Id);
                     icon.sprite = await Services.Assets.GetSprite("Items/" + res.Id + "/icon", true);
                 }
             }

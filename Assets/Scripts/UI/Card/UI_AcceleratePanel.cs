@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Assets.SimpleLocalization;
-using Meta;
+using Data;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -42,7 +42,7 @@ public class UI_AcceleratePanel : ServiceBehaviour
 
         if (Services.isInited && iconItemVO != null)
         {
-            availableCount = Services.Player.AvailableItem(iconItemVO.id);
+            availableCount = Services.Player.AvailableItem(iconItemVO.Id);
             SetItem(availableCount, GameTime.Current);
             timer = StartCoroutine(Tick());
             timer = null;
@@ -67,28 +67,28 @@ public class UI_AcceleratePanel : ServiceBehaviour
     {
         base.OnServicesInited();
         return;
-        iconItemVO = new ItemVO(ItemData.ACCELERATE_ID, 0);
+        /*iconItemVO = new ItemVO(ItemMeta.ACCELERATE_ID, 0);
 
         Services.Player.OnProfileUpdated += OnProfileUpdated;
         timePerItem = Services.Data.Meta.Config.Accelerate;
 
         List<RewardData> priceData = new List<RewardData>();//Services.Data.GameData.Config.Price;
-        ItemVO ivo = new ItemVO(ItemData.ACCELERATE_ID, priceData[0].Id);
+        ItemVO ivo = new ItemVO(ItemMeta.ACCELERATE_ID, priceData[0].Id);
         buyBtn.transform.Find("Price").GetComponent<Text>().text = priceData[0].Count.ToString();
         buyBtn.GetComponent<UI_InventoryItem>().SetItem(ivo);
 
-        accelerateItemVO = new ItemVO(ItemData.ACCELERATE_ID, 0);
+        accelerateItemVO = new ItemVO(ItemMeta.ACCELERATE_ID, 0);
         accelerateItem.SetItem(accelerateItemVO);
 
-        availableCount = Services.Player.AvailableItem(iconItemVO.id);
-        SetItem(availableCount, GameTime.Current);
+        availableCount = Services.Player.AvailableItem(iconItemVO.Id);
+        SetItem(availableCount, GameTime.Current);*/
     }
     private void OnProfileUpdated()
     {
         if (gameObject.activeInHierarchy == false)
             return;
 
-        availableCount = Services.Player.AvailableItem(iconItemVO.id);
+        availableCount = Services.Player.AvailableItem(iconItemVO.Id);
         if (GameTime.Left(GameTime.Current, start, wait) > 0)
         {
             timer = StartCoroutine(Tick());
@@ -115,11 +115,11 @@ public class UI_AcceleratePanel : ServiceBehaviour
             float timeLeft = GameTime.Left(timestamp, start, wait);
             int count = Mathf.CeilToInt(timeLeft / timePerItem);
             count = count < 0 ? 0 : count;
-            accelerateItemVO.count = Math.Min(availableCount, count);
+            accelerateItemVO.Count = Math.Min(availableCount, count);
             accelerateItem.SetItem(accelerateItemVO);
         }
 
-        iconItemVO.count = availableCount;
+        iconItemVO.Count = availableCount;
         iconItem.SetItem(iconItemVO);
     }
 
@@ -148,20 +148,20 @@ public class UI_AcceleratePanel : ServiceBehaviour
     }
     private void Accelerate()
     {
-        if (accelerateItemVO.count == 0)
+        if (accelerateItemVO.Count == 0)
             return;
         if (wait <= 0)
             return;
         if (wait <= timePerItem)
             return;
-        int available = Services.Player.AvailableItem(ItemData.ACCELERATE_ID);
+        int available = Services.Player.AvailableItem(ItemMeta.ACCELERATE_ID);
         if (available <= 0)
             return;
 
         int timestamp = GameTime.Current;
         SetItem(available, timestamp);
 
-        Services.Player.Accelerate(timestamp, accelerateItemVO.count);
+        Services.Player.Accelerate(timestamp, accelerateItemVO.Count);
     }
 
 }

@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Meta;
+using Data;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,14 +12,14 @@ public class UI_AchivementTooltip : UI_InventoryTooltip, ITick
     private Text description;
     private Text _name;
 
-    private ItemData _item;
+    private ItemMeta _item;
 
     public void HideTooltip()
     {
         gameObject.SetActive(false);
     }
 
-    public void ShowTooltip(ItemData item)
+    public void ShowTooltip(ItemMeta item)
     {
 
         return;

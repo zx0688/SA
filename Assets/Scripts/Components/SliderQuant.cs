@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Cards;
 using Controllers;
-using Meta;
+using Data;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -56,7 +56,7 @@ public class SliderQuant : MonoBehaviour
 
         int resId = GetComponent<ItemStateController>().itemId;
 
-        ActionData choiseData = null;
+        ActionMeta choiseData = null;
         //if (cardItem.me == true)
         //   choiseData = direction == SwipeDirection.LEFT ? cardItem.data.left : cardItem.data.right;
         //else

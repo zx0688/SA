@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Linq;
 using Cysharp.Threading.Tasks;
+using Data;
 using DG.Tweening;
 using UnityEditor;
 using UnityEngine;
@@ -25,8 +26,7 @@ namespace Cards
 
         //[HideInInspector]
         //public event Action<GameObject> OnNewCard;
-
-
+        [SerializeField] private PagePanel _pagePanel;
         // [SerializeField]
         //public List<CardData> queue;
         public States State;
@@ -88,6 +88,10 @@ namespace Cards
 
         void OnEnable()
         {
+
+            _pagePanel.SetActivePageCounter(false);
+            _pagePanel.HideArrow();
+
             int time = GameTime.Current;
             /*if (queue.Count == 0 && State == States.WAITING && startTimeLeft > 0)
             {
@@ -272,7 +276,7 @@ namespace Cards
             i = i >= _cards.Count ? 0 : i;
 
             _currentCard = _cards[i];
-            Data.SetCardData(Services.Data.Meta.Cards[0]);
+            Data.SetCardData(Services.Data.GameMeta.Cards[0]);
             Data.Left.Action = Data.Right.Action = null;
 
             //currentData.cardVO = Services.Player.OpenCard(currentData, time);
@@ -281,10 +285,10 @@ namespace Cards
             Data.Right.Available = true; // = currentData.right == null ? true : Services.Data.CheckConditions (currentData.right.condi, time);
             Data.Left.Chance = Data.Right.Chance = 0;
 
-            Data.Left.Action = new Meta.ActionData();
-            Data.Left.Action.Reward = new List<Meta.RewardData>();
-            Data.Right.Action = new Meta.ActionData();
-            Data.Right.Action.Reward = new List<Meta.RewardData>();
+            Data.Left.Action = new ActionMeta();
+            Data.Left.Action.Reward = new List<RewardData>();
+            Data.Right.Action = new ActionMeta();
+            Data.Right.Action.Reward = new List<RewardData>();
             /*Services.Player.skillHandler.ApplyCardSkill(
                 currentData,
                 new TriggerVO(TriggerData.CARD, currentData.cardData.id, 0, currentData, null, null, null),

@@ -5,28 +5,31 @@ using System.Linq;
 
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UI_Character : MonoBehaviour
 {
-    // Start is called before the first frame update
-
     //public UI_TickChildren tick;
-    public UI_SkillItem[] skillItems;
-    public UI_SkillItem[] effectItems;
+    [SerializeField] private UI_SkillItem[] _items;
+    [SerializeField] private PagePanel _pagePanel;
+    [SerializeField] private UI_SkillTooltip _tooltip;
+    [SerializeField] private Text _swipeCount;
 
     void Awake()
     {
-        skillItems = transform.Find("SpecialPanel").GetComponentsInChildren<UI_SkillItem>();
-        effectItems = transform.Find("EffectPanel").GetComponentsInChildren<UI_SkillItem>();
+        foreach (UI_SkillItem item in _items)
+        {
+            item.SetTooltip(_tooltip);
+        }
     }
 
-    void Start()
-    {
-        //tooltip.HideTooltip ();
-    }
     void OnEnable()
     {
+        _tooltip?.HideTooltip();
         UpdateList();
+        _pagePanel.SetActivePageCounter(false);
+        _pagePanel.HideArrow();
+
     }
 
     public void UpdateList()
@@ -37,20 +40,14 @@ public class UI_Character : MonoBehaviour
 
         //List<SkillVO> skills = Services.Player.playerVO.skills;
         //int time = GameTime.Get ();
+        _swipeCount.text = Services.Player.GetVO.SwipeCount.ToString();
 
-        for (int i = 0; i < skillItems.Length; i++)
+        for (int i = 0; i < _items.Length; i++)
         {
-            UI_SkillItem skillItem = skillItems[i];
-            SkillVO skillVO = null;//Services.Player.skillHandler.GetVO(skillItem.id, skillItem.type);
-            skillItem.SetItem(skillVO);
-        }
-
-        List<SkillVO> effects = null;//Services.Player.skillHandler.GetListVOByType(2);
-        effects = effects.OrderBy(x => x.activated).ToList();
-        for (int i = 0; i < effectItems.Length; i++)
-        {
-            UI_SkillItem effectItem = effectItems[i];
-            effectItem.SetItem(i < effects.Count ? effects[i] : null);
+            UI_SkillItem item = _items[i];
+            SkillVO skillVO = new SkillVO(1, 2);//Services.Player.skillHandler.GetVO(skillItem.id, skillItem.type);
+            skillVO.Activated = 2;
+            item.SetItem(skillVO);
         }
 
         //tick.UpdateTickList ();

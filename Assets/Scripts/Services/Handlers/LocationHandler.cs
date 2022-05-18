@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Meta;
+using Data;
 using UnityEngine;
 
 
@@ -19,12 +19,12 @@ public class LocationHandler
         return player.locations.IndexOf(id) != -1 ? id : 0;
     }
 
-    public void ChangeLocation(LocationData locationData)
+    public void ChangeLocation(LocationMeta locationData)
     {
         player.locationId = locationData.id;
     }
 
-    public int Add(int id, int count, LocationData data, int time)
+    public int Add(int id, int count, LocationMeta data, int time)
     {
 
         if (player.locations.IndexOf(data.id) != -1)
@@ -48,17 +48,17 @@ public class LocationHandler
         return id;
     }
 
-    public CardData CreateCard(LocationData data, int vo, int state, int time)
+    public CardMeta CreateCard(LocationMeta data, int vo, int state, int time)
     {
         throw new System.NotImplementedException();
     }
 
-    public int Add(LocationData data, int count, int time)
+    public int Add(LocationMeta data, int count, int time)
     {
         throw new System.NotImplementedException();
     }
 
-    public int Change(LocationData data, int time)
+    public int Change(LocationMeta data, int time)
     {
         throw new System.NotImplementedException();
     }

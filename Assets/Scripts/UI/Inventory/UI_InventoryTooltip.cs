@@ -2,46 +2,52 @@
 using System.Collections.Generic;
 using Assets.SimpleLocalization;
 using Cysharp.Threading.Tasks;
-using Meta;
+using Data;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class UI_InventoryTooltip : MonoBehaviour, ITick
 {
+    [SerializeField] private TooltipBack _background;
 
-    protected Image image;
+    protected Image icon;
     protected Text description;
     protected Text header;
 
-    protected ItemData itemData;
+    protected ItemMeta _meta;
 
     public void HideTooltip()
     {
+        _background.Hide();
+        _background.gameObject.SetActive(false);
         gameObject.SetActive(false);
     }
 
-    protected virtual void Start()
+    void Start()
     {
 
     }
 
-    public virtual void ShowTooltip(ItemData itemData)
+    public void ShowTooltip(ItemMeta meta)
     {
+        _background.Show("red", meta.Name);
+        _background.gameObject.SetActive(true);
 
         gameObject.SetActive(true);
-        this.itemData = itemData;
+        this._meta = meta;
         //header.text = LocalizationManager.Localize(this.itemData.Nam);
-        description.text = LocalizationManager.Localize(this.itemData.descr);
+        //description.text = LocalizationManager.Localize(this._meta.descr);
 
-        //Services.Assets.SetSpriteIntoImage(I)
+        Services.Assets.SetSpriteIntoImage(icon, "Items/" + meta.Id + "/icon", true).Forget();
         //LoadSprite ().Forget ();
     }
 
     protected virtual void Awake()
     {
-        //image = transform.Find ("Image").GetComponent<Image> ();
-        header = transform.Find("Name").GetComponent<Text>();
-        description = transform.Find("Description").GetComponent<Text>();
+        icon = transform.Find("Item").GetComponent<Image>();
+        //header = transform.Find("Name").GetComponent<Text>();
+        //description = transform.Find("Description").GetComponent<Text>();
+
         /// gameObject.GetComponent<Button> ().onClick.AddListener (HideTooltip);
     }
 

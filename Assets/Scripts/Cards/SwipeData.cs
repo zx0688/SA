@@ -1,18 +1,18 @@
 using System.Collections.Generic;
-using Meta;
+using Data;
 
 namespace Cards
 {
     public class SwipeData
     {
-        public CardData Data;
+        public CardMeta Data;
         //public CardVO cardVO;
         public ChoiceData Left;
         public ChoiceData Right;
         //public List<SkillVO> skills;
         public List<RewardData> Drop;
 
-        public void SetCardData(CardData cardData)
+        public void SetCardData(CardMeta cardData)
         {
             this.Left = new ChoiceData();
             this.Right = new ChoiceData();
@@ -25,7 +25,7 @@ namespace Cards
         public bool Available;
         public int Chance;
 
-        public CardData NextCard;
-        public ActionData Action;
+        public CardMeta NextCard;
+        public ActionMeta Action;
     }
 }

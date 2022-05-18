@@ -15,10 +15,10 @@ public class UI_Achivement : UI_Inventory
         if (!Services.isInited)
             return;
 
-        List<ItemVO> items = new List<ItemVO>(Services.Player.playerVO.items);
-        items = items.Where(i => Services.Data.ItemInfo(i.id).Type > 0).ToList();
+        List<ItemVO> items = new List<ItemVO>(Services.Player.GetVO.items);
+        items = items.Where(i => Services.Data.ItemInfo(i.Id).Type > 0).ToList();
 
-        PageSwiper p = GetComponentInChildren<PageSwiper>();
-        p.UpdateData(items);
+        //PageSwiper p = GetComponentInChildren<PageSwiper>();
+        //p.UpdateData(items);
     }
 }

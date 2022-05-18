@@ -21,8 +21,8 @@ namespace UI
 
         private void FadeIn()
         {
-            _topLeft.GetComponent<RectTransform>().DOAnchorPos(new Vector2(194f, 766f), 0.3f, true);
-            _topRight.GetComponent<RectTransform>().DOAnchorPos(new Vector2(-194f, 766f), 0.3f, true);
+            _topLeft.GetComponent<RectTransform>().DOAnchorPos(new Vector2(150f, 766f), 0.3f, true);
+            _topRight.GetComponent<RectTransform>().DOAnchorPos(new Vector2(-150f, 766f), 0.3f, true);
             _bottomLeft.GetComponent<RectTransform>().DOAnchorPos(new Vector2(178f, -1001f), 0.3f, true);
             _bottomRight.GetComponent<RectTransform>().DOAnchorPos(new Vector2(-178f, -1001f), 0.3f, true);
         }

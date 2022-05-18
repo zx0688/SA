@@ -2,70 +2,59 @@
 using System.Collections.Generic;
 using Assets.SimpleLocalization;
 using Cysharp.Threading.Tasks;
-using Meta;
+using Data;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
 
 
-public class UI_BuildingTooltip : UI_InventoryTooltip, ITick
+public class UI_BuildingTooltip : MonoBehaviour, ITick
 {
 
-    private BuildingData buildingData;
+    private BuildingMeta buildingData;
     private UI_Reward reward;
     //private Button button;
     private Text text;
-
+    private Text description;
+    private ItemMeta _meta;
 
     private UI_AcceleratePanel acceleratePanel;
 
-    public override void ShowTooltip(ItemData itemData)
+    public void ShowTooltip(ItemMeta meta)
     {
 
         gameObject.SetActive(true);
-        this.itemData = itemData;
+        this._meta = meta;
         //header.text = LocalizationManager.Localize(itemData.name);
-        description.text = LocalizationManager.Localize(itemData.Des);
+        description.text = LocalizationManager.Localize(meta.Des);
 
-        buildingData = (BuildingData)itemData;
+        buildingData = (BuildingMeta)meta;
 
         BuildingVO buildingVO = null;//Services.Player.buildingHandler.GetVO(buildingData.id, 0);
         // acceleratePanel.SetTimer(4,);
 
-        if (buildingVO.stact > 0 && buildingVO.stact > buildingVO.executed)
+        if (buildingVO.Stact > 0 && buildingVO.Stact > buildingVO.Executed)
         {
-            acceleratePanel.SetTimer(buildingVO.stact, buildingData.Act.Time);
+            acceleratePanel.SetTimer(buildingVO.Stact, buildingData.Act.Time);
         }
         else
         {
             acceleratePanel.SetTimer(0, 0);
         }
     }
-    public override void Update()
+    public void Update()
     {
         //base.Update();
     }
 
-    protected override void Start()
-    {
-        // reward.SetHeader ("Card.Reward");
-        //  button.onClick.AddListener(() => HideTooltip());
-    }
-    protected override void Awake()
-    {
-        base.Awake();
-        reward = transform.Find("UI_Reward").GetComponent<UI_Reward>();
-        //button = transform.Find("Button").GetComponent<Button>();
-        acceleratePanel = transform.Find("AcceleratePanel").GetComponent<UI_AcceleratePanel>();
 
-    }
 
-    public override void Tick(int timestamp)
+    public void Tick(int timestamp)
     {
 
     }
 
-    public override bool IsTickble()
+    public bool IsTickble()
     {
         return false;
     }

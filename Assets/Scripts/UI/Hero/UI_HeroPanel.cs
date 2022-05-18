@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Meta;
+using Data;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -33,7 +33,7 @@ public class UI_HeroPanel : MonoBehaviour
             return;
 
         this.id = id;
-        ItemData heroData = Services.Data.ItemInfo(id);
+        ItemMeta heroData = Services.Data.ItemInfo(id);
         //name.text = heroData.name.ToString();
 
         Services.Assets.SetSpriteIntoImage(icon, "Heroes/" + id + "/icon", true).Forget();

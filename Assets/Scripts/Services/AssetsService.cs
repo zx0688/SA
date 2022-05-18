@@ -108,8 +108,29 @@ public class AssetsService
         return jsonFromUrl;
     }
 
+    public async UniTaskVoid SetSpriteIntoImageData(Image icon, int type, int id, bool fromResources, IProgress<float> progress = null)
+    {
+        //Debug.Log($"load:{name}");
+        string name;
+        switch (type)
+        {
+            case 1:
+                name = $"Items/{id}/icon";
+                break;
+            case 2:
+                name = $"Building/{id}/icon";
+                break;
+            default:
+                name = $"Items/{0}/icon";
+                break;
+        }
+
+        icon.sprite = await Services.Assets.GetSprite(name, fromResources, progress);
+    }
+
     public async UniTaskVoid SetSpriteIntoImage(Image icon, string name, bool fromResources, IProgress<float> progress = null)
     {
+        //Debug.Log($"load:{name}");
         icon.sprite = await Services.Assets.GetSprite(name, fromResources, progress);
     }
 

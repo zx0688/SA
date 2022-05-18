@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Meta;
+using Data;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -40,7 +40,7 @@ public class UI_Map : ServiceBehaviour
         {
             int id = int.Parse(b.name.Split('_')[1]);
             Image i = b.gameObject.GetComponent<Image>();
-            LocationData location = Services.Data.Meta.Locations.Find(l => l.id == id);
+            LocationMeta location = Services.Data.GameMeta.Locations.Find(l => l.id == id);
 
             if (location == null)
                 throw new Exception("Нет локации к кнопке N" + id);
@@ -99,7 +99,7 @@ public class UI_Map : ServiceBehaviour
         }
     }
 
-    private void OnClick(LocationData location)
+    private void OnClick(LocationMeta location)
     {
 
         int time = GameTime.Current;

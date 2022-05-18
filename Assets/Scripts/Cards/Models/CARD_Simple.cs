@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Assets.SimpleLocalization;
 using DG.Tweening;
-using Meta;
+using Data;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -79,19 +79,19 @@ namespace Cards
                         // hero.gameObject.SetActive (true);
                         int id = Data.Right.Action.Reward[0].Id;
                         isOneReward = true;
-                        switch (Data.Right.Action.Reward[0].Tp)
-                        {
-                            case DataService.SKILL_ID:
-                                Services.Assets.SetSpriteIntoImage(hero, "Skills/" + id + "/icon", true).Forget();
-                                break;
-                            case DataService.ITEM_ID:
-                                //Services.Assets.SetSpriteIntoImage (back, "Actions/back", true).Forget ();
-                                Services.Assets.SetSpriteIntoImage(hero, "Items/" + id + "/icon", true).Forget();
-                                break;
-                            case DataService.BUILDING_ID:
-                                Services.Assets.SetSpriteIntoImage(hero, "Buildings/" + id + "/icon", true).Forget();
-                                break;
-                        }
+                        // switch (Data.Right.Action.Reward[0].Tp)
+                        // {
+                        //     case DataService.SKILL_ID:
+                        //         Services.Assets.SetSpriteIntoImage(hero, "Skills/" + id + "/icon", true).Forget();
+                        //         break;
+                        //     case DataService.ITEM_ID:
+                        //         //Services.Assets.SetSpriteIntoImage (back, "Actions/back", true).Forget ();
+                        //         Services.Assets.SetSpriteIntoImage(hero, "Items/" + id + "/icon", true).Forget();
+                        //         break;
+                        //     case DataService.BUILDING_ID:
+                        //         Services.Assets.SetSpriteIntoImage(hero, "Buildings/" + id + "/icon", true).Forget();
+                        //         break;
+                        // }
 
                     }
                     else

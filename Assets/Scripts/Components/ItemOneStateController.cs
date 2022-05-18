@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Controllers;
-using Meta;
+using Data;
 using UnityEngine;
 
 
@@ -22,11 +22,11 @@ namespace Controllers
             if (!isAvailable())
                 return;
 
-            ItemVO r = rs.Find(_r => _r.id == itemId);
+            ItemVO r = rs.Find(_r => _r.Id == itemId);
             if (r == null)
                 return;
 
-            ItemData rd = Services.Data.ItemInfo(r.id);
+            ItemMeta rd = Services.Data.ItemInfo(r.Id);
 
             //if (tags.Length > 0 && rd. != null && Utils.Intersection(tags, rd.tags))
             //    return;

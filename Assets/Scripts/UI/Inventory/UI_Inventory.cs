@@ -8,9 +8,9 @@ using UnityEngine;
 public class UI_Inventory : MonoBehaviour
 {
     [SerializeField] private UI_InventoryTooltip _tooltip;
-    [SerializeField] private PagePanel _pagePanel;
 
     protected UI_InventoryItem[] _items;
+    private PageSwiper _swiper;
 
     protected virtual void Awake()
     {
@@ -20,44 +20,26 @@ public class UI_Inventory : MonoBehaviour
         {
             item.SetTooltip(_tooltip);
         }
-    }
 
-    void Start()
-    {
-        _tooltip?.HideTooltip();
-    }
-
-    private void OnPageChanged()
-    {
-        //int currentPage = swiper.GetCurrentPage();
+        _swiper = GetComponentInChildren<PageSwiper>();
     }
 
     void OnEnable()
     {
+        _tooltip?.HideTooltip();
         UpdateList();
-
-    }
-
-    void OnDisable()
-    {
-        _pagePanel.Hide();
     }
 
     protected virtual void UpdateList()
     {
-
         if (!Services.isInited)
             return;
 
-        _pagePanel.Show();
-
-        //List<ItemVO> items = new List<ItemVO>(Services.Player.playerVO.items);
-
         List<ItemVO> items = new List<ItemVO>();
-        //for(int i = 0; i < 32; i++)
-        //    items.Add(new ItemVO(2, 5));
 
-        PageSwiper p = GetComponentInChildren<PageSwiper>();
-        p.UpdateData(items);
+        for (int i = 0; i < 32; i++)
+            items.Add(new ItemVO(2, i));
+
+        _swiper.UpdateData(items);
     }
 }

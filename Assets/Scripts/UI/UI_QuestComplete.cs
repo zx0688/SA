@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
-using Meta;
+using Data;
 using UnityEngine;
 
 namespace UI
@@ -10,8 +10,8 @@ namespace UI
     public class UI_QuestComplete : ServiceBehaviour
     {
         // Start is called before the first frame update
-        private List<CardData> queue;
-        private CardData current;
+        private List<CardMeta> queue;
+        private CardMeta current;
         private bool isPlaying;
 
         protected override void OnServicesInited()
@@ -63,7 +63,7 @@ namespace UI
 
         void Start()
         {
-            queue = new List<CardData>();
+            queue = new List<CardMeta>();
             isPlaying = false;
         }
 

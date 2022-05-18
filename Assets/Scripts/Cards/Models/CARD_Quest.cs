@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Meta;
+using Data;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,7 +10,7 @@ namespace Cards
     public class CARD_Quest : CARD_Base
     {
 
-        private CardData questData;
+        private CardMeta questData;
         private int state;
 
         private Text status;

@@ -10,7 +10,7 @@ public class UI_AchivementItem : UI_InventoryItem, ITick
 {
 
 
-    public override void SetItem(ItemVO item)
+    /*public override void SetItem(ItemVO item)
     {
 
         if (item == null)
@@ -19,22 +19,22 @@ public class UI_AchivementItem : UI_InventoryItem, ITick
             return;
         }
 
-        count.text = item.count.ToString();
+        //count.text = item.Count.ToString();
         isEmpty = false;
 
-        if (this.data != null && this.data.Id == item.id)
+        if (this.data != null && this.data.Id == item.Id)
             return;
 
-        data = Services.Data.ItemInfo(item.id);
-        icon.enabled = true;
-        count.enabled = true;
+        data = Services.Data.ItemInfo(item.Id);
+        Icon.enabled = true;
+        //count.enabled = true;
 
         Tick(GameTime.Current);
 
         if (tooltip != null)
-            showTooltipBtn.interactable = true;
+            ShowTooltipBtn.interactable = true;
 
-        Services.Assets.SetSpriteIntoImage(icon, "Items/" + item.id + "/icon", true).Forget();
-    }
+        Services.Assets.SetSpriteIntoImage(Icon, "Items/" + item.Id + "/icon", true).Forget();
+    }*/
 
 }

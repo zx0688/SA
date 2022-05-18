@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Cards;
-using Meta;
+using Data;
 using UnityEngine;
 
 public class SkillHandler
@@ -84,28 +84,28 @@ public class SkillHandler
 
     }*/
 
-    public SkillVO Add(SkillData data, int count, int time)
+    public SkillVO Add(SkillMeta data, int count, int time)
     {
 
-        if (data.one == true)
+        if (data.One == true)
         {
             SkillVO c = GetVO(0, data.Type);
             if (c != null)
                 player.skills.Remove(c);
         }
 
-        SkillVO current = player.skills.Find(s => s.id == data.Id);
+        SkillVO current = player.skills.Find(s => s.Id == data.Id);
         if (current == null)
         {
             current = new SkillVO(data.Id, 1);
             //current.id = data.Id;
-            current.count = 0;
+            current.Count = 0;
             player.skills.Add(current);
         }
-        current.time = data.act.Time;
+        //current.time = data.Act.Time;
         //current.id = data.;
-        current.activated = time;
-        current.count = count;
+        current.Activated = time;
+        current.Count = count;
         return current;
     }
 
@@ -139,55 +139,56 @@ public class SkillHandler
         for (int i = 0; i < player.skills.Count; i++)
         {
             SkillVO skillVO = player.skills[i];
-            if (skillVO.count == 0)
+            if (skillVO.Count == 0)
                 continue;
             else if (id == 0 && type > 0)
             {
-                SkillData sd = Services.Data.SkillInfo(skillVO.id);
+                SkillMeta sd = Services.Data.GetSkillMeta(skillVO.Id);
                 if (sd.Type == type)
                     return skillVO;
             }
-            else if (skillVO.id == id)
+            else if (skillVO.Id == id)
                 return skillVO;
         }
         return null;
     }
 
-    public List<RewardData> GetIncrease(SkillVO skillVO, SkillData skillData)
+    public List<RewardData> GetIncrease(SkillVO skillVO, SkillMeta skillData)
     {
-        if (skillVO == null)
+        /*if (skillVO == null)
             return new List<RewardData>();
-        if (skillVO.count == 1)
+        if (skillVO.Count == 1)
             return skillData.increase1;
-        else if (skillVO.count == 2)
+        else if (skillVO.Count == 2)
             return skillData.increase2;
-        else if (skillVO.count == 3)
+        else if (skillVO.Count == 3)
             return skillData.increase3;
+        */
         return new List<RewardData>();
     }
 
-    public List<RewardData> GetChance(SkillVO skillVO, SkillData skillData)
+    public List<RewardData> GetChance(SkillVO skillVO, SkillMeta skillData)
     {
-        if (skillVO == null)
+        /*if (skillVO == null)
             return new List<RewardData>();
-        if (skillVO.count == 1)
+        if (skillVO.Count == 1)
             return skillData.chance1;
-        else if (skillVO.count == 2)
+        else if (skillVO.Count == 2)
             return skillData.chance2;
-        else if (skillVO.count == 3)
-            return skillData.chance3;
+        else if (skillVO.Count == 3)
+            return skillData.chance3;*/
         return new List<RewardData>();
     }
-    public List<RewardData> GetDrop(SkillVO skillVO, SkillData skillData)
+    public List<RewardData> GetDrop(SkillVO skillVO, SkillMeta skillData)
     {
-        if (skillVO == null)
+        /*if (skillVO == null)
             return new List<RewardData>();
-        if (skillVO.count == 1)
+        if (skillVO.Count == 1)
             return skillData.drop1;
-        else if (skillVO.count == 2)
+        else if (skillVO.Count == 2)
             return skillData.drop2;
-        else if (skillVO.count == 3)
-            return skillData.drop3;
+        else if (skillVO.Count == 3)
+            return skillData.drop3;*/
         return new List<RewardData>();
     }
 
@@ -197,17 +198,17 @@ public class SkillHandler
         for (int i = 0; i < player.skills.Count; i++)
         {
             SkillVO skillVO = player.skills[i];
-            if (skillVO.count == 0)
+            if (skillVO.Count == 0)
                 continue;
 
-            SkillData sd = Services.Data.SkillInfo(skillVO.id);
+            SkillMeta sd = Services.Data.GetSkillMeta(skillVO.Id);
             if (sd.Type == type)
                 result.Add(skillVO);
         }
         return result;
     }
 
-    public SkillVO Change(SkillData data, int time)
+    public SkillVO Change(SkillMeta data, int time)
     {
         throw new System.NotImplementedException();
     }

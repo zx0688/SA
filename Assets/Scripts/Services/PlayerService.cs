@@ -6,7 +6,7 @@ using System.Reflection;
 using Assets.SimpleLocalization;
 using Cards;
 using Cysharp.Threading.Tasks;
-using Meta;
+using Data;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -19,10 +19,10 @@ public class PlayerService : IService
 
     public event Action<List<RewardData>> OnItemReceived;
 
-    public event Action<LocationData> OnChangedLocation;
-    public event Action<LocationData> OnOpenedLocation;
+    public event Action<LocationMeta> OnChangedLocation;
+    public event Action<LocationMeta> OnOpenedLocation;
 
-    public event Action<CardData, ActionData> OnCardExecuted;
+    public event Action<CardMeta, ActionMeta> OnCardExecuted;
     public event Action OnProfileUpdated;
     public event Action OnQuestComplete;
     public event Action OnAccelerated;
@@ -30,7 +30,8 @@ public class PlayerService : IService
     public event Action OnUpdated;
     public event Action OnDestroed;
 
-    public PlayerVO playerVO;
+    private PlayerVO _playerVO;
+    private ItemVO _emptyItem;
 
     public int currentChoise;
 
@@ -55,14 +56,29 @@ public class PlayerService : IService
         //Facade.meta.OnUpdate += OnMetaUpdate;
     }
 
-    public void ChangeLocation(LocationData locationData)
+    public PlayerVO GetVO => _playerVO;
+    public CardVO GetCardId(int id) => _playerVO.cards.Find(c => c.Id == id);
+
+    public ItemVO GetItemId(int id)
+    {
+        ItemVO item = _playerVO.items.Find(i => i.Id == id);
+        return item != null ? item : _emptyItem;
+    }
+
+    public int SwipeCountLeft(int activate, int time)
+    {
+        return (time + activate) - _playerVO.SwipeCount;
+    }
+
+
+    public void ChangeLocation(LocationMeta locationData)
     {
         //locationHandler.ChangeLocation(locationData);
         OnChangedLocation?.Invoke(locationData);
         OnProfileUpdated?.Invoke();
     }
 
-    public void OpenLocation(LocationData _location)
+    public void OpenLocation(LocationMeta _location)
     {
         //locationHandler.Add(_location.id, 1, _location, 0);
         OnOpenedLocation?.Invoke(_location);
@@ -74,6 +90,8 @@ public class PlayerService : IService
         RequestVO r = new RequestVO("profile");
         //.network.AddRequestToPool(r);
 
+        _emptyItem = new ItemVO(0, 0);
+
         await UniTask.DelayFrame(2);
 
         //if the answer is none 
@@ -84,8 +102,12 @@ public class PlayerService : IService
         // PlayerData[] players = JsonUtility.FromJson<PlayerData[]> (json);
 
         // foreach (PlayerData p in Services.Data.game.profiles) {
-        playerVO = await Services.Assets.GetProfile();
-        playerVO = playerVO == null ? Services.Data.Meta.Profile : playerVO;
+        _playerVO = await Services.Assets.GetProfile();
+        _playerVO = _playerVO == null ? Services.Data.GameMeta.Profile : _playerVO;
+
+        _playerVO = new PlayerVO();
+        _playerVO.items = new List<ItemVO>();
+        _playerVO.SwipeCount = 15;
 
         /*if (playerVO.quests == null)
             playerVO.quests = new List<QuestVO>();
@@ -125,7 +147,7 @@ public class PlayerService : IService
                 }
                 Utils.ClearArray<CardData>(ref App.Data.game.cards);
         */
-        await Services.Assets.SetProfile(playerVO);
+        await Services.Assets.SetProfile(_playerVO);
 
         //OnProfileUpdated?.Invoke ();
     }
@@ -143,7 +165,7 @@ public class PlayerService : IService
 
     public CardVO OpenCard(SwipeData param, int time)
     {
-        CardData cardData = param.Data;
+        CardMeta cardData = param.Data;
         if (true)
         {
             return null;//questHandler.Add(Services.Data.QuestInfo(cardData.id), 1, time);
@@ -162,15 +184,15 @@ public class PlayerService : IService
             //ActionData[] right = { cardData.right1, cardData.right2, cardData.right3 };
             //param.right.action = right[cardVO.right - 1];
 
-            if (cardVO.left == 0)
+            /*if (cardVO.Left == 0)
             {
-                param.Left.Action = null;
+                //param.Left.Action = null;
             }
             else
             {
                 //ActionData[] left = { cardData.left1, cardData.left2, cardData.left3 };
                 //param.left.action = left[cardVO.left - 1];
-            }
+            }*/
 
 
 
@@ -256,12 +278,12 @@ public class PlayerService : IService
     }*/
     public void Buy(int timestamp)
     {
-        List<RewardData> priceData = Services.Data.Meta.Config.Price;
+        List<RewardData> priceData = Services.Data.GameMeta.Config.Price;
         List<RewardData> items = new List<RewardData>();
         //ItemVO i = (ItemVO) itemHandler.Add(Services.Data.ItemInfo(ItemData.ACCELERATE_ID), priceData[0].id, timestamp);
         RewardData r = new RewardData();
-        r.Id = ItemData.ACCELERATE_ID;
-        r.Tp = DataService.ITEM_ID;
+        r.Id = ItemMeta.ACCELERATE_ID;
+        //r.Tp = DataService.ITEM_ID;
         r.Count = priceData[0].Id;
         items.Add(r);
         OnItemReceived?.Invoke(items);
@@ -271,7 +293,7 @@ public class PlayerService : IService
     public void Accelerate(int timestamp, int count)
     {
 
-        int timeAccelerate = Services.Data.Meta.Config.Accelerate * count;
+        int timeAccelerate = Services.Data.GameMeta.Config.Accelerate * count;
 
         /*if (Deck.instance.waitingTimeLeft - timeAccelerate < 0)
             timeAccelerate = Deck.instance.waitingTimeLeft;
@@ -297,11 +319,6 @@ public class PlayerService : IService
         // OnItemReceived?.Invoke(items);
         OnProfileUpdated?.Invoke();
         OnAccelerated?.Invoke();
-    }
-
-    public PlayerVO GetVO(int id, int type)
-    {
-        return playerVO;
     }
 
 }

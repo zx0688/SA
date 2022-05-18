@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Meta;
+using Data;
 using UnityEngine;
 
 
@@ -22,14 +22,14 @@ public class CardHandler
     }
     public int AvailableItem(int id, int type)
     {
-        return player.cards.Find(c => c.id == id) != null ? 1 : 0;
+        return player.cards.Find(c => c.Id == id) != null ? 1 : 0;
     }
 
-    private int CreateChoiceData(List<ActionData> choices, int time)
+    private int CreateChoiceData(List<ActionMeta> choices, int time)
     {
         for (int i = 0; i < choices.Count; i++)
         {
-            ActionData cd = choices[i];
+            ActionMeta cd = choices[i];
             if (cd == null)
                 continue;
             if (cd.Text == null && cd.Reward == null && cd.Con == null)
@@ -40,17 +40,17 @@ public class CardHandler
         return 0;
     }
 
-    public CardVO Add(CardData data, int count, int time)
+    public CardVO Add(CardMeta data, int count, int time)
     {
         CardVO cardVO = GetVO(data.Id, 0);
         if (cardVO == null)
         {
-            cardVO = new CardVO();
+            cardVO = new CardVO(data.Id, 1);
             player.cards.Add(cardVO);
-            cardVO.id = data.Id;
+            cardVO.Id = data.Id;
         }
 
-        cardVO.activated = time;
+        cardVO.Activated = time;
 
         /*cardVO.left = CreateChoiceData(new List<ActionData>() {
                 data.left1, data.left2, data.left3
@@ -61,7 +61,7 @@ public class CardHandler
 */
         return cardVO;
     }
-    private void AddToQueue(CardData cardData, List<CardData> queue, List<CardData> candidates)
+    private void AddToQueue(CardMeta cardData, List<CardMeta> queue, List<CardMeta> candidates)
     {
         if (true)
         {
@@ -167,13 +167,13 @@ public class CardHandler
     {
         for (int i = 0; i < player.cards.Count; i++)
         {
-            if (player.cards[i].id == id)
+            if (player.cards[i].Id == id)
                 return player.cards[i];
         }
         return null;
     }
 
-    public CardVO Change(CardData data, int time)
+    public CardVO Change(CardMeta data, int time)
     {
         throw new System.NotImplementedException();
     }

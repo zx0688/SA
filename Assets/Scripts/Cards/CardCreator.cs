@@ -1,13 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Meta;
+using Data;
 using UnityEngine;
 
 public static class CardCreator
 {
-    public static CardData NewLevel(ExpData newLevel)
+    public static CardMeta NewLevel(ExpMeta newLevel)
     {
-        CardData cardData = new CardData();
+        CardMeta cardData = new CardMeta();
         /*cardData.Id = 9999;
         //cardData.drops = newLevel.reward;
         cardData.prior = 100;

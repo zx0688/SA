@@ -2,129 +2,107 @@
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Meta;
+using Data;
 using UnityEngine;
 using UnityEngine.UI;
 
 
-public class UI_SkillItem : MonoBehaviour, ITick
+public class UI_SkillItem : MonoBehaviour
 {
+    [SerializeField] private int _type;
+    [SerializeField] private Image _icon;
+    [SerializeField] private Button _showTooltipBtn;
+    [SerializeField] private Text _timeValue;
+    [SerializeField] private GameObject _time;
 
-    public int id;
-    public int type;
-    public Button showTooltipBtn;
+    private UI_SkillTooltip _tooltip;
 
-    public Image icon;
+    private SkillMeta _meta;
+    private SkillVO _vo;
+    private bool _isEmpty;
+    //protected Image[] stars;
 
-    protected SkillData data;
-    protected bool isEmpty;
-    protected UI_SkillTooltip tooltip;
-
-    protected Text timer;
-
-    protected GameObject timerPanel;
-    protected Image[] stars;
-
-    public virtual void SetItem(SkillVO item)
+    public void SetItem(SkillVO item)
     {
-
         if (item == null)
         {
             Clear();
             return;
         }
 
-        if (id > 0 && id != item.id)
-            return;
+        _vo = item;
 
-        if (this.data != null && this.data.Id == item.id)
-            return;
-
-        this.data = Services.Data.SkillInfo(item.id);
-
-        if (type > 0 && this.data.Type != type)
-            return;
-
-        for (int i = 0; i < stars.Length; i++)
+        if (_meta != null && _meta.Act != null && _meta.Act.Time > 0)
         {
-            stars[i].gameObject.SetActive(i < item.count && item.count > 1);
+            _timeValue.text = Services.Player.SwipeCountLeft(_vo.Activated, _meta.Act.Time).ToString();
         }
 
-        isEmpty = false;
-        icon.enabled = true;
+        if (_meta != null && _meta.Id == item.Id) return;
 
-        if (tooltip != null)
-            showTooltipBtn.interactable = true;
+        _meta = new SkillMeta();//Services.Data.GetSkillMeta(item.Id);
+        _meta.Id = 1;
+        _meta.Name = "sdfsdfsdf";
+        _meta.Act = new ActionMeta();
+        //_meta.Act.Time = 20;
+        //_meta.Act.Chance = 2;
+        _meta.Act.Reward = new List<RewardData>();
+        _meta.Act.Reward.Add(new RewardData());
+        _meta.Act.Reward[0].Id = 4;
+        _meta.Act.Reward[0].Tp = MetaData.ITEM;
+        _meta.Act.Reward[0].Count = 23;
+        _meta.Act.Con = new List<ConditionData>();
+        _meta.Act.Tri = new List<TriggerData>();
+        _meta.One = true;
+        //_meta.Time = 3;
 
-        Services.Assets.SetSpriteIntoImage(icon, "Skills/" + item.id + "/icon", true).Forget();
+
+        if (_meta.Act != null && _meta.Act.Time > 0)
+        {
+            _timeValue.text = Services.Player.SwipeCountLeft(_vo.Activated, _meta.Act.Time).ToString();
+        }
+        _time.SetActive(_meta.Act != null && _meta.Act.Time > 0);
+
+
+        /*for (int i = 0; i < stars.Length; i++)
+        {
+            stars[i].gameObject.SetActive(i < item.Count && item.Count > 1);
+        }*/
+
+        _isEmpty = false;
+        _icon.gameObject.SetActive(true);
+
+        _showTooltipBtn.interactable = true;
+
+        Services.Assets.SetSpriteIntoImage(_icon, "Skills/" + item.Id + "/icon", true).Forget();
     }
-
-    /*public void UpdateItem () {
-        SkillVO skillVO = Services.Player.skillHandler.GetVO (id, type);
-        SetItem (skillVO == null || skillVO.count == 0 ? null : skillVO);
-    }*/
 
     public bool IsEmpty()
     {
-        return isEmpty;
+        return _isEmpty;
     }
 
-    public int GetId()
+    public void Clear()
     {
-        return data != null ? data.Id : 0;
+        _meta = null;
+        _isEmpty = true;
+
+        if (_showTooltipBtn)
+            _showTooltipBtn.interactable = false;
     }
 
-    public virtual void Clear()
+    void Awake()
     {
-        data = null;
-        isEmpty = true;
-        icon.enabled = false;
-        icon.sprite = null;
-
-        foreach (Image i in stars)
-            i.gameObject.SetActive(false);
-
-        if (tooltip != null)
-            showTooltipBtn.interactable = false;
-    }
-
-    void Start()
-    {
-
-        if (tooltip != null)
-            showTooltipBtn.onClick.AddListener(OnClick);
-    }
-    protected virtual void Awake()
-    {
-
-        //count = transform.Find ("Count").GetComponent<Text> ();
-        stars = transform.Find("Stars").GetComponentsInChildren<Image>();
-        //isEmpty = true;
         Clear();
     }
 
-    protected virtual void UpdateView(int timestamp)
+    private void OnClick()
     {
-
-    }
-
-    protected virtual void OnClick()
-    {
-        tooltip.ShowTooltip(data);
-    }
-
-    public virtual void Tick(int timestamp)
-    {
-
-    }
-
-    public virtual bool IsTickble()
-    {
-        return false;
+        _tooltip.ShowTooltip(_meta, _vo);
     }
 
     public void SetTooltip(UI_SkillTooltip tooltip)
     {
-        this.tooltip = tooltip;
+        this._tooltip = tooltip;
+        _showTooltipBtn.onClick.AddListener(OnClick);
     }
 }

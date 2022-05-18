@@ -13,11 +13,11 @@ public class UI_InventoryItemUpdate : UI_InventoryItem
     {
 
         Services.OnInited -= Init;
-        Services.Player.OnProfileUpdated += OnProfileUpdated;
-        OnProfileUpdated();
+        // Services.Player.OnProfileUpdated += OnProfileUpdated;
+        // OnProfileUpdated();
     }
 
-    protected override void Awake()
+    /*protected override void Awake()
     {
 
         base.Awake();
@@ -26,7 +26,7 @@ public class UI_InventoryItemUpdate : UI_InventoryItem
             Init();
         else
             Services.OnInited += Init;
-    }
+    }*/
 
     void OnEnable()
     {

@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Meta;
+using Data;
 using UnityEngine;
 
 public class BuildingHandler
@@ -16,16 +16,16 @@ public class BuildingHandler
     }
     public int AvailableItem(int id, int type)
     {
-        BuildingVO b = player.buildings.Find(_r => _r.id == id);
-        return b != null ? b.count : 0;
+        BuildingVO b = player.buildings.Find(_r => _r.Id == id);
+        return b != null ? b.Count : 0;
     }
 
-    public BuildingVO Add(BuildingData data, int count, int time)
+    public BuildingVO Add(BuildingMeta data, int count, int time)
     {
-        BuildingData d = dataManager.BuildingInfo(data.Id);
+        BuildingMeta d = dataManager.BuildingInfo(data.Id);
         BuildingVO current = null;
 
-        current = player.buildings.Find(_r => _r.id == data.Id);
+        /*current = player.buildings.Find(_r => _r.id == data.Id);
         if (current == null)
         {
             current = new BuildingVO(data.Id, 0);
@@ -34,16 +34,16 @@ public class BuildingHandler
 
         BuildingVO r = new BuildingVO(data.Id, current.id);
         int max = 9999999;
-        if (count + current.count < 0)
-            r.count = -current.count;
-        else if (count + current.count > max)
-            r.count = max - current.count;
+        if (count + current.Count < 0)
+            r.Count = -current.Count;
+        else if (count + current.Count > max)
+            r.Count = max - current.Count;
         else
-            r.count = count;
-        current.count += count;
-        if (current.count < 0)
-            current.count = 0;
-        return r;
+            r.Count = count;
+        current.Count += count;
+        if (current.Count < 0)
+            current.Count = 0;*/
+        return null;
     }
 
     /*public void Trigger(List<CardData> queue, TriggerVO trigger, List<RewardData> reward, int time)
@@ -77,16 +77,16 @@ public class BuildingHandler
 
     public BuildingVO GetVO(int id, int type)
     {
-        BuildingVO b = player.buildings.Find(_r => _r.id == id);
+        BuildingVO b = player.buildings.Find(_r => _r.Id == id);
         return b;
     }
 
-    public CardData CreateCard(BuildingData data, BuildingVO vo, int state, int time)
+    public CardMeta CreateCard(BuildingMeta data, BuildingVO vo, int state, int time)
     {
         throw new System.NotImplementedException();
     }
 
-    public BuildingVO Change(BuildingData data, int time)
+    public BuildingVO Change(BuildingMeta data, int time)
     {
         throw new System.NotImplementedException();
     }

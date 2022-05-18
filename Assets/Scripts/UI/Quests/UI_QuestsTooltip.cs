@@ -1,68 +1,68 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Assets.SimpleLocalization;
 using Cysharp.Threading.Tasks;
-using Meta;
+using Data;
 using UnityEngine;
 using UnityEngine.UI;
 
-
-
-public class UI_QuestsTooltip : MonoBehaviour, ITick
+public class UI_QuestsTooltip : MonoBehaviour
 {
+    [SerializeField] private TooltipBack _background;
+    [SerializeField] private Image _icon;
+    [SerializeField] private UI_Target _target;
+    [SerializeField] private UI_Reward _reward;
+    [SerializeField] private Text _timer;
+    [SerializeField] private GameObject _timerBox;
+    [SerializeField] private Text _description;
 
-    private Image image;
-    private Text description;
-    private Text title;
-    private Text timeLeft;
+    protected Text description;
+    protected Text header;
 
-    private UI_Reward reward;
-    private UI_Reward fine;
-
-    private CardData cardData;
-    private QuestVO cardItem;
+    private CardMeta _meta;
+    private QuestVO _vo;
 
     public void HideTooltip()
     {
+        _background.Hide();
+        _background.gameObject.SetActive(false);
         gameObject.SetActive(false);
     }
 
-    public void ShowTooltip(QuestVO item, CardData data)
+
+    public void ShowTooltip(CardMeta meta, QuestVO vo)
     {
+        _background.Show("green", meta.Name);
+        _background.gameObject.SetActive(true);
         gameObject.SetActive(true);
-        cardItem = item;
-        cardData = data;
 
-        title.text = cardData.Name;
-        description.text = cardData.Act.Text;
+        //_timer.text = TimeFormat.ONE_CELL_FULLNAME(i);
 
-        // reward.SetAsItems(null);//cardData.right != null ? cardData.right.reward : null);
-        //fine.SetAsItems(null);//cardData.left != null ? cardData.left.reward : null);
+        if (this._meta != null && this._meta.Id == meta.Id)
+            return;
 
-        LoadSprite().Forget();
-        OnEnable();
-    }
+        this._meta = meta;
+        this._vo = vo;
 
-    void OnEnable()
-    {
-        if (IsTickble())
-            Tick(GameTime.Current);
-    }
+        _target.SetItems(meta.Act.Con);
+        _reward.SetItems(meta.Act.Reward);
 
-    async UniTaskVoid LoadSprite()
-    {
-        image.sprite = await Services.Assets.GetSprite("Cards/" + cardData.Id + "/icon", true);
-    }
+        _description.text = _meta.Act.Text;
+        //header.text = LocalizationManager.Localize(this.itemData.Nam);
+        //description.text = LocalizationManager.Localize(this._meta.descr);
 
-    void Awake()
-    {
-        image = transform.Find("Image").GetComponent<Image>();
+        Services.Assets.SetSpriteIntoImage(_icon, "Items/" + meta.Id + "/icon", true).Forget();
+        //LoadSprite ().Forget ();
 
-        title = transform.Find("Name").GetComponent<Text>();
-        description = transform.Find("Description").GetComponent<Text>();
-
-        timeLeft = transform.Find("TimeLeft").GetComponent<Text>();
-        reward = transform.Find("Reward").GetComponent<UI_Reward>();
-        fine = transform.Find("Fine").GetComponent<UI_Reward>();
+        if (_meta != null && _meta.Act.Time > 0)
+        {
+            _timerBox.SetActive(true);
+            //Tick(GameTime.Current);
+        }
+        else
+        {
+            _timerBox.SetActive(false);
+        }
     }
 
     void Update()
@@ -73,13 +73,4 @@ public class UI_QuestsTooltip : MonoBehaviour, ITick
         }
     }
 
-    public void Tick(int timestamp)
-    {
-        timeLeft.text = TimeFormat.TWO_CELLS_FULLNAME(GameTime.Left(timestamp, cardItem.activated, cardData.Act.Time));
-    }
-
-    public bool IsTickble()
-    {
-        return gameObject.activeSelf && cardData != null && cardData.Act.Time > 0;
-    }
 }

@@ -5,7 +5,7 @@ using Assets.SimpleLocalization;
 using Cysharp.Threading.Tasks;
 
 using DG.Tweening;
-using Meta;
+using Data;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,7 +18,7 @@ public class UI_GetRewardAnimationItem : ServiceBehaviour
     private Text itemCount;
     private Text itemAction;
     private Image icon;
-    private ItemData data;
+    private ItemMeta data;
 
     [SerializeField]
     public float duration = 1.5f;
@@ -140,7 +140,7 @@ public class UI_GetRewardAnimationItem : ServiceBehaviour
 
     }
 
-    private string GetActionText(ItemData data, int current, int newValue)
+    private string GetActionText(ItemMeta data, int current, int newValue)
     {
         string key = "Reward.GetAdd";
         if (current == 0 && newValue > 0)

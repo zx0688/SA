@@ -25,7 +25,7 @@ public class UI_Building : MonoBehaviour
 
     void Start()
     {
-        tooltip.HideTooltip();
+        //tooltip.HideTooltip();
     }
 
     private void OnPageChanged()
@@ -46,8 +46,8 @@ public class UI_Building : MonoBehaviour
         if (!Services.isInited)
             return;
 
-        List<BuildingVO> items = Services.Player.playerVO.buildings;
-        PageSwiper p = GetComponentInChildren<PageSwiper>();
-        p.UpdateData(new List<ItemVO>(items));
+        List<BuildingVO> items = Services.Player.GetVO.buildings;
+        //PageSwiper p = GetComponentInChildren<PageSwiper>();
+        //p.UpdateData(new List<ItemVO>(items));
     }
 }

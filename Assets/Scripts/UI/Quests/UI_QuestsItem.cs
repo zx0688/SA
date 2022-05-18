@@ -3,116 +3,156 @@ using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
-using Meta;
+using Data;
 using UnityEngine;
 using UnityEngine.UI;
 
 
-public class UI_QuestsItem : MonoBehaviour, IItem, ITick
+public class UI_QuestsItem : MonoBehaviour, ITick, ISetItem
 {
-    public UI_QuestsTooltip tooltip;
-    public Button showTooltipBtn;
-    public Image icon;
-    public Text timeLeft;
-    public Text header;
+    [SerializeField] private Image[] _rewards;
+    [SerializeField] private Button _showTooltipBtn;
 
-    private CardData questData;
-    private QuestVO questItem;
-    private bool isEmpty;
-    private CanvasGroup canvasGroup;
+    private UI_QuestsTooltip _tooltip;
 
-    public void SetItem(QuestVO quest)
+    public Image Icon;
+    public Text Header;
+    public Text Timer;
+    public UI_Target _target;
+
+    private CardMeta _data;
+    private QuestVO _vo;
+    private bool _isEmpty;
+    private CanvasGroup _canvasGroup;
+
+    public void SetItem(ItemVO item)
     {
+        if (item == null)
+        {
+            Clear();
+            return;
+        }
 
-        isEmpty = false;
-
-        if (questData != null && questData.Id == quest.id)
+        if (this._vo != null && this._vo.Id == item.Id)
             return;
 
-        questItem = quest;
+        _isEmpty = false;
 
-        questData = Services.Data.QuestInfo(questItem.id);
+        _vo = (QuestVO)item;
 
-        if (questData == null)
-            return;
+        //questData = Services.Data.QuestInfo(data.Id);
+        _data = new CardMeta();
+        _data.Act = new ActionMeta();
+        _data.Act.Time = 0;
+        _data.Name = "Муки и спасение";
+        _data.Id = item.Id;
+        _data.Act.Con = new List<ConditionData>();
+        _data.Act.Con.Add(new ConditionData());
+        //_data.Act.Con.Add(new ConditionData());
+        //_data.Act.Con.Add(new ConditionData());
+        _data.Act.Con[0].Id = 2;
+        _data.Act.Con[0].Count = 3;
+        _data.Act.Text = "Соберите пять кристаллов";
+        //_data.Act.Con[1].Id = 3;
+        //_data.Act.Con[1].Count = 4;
+        //_data.Act.Con[2].Id = 4;
+        //_data.Act.Con[2].Count = 4;
+        _data.Act.Reward = new List<RewardData>();
+        RewardData r = new RewardData();
+        r.Count = 2;
+        r.Tp = Meta.;
+        r.Id = 3;
+        _data.Act.Reward.Add(r);
+        _data.Act.Reward.Add(r);
 
-        canvasGroup.DOKill();
-        canvasGroup.alpha = 1;
+        _canvasGroup.DOKill();
+        _canvasGroup.alpha = 1;
 
-        gameObject.SetActive(true);
-        header.text = questData.Name;
+        Header.text = _data.Name;
+        Icon.enabled = true;
+        _target.SetItems(_data.Act.Con);
 
-        icon.enabled = true;
+        Services.Assets.SetSpriteIntoImage(Icon, "Quests/" + item.Id + "/image", true).Forget();
 
-        showTooltipBtn.interactable = true;
+        _showTooltipBtn.interactable = true;
 
-        Services.Assets.SetSpriteIntoImage(icon, "Items/1/icon", true).Forget();
+        foreach (Image img in _rewards)
+        {
+            img.gameObject.SetActive(false);
+        }
+
+        for (int i = 0; i < _data.Act.Reward.Count && i < _rewards.Length; i++)
+        {
+            _rewards[i].gameObject.SetActive(true);
+            Services.Assets.SetSpriteIntoImage(_rewards[i], "Items/" + _data.Act.Reward[i].Id + "/icon", true).Forget();
+        }
 
         if (IsTickble()) { Tick(GameTime.Current); }
 
+        gameObject.SetActive(true);
     }
 
     public bool IsEmpty()
     {
-        return isEmpty;
-    }
-
-    public int GetId()
-    {
-        return questData != null ? questData.Id : 0;
+        return _isEmpty;
     }
 
     public void Clear()
     {
-        questData = null;
-        isEmpty = true;
-        icon.enabled = false;
-        icon.sprite = null;
-        showTooltipBtn.interactable = false;
-        gameObject.SetActive(false);
+        _data = null;
+        _isEmpty = true;
+        Icon.enabled = false;
+        Icon.sprite = null;
+
+        _canvasGroup.DOKill();
+        _canvasGroup.alpha = 0;
+
+        if (_showTooltipBtn)
+            _showTooltipBtn.interactable = false;
     }
 
     void Start()
     {
 
-        showTooltipBtn.onClick.AddListener(OnShowTooltip);
-        Clear();
-    }
-    void Awake()
-    {
-        isEmpty = true;
-        canvasGroup = gameObject.GetComponent<CanvasGroup>();
     }
 
-    void OnShowTooltip()
+    void Awake()
     {
-        //tooltip.ShowTooltip (questItem, questData);
+        _isEmpty = true;
+        _canvasGroup = gameObject.GetComponent<CanvasGroup>();
+    }
+
+    protected virtual void OnClick()
+    {
+        _tooltip.ShowTooltip(_data, _vo);
     }
 
     public void Tick(int timestamp)
     {
-
-        int i = GameTime.Left(timestamp, questItem.activated, questData.Act.Time);
+        int i = GameTime.Left(timestamp, _vo.Activated, _data.Act.Time);
 
         if (i <= 0)
         {
-            canvasGroup.alpha = 1f;
-            canvasGroup.DOFade(0, 0.3f).OnComplete(() =>
+            _canvasGroup.alpha = 1f;
+            _canvasGroup.DOFade(0, 0.3f).OnComplete(() =>
             {
                 Clear();
+                gameObject.SetActive(false);
             });
         }
         else
-            timeLeft.text = TimeFormat.ONE_CELL_FULLNAME(i);
+            Timer.text = TimeFormat.ONE_CELL_FULLNAME(i);
     }
 
     public bool IsTickble()
     {
-        return gameObject.activeSelf && questItem != null && questData != null && questData.Act.Time > 0;
+        return gameObject.activeSelf && _vo != null && _data != null && _data.Act.Time > 0;
     }
 
     public void SetTooltip(UI_QuestsTooltip tooltip)
     {
-        this.tooltip = tooltip;
+        this._tooltip = tooltip;
+        _showTooltipBtn.onClick.AddListener(OnClick);
     }
+
 }

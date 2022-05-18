@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Assets.SimpleLocalization;
 using Cysharp.Threading.Tasks;
-using Meta;
+using Data;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,7 +17,7 @@ public class UI_MapTooltip : ServiceBehaviour, ITick
     private GameObject youAreHere;
 
     private Button changeLocation;
-    private LocationData _location;
+    private LocationMeta _location;
 
     private UI_Reward cost;
 
@@ -32,7 +32,7 @@ public class UI_MapTooltip : ServiceBehaviour, ITick
         gameObject.SetActive(false);
     }
 
-    public void ShowTooltip(LocationData location)
+    public void ShowTooltip(LocationMeta location)
     {
 
         int time = GameTime.Current;
@@ -62,11 +62,11 @@ public class UI_MapTooltip : ServiceBehaviour, ITick
     }
     public bool isOpenedLocation()
     {
-        return Services.Player.playerVO.locations.Exists(l => l == _location.id);
+        return Services.Player.GetVO.locations.Exists(l => l == _location.id);
     }
     public bool isCurrentLocation()
     {
-        return Services.Player.playerVO.locationId == _location.id;
+        return Services.Player.GetVO.locationId == _location.id;
     }
 
     protected override void Awake()

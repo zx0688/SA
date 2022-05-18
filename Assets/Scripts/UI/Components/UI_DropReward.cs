@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 using DG.Tweening;
-using Meta;
+using Data;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -78,14 +78,14 @@ public class UI_DropReward : ServiceBehaviour
         item.SetActive(true);
         item.GetComponent<RectTransform>().anchoredPosition = new Vector3(0, 0, 0);
 
-        if (reward.Tp == DataService.SKILL_ID)
+        if (reward.Tp == 0)//DataService.SKILL_ID)
         {
 
             Services.Assets.SetSpriteIntoImage(item.GetComponent<Image>(), "Skills/" + reward.Id + "/icon", true).Forget();
             ScenarioSPETIAL(item, position);
 
         }
-        else if (reward.Tp == DataService.BUILDING_ID)
+        else if (reward.Tp == 0)//DataService.BUILDING_ID)
         {
 
             Services.Assets.SetSpriteIntoImage(item.GetComponent<Image>(), "Buildings/" + reward.Id + "/icon", true).Forget();
@@ -154,7 +154,7 @@ public class UI_DropReward : ServiceBehaviour
     {
         GameObject item = items[items.Count - 1];
 
-        if (cost.Id == ItemData.ACCELERATE_ID || cost.Tp == DataService.ACTION_ID)
+        if (cost.Id == ItemMeta.ACCELERATE_ID || cost.Tp == MetaData.BUILDING)
             return;
 
         if (item.activeInHierarchy)
@@ -164,7 +164,7 @@ public class UI_DropReward : ServiceBehaviour
         }
 
         gameObject.SetActive(true);
-        ItemData data = Services.Data.ItemInfo(cost.Id);
+        ItemMeta data = Services.Data.ItemInfo(cost.Id);
 
         items.RemoveAt(items.Count - 1);
         items.Insert(0, item);

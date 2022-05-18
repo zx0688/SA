@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Assets.SimpleLocalization;
 using DG.Tweening;
-using Meta;
+using Data;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -27,7 +27,7 @@ namespace Cards
             title.text = LocalizationManager.Localize("Новый уровень");
             description.text = 15 + ' ' + LocalizationManager.Localize("уровень");
 
-            ExpData expData = new ExpData();
+            ExpMeta expData = new ExpMeta();
 
             // reward.PlaceAround ();
             // reward.gameObject.SetActive (true);

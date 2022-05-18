@@ -2,32 +2,30 @@
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Meta;
+using Data;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class UI_RewardItem : MonoBehaviour, ITick
 {
 
-    [HideInInspector]
-    protected Text count;
+    [SerializeField] private Text _count;
+    [SerializeField] private Image _icon;
 
-    public Button showTooltipBtn;
+    private RewardData _data;
+    private bool _isEmpty;
 
-    public Image icon;
+    //protected IShowTooltip<ItemMeta> tooltip;
+    //public Button showTooltipBtn;
 
-    protected RewardData data;
-    protected bool isEmpty;
-    protected IShowTooltip<ItemData> tooltip;
+    // [HideInInspector]
+    // protected Text timer;
+    // [HideInInspector]
+    // protected GameObject coin;
+    // [HideInInspector]
+    // protected GameObject timerPanel;
 
-    [HideInInspector]
-    protected Text timer;
-    [HideInInspector]
-    protected GameObject coin;
-    [HideInInspector]
-    protected GameObject timerPanel;
-
-    protected Image back;
+    //protected Image back;
 
     public virtual void SetItem(RewardData reward)
     {
@@ -38,46 +36,44 @@ public class UI_RewardItem : MonoBehaviour, ITick
             return;
         }
 
-        count.text = reward.Count.ToString();
-        isEmpty = false;
+        _count.text = reward.Count > 0 ? $"+{reward.Count}" : $"-{reward.Count}";
+        _count.color = reward.Count > 0 ? Color.green : Color.red;
+        _isEmpty = false;
 
-        if (this.data != null && this.data.Id == reward.Id && this.data.Tp == reward.Tp)
+        if (this._data != null && this._data.Id == reward.Id && this._data.Tp == reward.Tp)
             return;
 
-        this.data = reward; //Services.Data.ItemInfo (reward.id);
+        this._data = reward; //Services.Data.ItemInfo (reward.id);
+        this.gameObject.SetActive(true);
 
-        icon.enabled = true;
-        count.enabled = true;
+        //if (tooltip != null)
+        //    showTooltipBtn.interactable = true;
 
-        if (tooltip != null)
-            showTooltipBtn.interactable = true;
-
-        count.gameObject.SetActive(true);
         switch (reward.Tp)
         {
-            case DataService.CARD_ID:
+            case MetaData.CARD:
                 break;
-            case DataService.SKILL_ID:
-                Services.Assets.SetSpriteIntoImage(back, "Skills/back", true).Forget();
-                Services.Assets.SetSpriteIntoImage(icon, "skills/" + reward.Id + "/icon", true).Forget();
-                break;
-            case DataService.ITEM_ID:
-                Services.Assets.SetSpriteIntoImage(back, "Actions/back", true).Forget();
+            //case DataService.SKILL_ID:
+            //Services.Assets.SetSpriteIntoImage(back, "Skills/back", true).Forget();
+            //Services.Assets.SetSpriteIntoImage(_icon, "skills/" + reward.Id + "/icon", true).Forget();
+            //    break;
+            case MetaData.ITEM:
+                //Services.Assets.SetSpriteIntoImage(back, "Actions/back", true).Forget();
                 //Services.Assets.SetSpriteIntoImage (back, "Items/back", true).Forget ();
-                Services.Assets.SetSpriteIntoImage(icon, "Items/" + reward.Id + "/icon", true).Forget();
+                Services.Assets.SetSpriteIntoImage(_icon, "Items/" + reward.Id + "/icon", true).Forget();
                 break;
-            case DataService.BUILDING_ID:
-                Services.Assets.SetSpriteIntoImage(icon, "Buildings/" + reward.Id + "/icon", true).Forget();
-                break;
-            case DataService.ACTION_ID:
+            // case DataService.BUILDING_ID:
+            //     Services.Assets.SetSpriteIntoImage(_icon, "Buildings/" + reward.Id + "/icon", true).Forget();
+            //     break;
+            // case DataService.ACTION_ID:
 
-                Services.Assets.SetSpriteIntoImage(back, "Actions/back", true).Forget();
-                Services.Assets.SetSpriteIntoImage(icon, "Actions/" + reward.Id + "/icon", true).Forget();
-                count.gameObject.SetActive(false);
-                break;
+            //     Services.Assets.SetSpriteIntoImage(back, "Actions/back", true).Forget();
+            //     Services.Assets.SetSpriteIntoImage(_icon, "Actions/" + reward.Id + "/icon", true).Forget();
+            //     _count.gameObject.SetActive(false);
+            //     break;
 
             default:
-                // icon.gameObject.SetActive(false);
+                this.gameObject.SetActive(false);
                 break;
         }
 
@@ -85,41 +81,30 @@ public class UI_RewardItem : MonoBehaviour, ITick
 
     public bool IsEmpty()
     {
-        return isEmpty;
-    }
-
-    public int GetId()
-    {
-        return data != null ? data.Id : 0;
+        return _isEmpty;
     }
 
     public virtual void Clear()
     {
-        data = null;
-        isEmpty = true;
-        icon.enabled = false;
-        icon.sprite = null;
+        _data = null;
+        _isEmpty = true;
 
-        count.enabled = false;
+        _icon.sprite = null;
 
-        if (tooltip != null)
-            showTooltipBtn.interactable = false;
+        this.gameObject.SetActive(false);
+
+        //if (tooltip != null)
+        //    showTooltipBtn.interactable = false;
     }
 
     void Start()
     {
-
-        if (tooltip != null)
-            showTooltipBtn.onClick.AddListener(OnClick);
+        // if (tooltip != null)
+        //     showTooltipBtn.onClick.AddListener(OnClick);
     }
     protected virtual void Awake()
     {
-
-        count = transform.Find("Count").GetComponent<Text>();
-        back = transform.Find("Back").GetComponent<Image>();
-
-        //isEmpty = true;
-        // Clear ();
+        Clear();
     }
 
     protected virtual void UpdateView(int timestamp)

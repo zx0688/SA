@@ -5,21 +5,20 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using Cysharp.Threading.Tasks;
-using Meta;
+using Data;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
 
-
 public class DataService
 {
 
-    public const int CARD_ID = 0;
-    public const int ITEM_ID = 1;
-    public const int QUEST_ID = 2;
-    public const int BUILDING_ID = 3;
-    public const int ACTION_ID = 4;
-    public const int SKILL_ID = 5;
+    // public const int CARD_ID = 0;
+    // public const int ITEM_ID = 1;
+    // public const int QUEST_ID = 2;
+    // public const int BUILDING_ID = 3;
+    // public const int ACTION_ID = 4;
+    // public const int SKILL_ID = 5;
 
     //public const int ACTION_ID = 3;
     //==========
@@ -37,7 +36,7 @@ public class DataService
 
     //private delegate 
 
-    public MetaData Meta;
+    public Data.MetaData GameMeta;
     public int Version;
     public event Action OnUpdate;
 
@@ -65,33 +64,33 @@ public class DataService
         return reward;
     }
 
-    public BuildingData BuildingInfo(int id)
+    public BuildingMeta BuildingInfo(int id)
     {
-        return Meta.Buildings[id - 2];
+        return GameMeta.Buildings[id - 2];
     }
-    public ItemData ItemInfo(int id)
+    public ItemMeta ItemInfo(int id)
     {
-        return Array.Find(Meta.Items, i => i.Id == id);
+        return Array.Find(GameMeta.Items, i => i.Id == id);
     }
-    public SkillData SkillInfo(int id)
+    public SkillMeta GetSkillMeta(int id)
     {
-        return Array.Find(Meta.Skills, s => s.Id == id);
-    }
-
-    public List<ItemData> ItemInfoByType(int type)
-    {
-        return Meta.Items.Where(c => c.Type == type).ToList();
+        return Array.Find(GameMeta.Skills, s => s.Id == id);
     }
 
-    public CardData CardInfo(int id)
+    public List<ItemMeta> ItemInfoByType(int type)
+    {
+        return GameMeta.Items.Where(c => c.Type == type).ToList();
+    }
+
+    public CardMeta CardInfo(int id)
     {
         Debug.Log("== " + id);
         //return game.cards[id - 2];
-        return Array.Find(Meta.Cards, c => c.Id == id);
+        return Array.Find(GameMeta.Cards, c => c.Id == id);
     }
-    public CardData QuestInfo(int id)
+    public CardMeta QuestInfo(int id)
     {
-        return Array.Find(Meta.Quests, q => q.Id == id);
+        return Array.Find(GameMeta.Quests, q => q.Id == id);
     }
 
     public bool MatchReward(List<RewardData> reward1, List<RewardData> reward2)
@@ -134,9 +133,9 @@ public class DataService
         //    return false;
         //else if(cardVO.activated < time && cardVO.activated > cardVO.executed)
         //    return false;
-        else if (eData.once == true && cardVO.activated > 0)
+        else if (eData.once == true && cardVO.Activated > 0)
             return false;
-        else if (eData.act.Time > 0 && GameTime.Left(time, cardVO.executed, eData.act.Time) > 0)
+        else if (eData.act.Time > 0 && GameTime.Left(time, cardVO.Executed, eData.act.Time) > 0)
             return false;
         return true;
     }
@@ -218,17 +217,17 @@ public class DataService
                 if (action == null || action.id != c.id)
                     return false;
                 break;*/
-                case CARD_ID:
-                    CardVO cardVO1 = player.playerVO.cards.Find(crt => crt.id == c.Id);
-                    if (cardVO1 == null || cardVO1.activated == 0 || cardVO1.executed == 0)
+                case 0:
+                    CardVO cardVO1 = player.GetVO.cards.Find(crt => crt.Id == c.Id);
+                    if (cardVO1 == null || cardVO1.Activated == 0 || cardVO1.Executed == 0)
                         return false;
                     break;
-                case QUEST_ID:
-                    QuestVO cardVO2 = player.playerVO.quests.Find(crt => crt.id == c.Id);
+                case 1:
+                    QuestVO cardVO2 = player.GetVO.quests.Find(crt => crt.Id == c.Id);
                     //if (cardVO2 == null || cardVO2.executed == 0 || c.choice == 0)
                     return false;
                     break;
-                case BUILDING_ID:
+                case 2:
                     int value = 0;//player.buildingHandler.AvailableItem(c.id, 0);
                     switch (c.Sign)
                     {
@@ -247,7 +246,7 @@ public class DataService
                     }
                     break;
 
-                case ITEM_ID:
+                case 3:
                     value = 0;//player.itemHandler.AvailableItem(c.id);
                     switch (c.Sign)
                     {
@@ -293,12 +292,12 @@ public class DataService
 
         Debug.Log(asset);
 
-        Meta = JsonUtility.FromJson<MetaData>(asset);
+        GameMeta = JsonUtility.FromJson<Data.MetaData>(asset);
 
         // quests = new List<CardData> ();
-        List<CardData> _asyncDurationCardList = new List<CardData>();
+        List<CardMeta> _asyncDurationCardList = new List<CardMeta>();
 
-        foreach (CardData card in Meta.Cards)
+        foreach (CardMeta card in GameMeta.Cards)
         {
             //if (card.tags == null)
             //    card.tags = new string[0];
@@ -334,14 +333,14 @@ public class DataService
         //--resources
         //itemIdByTag = new Dictionary<string, List<int>>();
 
-        foreach (ItemData item in Meta.Items)
+        foreach (ItemMeta item in GameMeta.Items)
         {
             //if (item.T == null)
             //    item.Tags = new string[0];
 
         }
 
-        Version = Meta.Timestamp;
+        Version = GameMeta.Timestamp;
         if (mversion != Version)
         {
             //SecurePlayerPrefs.SetInt("meta_version", version);

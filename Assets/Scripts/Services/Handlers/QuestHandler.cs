@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Meta;
+using Data;
 using UnityEngine;
 
 
@@ -21,25 +21,25 @@ public class QuestHandler
     }
     public int AvailableItem(int id, int type)
     {
-        return player.quests.Find(c => c.id == id) != null ? 1 : 0;
+        return player.quests.Find(c => c.Id == id) != null ? 1 : 0;
     }
 
-    public QuestVO Add(CardData data, int count, int time)
+    public QuestVO Add(CardMeta data, int count, int time)
     {
 
-        QuestVO questVO = player.quests.Find(q => q.id == data.Id);
+        QuestVO questVO = player.quests.Find(q => q.Id == data.Id);
         if (questVO == null)
         {
-            questVO = new QuestVO();
+            questVO = new QuestVO(data.Id, 1);
             player.quests.Add(questVO);
         }
         if (true)
         {
-            questVO.id = data.Id;
-            questVO.activated = time;
-            questVO.rew1 = questVO.rew2 = false;
-            questVO.state = 0;
-            questVO.executed = 0;
+            questVO.Id = data.Id;
+            questVO.Activated = time;
+            //questVO.rew1 = questVO.rew2 = false;
+            //questVO.state = 0;
+            questVO.Executed = 0;
         }
         return questVO;
     }
@@ -107,9 +107,9 @@ public class QuestHandler
             }
         }
     */
-    public CardData CreateCard(CardData data, QuestVO vo, int state, int time)
+    public CardMeta CreateCard(CardMeta data, QuestVO vo, int state, int time)
     {
-        CardData cardData = new CardData();
+        CardMeta cardData = new CardMeta();
         cardData.Id = data.Id;
         cardData.Pri = data.Pri;
         //cardData.Typ = 1;
@@ -118,10 +118,10 @@ public class QuestHandler
 
     public QuestVO GetVO(int id, int type)
     {
-        return player.quests.Find(_r => _r.id == id);
+        return player.quests.Find(_r => _r.Id == id);
     }
 
-    public QuestVO Change(CardData data, int time)
+    public QuestVO Change(CardMeta data, int time)
     {
         throw new System.NotImplementedException();
     }

@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Meta;
+using Data;
 using UnityEngine;
 
 public class ItemHandler
@@ -23,35 +23,37 @@ public class ItemHandler
 
     public int AvailableItem(int id, int type = -1)
     {
-        InventoryVO b = player.items.Find(_r => _r.id == id);
-        return b != null ? b.count : 0;
+        ItemVO b = player.items.Find(_r => _r.Id == id);
+        return b != null ? b.Count : 0;
     }
 
-    public InventoryVO Add(ItemData data, int count, int time)
+    public ItemVO Add(ItemMeta data, int count, int time)
     {
+        /*
+                ItemMeta d = dataManager.ItemInfo(data.Id);
 
-        ItemData d = dataManager.ItemInfo(data.Id);
+                ItemVO current = null;
+                current = player.items.Find(_r => _r.id == data.Id);
+                if (current == null)
+                {
+                    current = new InventoryVO(data.Id, 0);
+                    player.items.Add(current);
+                }
+                InventoryVO r = new InventoryVO(data.Id, current.id);
+                int max = 9999999;
+                if (count + current.count < 0)
+                    r.count = -current.count;
+                else if (count + current.count > max)
+                    r.count = max - current.count;
+                else
+                    r.count = count;
+                current.count += count;
+                if (current.count < 0)
+                    current.count = 0;
 
-        InventoryVO current = null;
-        current = player.items.Find(_r => _r.id == data.Id);
-        if (current == null)
-        {
-            current = new InventoryVO(data.Id, 0);
-            player.items.Add(current);
-        }
-        InventoryVO r = new InventoryVO(data.Id, current.id);
-        int max = 9999999;
-        if (count + current.count < 0)
-            r.count = -current.count;
-        else if (count + current.count > max)
-            r.count = max - current.count;
-        else
-            r.count = count;
-        current.count += count;
-        if (current.count < 0)
-            current.count = 0;
-
-        return r;
+                return r;
+                */
+        return null;
     }
 
     /*public void Trigger(List<CardData> queue, TriggerVO trigger, List<RewardData> reward, int time)
@@ -83,17 +85,17 @@ public class ItemHandler
 
     }*/
 
-    public InventoryVO GetVO(int id, int type)
+    public ItemVO GetVO(int id, int type)
     {
         for (int i = 0; i < player.items.Count; i++)
         {
-            if (player.items[i].id == id)
+            if (player.items[i].Id == id)
                 return player.items[i];
         }
         return null;
     }
 
-    public InventoryVO Change(ItemData data, int time)
+    public ItemVO Change(ItemMeta data, int time)
     {
         throw new System.NotImplementedException();
     }

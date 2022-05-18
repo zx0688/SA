@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Meta;
+using Data;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -73,15 +73,15 @@ namespace Controllers
 
         private void OnUpdateCountP()
         {
-            ItemVO r = new ItemVO(itemId, 0);
-            List<ItemVO> rr = new List<ItemVO>();
-            rr.Add(r);
-            OnUpdateCount(rr);
+            // ItemVO r = new ItemVO(itemId, 0);
+            //List<ItemVO> rr = new List<ItemVO>();
+            //rr.Add(r);
+            //OnUpdateCount(rr);
         }
 
         async UniTaskVoid InitHUD()
         {
-            ItemData resinfo = Services.Data.ItemInfo(itemId);
+            ItemMeta resinfo = Services.Data.ItemInfo(itemId);
             Text t = transform.Find("Name")?.gameObject.GetComponent<Text>();
             if (t != null)
             {
@@ -146,7 +146,7 @@ namespace Controllers
             if (!isAvailable())
                 return;
 
-            ItemVO res = rs.Find(r => r.id == itemId);
+            ItemVO res = rs.Find(r => r.Id == itemId);
             if (res == null)
                 return;
 

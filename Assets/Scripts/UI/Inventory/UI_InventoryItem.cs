@@ -2,53 +2,46 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Meta;
+using Data;
 using UnityEngine;
 using UnityEngine.UI;
 
 
-public class UI_InventoryItem : MonoBehaviour, ITick
+public class UI_InventoryItem : MonoBehaviour, ITick, ISetItem
 {
+    [SerializeField] protected Text count;
+    [SerializeField] protected GameObject counter;
 
-    [HideInInspector]
-    protected Text count;
+    [SerializeField] private Button _showTooltipBtn;
+    public Image Icon;
 
-    public Button showTooltipBtn;
-
-    public Image icon;
-
-    protected ItemData data;
+    protected ItemMeta data;
     protected bool isEmpty;
     protected UI_InventoryTooltip tooltip;
 
-
-
-
-
-    public virtual void SetItem(ItemVO item)
+    public void SetItem(ItemVO item)
     {
-
         if (item == null)
         {
             Clear();
             return;
         }
 
-        count.text = item.count.ToString();
+        count.text = item.Count.ToString();
         isEmpty = false;
 
-        if (this.data != null && this.data.Id == item.id)
+
+        if (this.data != null && this.data.Id == item.Id)
             return;
 
-        this.data = Services.Data.ItemInfo(item.id);
-
-        icon.enabled = true;
+        this.data = Services.Data.ItemInfo(item.Id);
+        counter.SetActive(true);
+        Icon.enabled = true;
         count.enabled = true;
 
-        if (tooltip != null)
-            showTooltipBtn.interactable = true;
+        _showTooltipBtn.interactable = true;
 
-        Services.Assets.SetSpriteIntoImage(icon, "Items/" + item.id + "/icon", true).Forget();
+        Services.Assets.SetSpriteIntoImage(Icon, "Items/" + item.Id + "/icon", true).Forget();
     }
 
     public bool IsEmpty()
@@ -65,46 +58,44 @@ public class UI_InventoryItem : MonoBehaviour, ITick
     {
         data = null;
         isEmpty = true;
-        icon.enabled = false;
-        icon.sprite = null;
+        Icon.enabled = false;
+        Icon.sprite = null;
+        counter.SetActive(false);
 
         count.enabled = false;
 
-        if (tooltip != null)
-            showTooltipBtn.interactable = false;
+        if (_showTooltipBtn)
+            _showTooltipBtn.interactable = false;
     }
 
     void Start()
     {
 
-        if (tooltip != null)
-            showTooltipBtn.onClick.AddListener(OnClick);
     }
-    protected virtual void Awake()
+
+    void Awake()
     {
-
-        count = transform.Find("Value").GetComponent<Text>();
-
-        //isEmpty = true;
-        // Clear ();
+        isEmpty = true;
+        Clear();
     }
 
-    protected virtual void UpdateView(int timestamp)
+    protected void UpdateView(int timestamp)
     {
 
     }
 
-    protected virtual void OnClick()
+    protected void OnClick()
     {
-        tooltip.ShowTooltip(data);
+        if (data != null)
+            tooltip.ShowTooltip(data);
     }
 
-    public virtual void Tick(int timestamp)
+    public void Tick(int timestamp)
     {
 
     }
 
-    public virtual bool IsTickble()
+    public bool IsTickble()
     {
         return false;
     }
@@ -112,6 +103,7 @@ public class UI_InventoryItem : MonoBehaviour, ITick
     public void SetTooltip(UI_InventoryTooltip tooltip)
     {
         this.tooltip = tooltip;
+        _showTooltipBtn.onClick.AddListener(OnClick);
     }
 
 }

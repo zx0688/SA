@@ -3,11 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PagePanel : MonoBehaviour
 {
-    private readonly float _hidePosition = 650f;
-    private readonly float _showPosition = 451f;
+    private readonly float _hidePosition = 90f;
+    private readonly float _showPosition = -150f;
 
     public Action ScrollPageLeft;
     public Action ScrollPageRight;
@@ -18,6 +19,9 @@ public class PagePanel : MonoBehaviour
     [SerializeField] private RectTransform _rightPanel;
     private ClickButton _rightButton;
 
+    [SerializeField] private GameObject _pageCounter;
+    [SerializeField] private Text _pageText;
+
     void Awake()
     {
         _leftButton = _leftPanel.transform.GetComponentInChildren<ClickButton>();
@@ -26,6 +30,7 @@ public class PagePanel : MonoBehaviour
         _rightButton.OnClick += OnRightButtonClick;
 
         ForceHide();
+
     }
 
     private void OnRightButtonClick()
@@ -47,13 +52,23 @@ public class PagePanel : MonoBehaviour
         _rightPanel.anchoredPosition = new Vector2(_hidePosition, 0f);
     }
 
-    public void Show()
+    public void SetActivePageCounter(bool active)
+    {
+        _pageCounter.gameObject.SetActive(active);
+    }
+
+    public void SetTextCounter(int value, int total)
+    {
+        _pageText.text = $"{(value + 1)}/{total}";
+    }
+
+    public void ShowArrow()
     {
         _leftPanel.GetComponent<RectTransform>().DOAnchorPos(new Vector2(-_showPosition, 0f), 0.3f, true);
         _rightPanel.GetComponent<RectTransform>().DOAnchorPos(new Vector2(_showPosition, 0f), 0.3f, true);
     }
 
-    public void Hide()
+    public void HideArrow()
     {
         _leftPanel.GetComponent<RectTransform>().DOAnchorPos(new Vector2(-_hidePosition, 0f), 0.3f, true);
         _rightPanel.GetComponent<RectTransform>().DOAnchorPos(new Vector2(_hidePosition, 0f), 0.3f, true);

@@ -2,47 +2,63 @@
 using System.Collections.Generic;
 using Assets.SimpleLocalization;
 using Cysharp.Threading.Tasks;
-using Meta;
+using Data;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UI_SkillTooltip : MonoBehaviour, ITick
+public class UI_SkillTooltip : MonoBehaviour
 {
+    [SerializeField] private TooltipBack _background;
+    [SerializeField] private Text _description;
+    [SerializeField] private Image _icon;
+    [SerializeField] private Text _type;
 
-    protected Image image;
-    protected Text description;
-    protected Text header;
+    private UI_SKillBilder _skillBilder;
+    private SkillMeta _meta;
+    private SkillVO _vo;
 
-    protected ItemData itemData;
+    void Awake()
+    {
+        _skillBilder = GetComponent<UI_SKillBilder>();
+    }
 
     public void HideTooltip()
     {
+        _background.Hide();
+        _background.gameObject.SetActive(false);
         gameObject.SetActive(false);
     }
 
-    protected virtual void Start()
+    public void ShowTooltip(SkillMeta meta, SkillVO vo)
     {
+        _background.Show("pink", meta.Name);
+        _background.gameObject.SetActive(true);
 
-    }
-
-    public virtual void ShowTooltip(ItemData itemData)
-    {
+        switch (meta.Type)
+        {
+            case 1:
+                _type.text = "Предмет";
+                break;
+            case 2:
+                _type.text = "Репутация";
+                break;
+            case 3:
+                _type.text = "Навык";
+                break;
+            case 4:
+                _type.text = "Помощник";
+                break;
+        }
 
         gameObject.SetActive(true);
-        this.itemData = itemData;
-        header.text = LocalizationManager.Localize(this.itemData.Name);
-        description.text = LocalizationManager.Localize(this.itemData.Des);
+        _meta = meta;
+        _vo = vo;
 
-        //Services.Assets.SetSpriteIntoImage(I)
-        //LoadSprite ().Forget ();
-    }
+        _skillBilder.Build(meta, vo);
+        //_description.text = "";LocalizationManager.Localize(this._meta.Des);
 
-    protected virtual void Awake()
-    {
-        //image = transform.Find ("Image").GetComponent<Image> ();
-        header = transform.Find("Name").GetComponent<Text>();
-        description = transform.Find("Description").GetComponent<Text>();
-        /// gameObject.GetComponent<Button> ().onClick.AddListener (HideTooltip);
+        Services.Assets.SetSpriteIntoImage(_icon, "Skills/" + meta.Id + "/icon", true).Forget();
+        //   UpdateTime();
     }
 
     void Update()
@@ -53,13 +69,4 @@ public class UI_SkillTooltip : MonoBehaviour, ITick
         }
     }
 
-    public virtual void Tick(int timestamp)
-    {
-
-    }
-
-    public virtual bool IsTickble()
-    {
-        return false;
-    }
 }

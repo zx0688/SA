@@ -1,0 +1,7 @@
+-cp src
+--cs bin/cs
+--main SL
+-D dll
+-D unity
+-D no-debug
+-D no-root

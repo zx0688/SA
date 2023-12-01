@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Assets.SimpleLocalization;
+
 using Core;
 using DG.Tweening;
-using Meta;
+
 using UnityEngine;
 using UnityEngine.UI;
 using UI.Components;
@@ -17,10 +17,9 @@ namespace Core
 
         [SerializeField] private Image art;
         [SerializeField] private Text name;
-        [SerializeField] private Text description;
         [SerializeField] private GameObject eventIcon;
 
-        private CardMeta card => data.CurrentCardMeta;
+        private CardMeta card => data.Card;
 
         public void SetActive(bool enable)
         {
@@ -35,24 +34,24 @@ namespace Core
 
         protected void UpdateHUD()
         {
-            description.gameObject.SetActive(false);
+            // description.gameObject.SetActive(false);
             art.gameObject.SetActive(false);
 
             name.Localize(card.Name);
 
-            if (card.Des != null)
+            if (card.Desc != null)
             {
-                description.Localize(card.Des);
-                description.gameObject.SetActive(true);
+                //description.Localize(card.Desc);
+                //description.gameObject.SetActive(true);
             }
 
             if (card.Image != null)
             {
-                art.SetImage(AssetsService.CARD_ADDRESS(card.Image));
+                art.LoadCardImage(card.Image);
                 art.gameObject.SetActive(true);
             }
 
-            eventIcon.SetActive(card.Event == true);
+            //eventIcon.SetActive(card.Event == true);
         }
     }
 

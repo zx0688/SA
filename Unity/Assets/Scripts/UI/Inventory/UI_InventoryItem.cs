@@ -2,13 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Meta;
+
 using UI;
 using UnityEngine;
 using UnityEngine.UI;
 
 
-public class UI_InventoryItem : MonoBehaviour, ITick, ISetData<ItemVO>
+public class UI_InventoryItem : MonoBehaviour, ITick, ISetData<ItemData>
 {
     [SerializeField] protected Text count;
     [SerializeField] protected GameObject counter;
@@ -17,12 +17,13 @@ public class UI_InventoryItem : MonoBehaviour, ITick, ISetData<ItemVO>
     public Image Icon;
 
     protected ItemMeta data;
+    protected string id;
     protected bool isEmpty;
     protected UI_InventoryTooltip tooltip;
 
-    public ItemVO Data => throw new NotImplementedException();
+    public ItemData Data => throw new NotImplementedException();
 
-    public void SetItem(ItemVO item)
+    public void SetItem(ItemData item)
     {
         if (item == null)
         {
@@ -33,18 +34,18 @@ public class UI_InventoryItem : MonoBehaviour, ITick, ISetData<ItemVO>
         count.text = item.Count.ToString();
         isEmpty = false;
 
-
-        if (this.data != null && this.data.Id == item.Id)
+        if (id == item.Id)
             return;
 
-        this.data = Services.Data.ItemInfo(item.Id);
+        id = item.Id;
+        data = null;///Services.Meta.Game.Items[item.Id.ToString()];
         counter.SetActive(true);
         Icon.enabled = true;
         count.enabled = true;
 
         _showTooltipBtn.interactable = true;
 
-        Services.Assets.SetSpriteIntoImage(Icon, "Items/" + item.Id, true).Forget();
+        Icon.LoadItemIcon(item.Id);
     }
 
     public bool IsEmpty()
@@ -59,7 +60,6 @@ public class UI_InventoryItem : MonoBehaviour, ITick, ISetData<ItemVO>
 
     public virtual void Clear()
     {
-        data = null;
         isEmpty = true;
         Icon.enabled = false;
         Icon.sprite = null;
@@ -90,7 +90,7 @@ public class UI_InventoryItem : MonoBehaviour, ITick, ISetData<ItemVO>
     protected void OnClick()
     {
         if (data != null)
-            tooltip.ShowTooltip(data);
+            tooltip.ShowTooltip(data.Id, data);
     }
 
     public void Tick(int timestamp)

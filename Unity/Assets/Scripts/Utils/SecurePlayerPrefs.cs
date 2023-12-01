@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using UnityEngine;
+using Cysharp.Text;
 
 public class SecurePlayerPrefs
 {
@@ -12,15 +13,16 @@ public class SecurePlayerPrefs
     public static List<T> GetListOrEmpty<T>(string key) where T : class
     {
         List<T> list = new();
-        int count = PlayerPrefs.GetInt($"lst_{key}_ct", 0);
+        string c = ZString.Format("lst_{0}_ct", key);
+        int count = PlayerPrefs.GetInt(c, 0);
         for (int i = 0; i < count; i++)
         {
             try
             {
-                string keylist = $"lst_{key}_{i}";
+                string keylist = ZString.Format("lst_{0}_{1}", key, i);
                 if (!PlayerPrefs.HasKey(keylist))
                     continue;
-                string json = decrypt(PlayerPrefs.GetString(keylist)) as string;
+                string json = Decrypt(PlayerPrefs.GetString(keylist)) as string;
                 T item = JsonUtility.FromJson<T>(json);
                 list.Add(item);
             }
@@ -29,7 +31,7 @@ public class SecurePlayerPrefs
         //fix lenght
         if (count != list.Count)
         {
-            PlayerPrefs.SetInt($"lst_{key}_ct", list.Count);
+            PlayerPrefs.SetInt(c, list.Count);
         }
 
         return list;
@@ -37,12 +39,12 @@ public class SecurePlayerPrefs
 
     public static void ClearList(string key)
     {
-        string keylist = $"lst_{key}_ct";
+        string keylist = ZString.Format("lst_{0}_ct", key);
         int count = PlayerPrefs.GetInt(keylist, 0);
         try
         {
             for (int i = 0; i < count; i++)
-                PlayerPrefs.DeleteKey($"lst_{key}_{i}");
+                PlayerPrefs.DeleteKey(ZString.Format("lst_{0}_{1}", key, i));
             PlayerPrefs.DeleteKey(keylist);
         }
         catch (Exception) { }
@@ -50,11 +52,11 @@ public class SecurePlayerPrefs
 
     public static void AddToList<T>(string key, T item) where T : class
     {
-        string keylist = $"lst_{key}_ct";
+        string keylist = ZString.Format("lst_{0}_ct", key);
         try
         {
             int count = PlayerPrefs.GetInt(keylist, 0);
-            PlayerPrefs.SetString($"lst_{key}_{count}", encrypt(JsonUtility.ToJson(item)));
+            PlayerPrefs.SetString(ZString.Format("lst_{0}_{1}", key, count), Encrypt(JsonUtility.ToJson(item)));
             PlayerPrefs.SetInt(keylist, count + 1);
         }
         catch (Exception) { }
@@ -62,7 +64,7 @@ public class SecurePlayerPrefs
 
     public static void SetString(string key, string value)
     {
-        PlayerPrefs.SetString(md5(key), encrypt(value));
+        PlayerPrefs.SetString(md5(key), Encrypt(value));
     }
 
     public static string GetString(string key, string defaultValue)
@@ -71,7 +73,7 @@ public class SecurePlayerPrefs
             return defaultValue;
         try
         {
-            string s = decrypt(PlayerPrefs.GetString(md5(key)));
+            string s = Decrypt(PlayerPrefs.GetString(md5(key)));
             return s;
         }
         catch
@@ -87,7 +89,7 @@ public class SecurePlayerPrefs
 
     public static void SetInt(string key, int value)
     {
-        PlayerPrefs.SetString(md5(key), encrypt(value.ToString()));
+        PlayerPrefs.SetString(md5(key), Encrypt(value.ToString()));
     }
 
     public static int GetInt(string key, int defaultValue)
@@ -96,7 +98,7 @@ public class SecurePlayerPrefs
             return defaultValue;
         try
         {
-            string s = decrypt(PlayerPrefs.GetString(md5(key)));
+            string s = Decrypt(PlayerPrefs.GetString(md5(key)));
             int i = int.Parse(s);
             return i;
         }
@@ -114,7 +116,7 @@ public class SecurePlayerPrefs
 
     public static void SetFloat(string key, float value)
     {
-        PlayerPrefs.SetString(md5(key), encrypt(value.ToString()));
+        PlayerPrefs.SetString(md5(key), Encrypt(value.ToString()));
     }
 
 
@@ -124,7 +126,7 @@ public class SecurePlayerPrefs
             return defaultValue;
         try
         {
-            string s = decrypt(PlayerPrefs.GetString(md5(key)));
+            string s = Decrypt(PlayerPrefs.GetString(md5(key)));
             float f = float.Parse(s, System.Globalization.CultureInfo.InvariantCulture);
             return f;
         }
@@ -163,7 +165,7 @@ public class SecurePlayerPrefs
     private static byte[] key = new byte[8] { 12, 11, 18, 27, 56, 208, 65, 14 };
     private static byte[] iv = new byte[8] { 35, 63, 12, 43, 43, 43, 56, 12 };
 
-    private static string encrypt(string s)
+    public static string Encrypt(string s)
     {
         byte[] inputbuffer = Encoding.Unicode.GetBytes(s);
         byte[] outputBuffer = DES.Create().CreateEncryptor(key, iv).TransformFinalBlock(inputbuffer, 0, inputbuffer.Length);
@@ -180,7 +182,7 @@ public class SecurePlayerPrefs
         }
     }
 
-    private static string decrypt(string s)
+    public static string Decrypt(string s)
     {
         byte[] inputbuffer = System.Convert.FromBase64String(s);
 

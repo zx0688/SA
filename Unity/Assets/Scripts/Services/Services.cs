@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Assets.SimpleLocalization;
+
 using Cysharp.Threading.Tasks;
 using GameServer;
-
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -18,8 +17,7 @@ public class Services : MonoBehaviour
     }
 
     public static PlayerService Player;
-    public static DataService Data;
-    public static NetworkService Network;
+    public static MetaService Meta;
     public static AssetsService Assets;
     private static Services _instance;
 
@@ -42,8 +40,7 @@ public class Services : MonoBehaviour
             _instance = this;
 
             Player = new PlayerService();
-            Data = new DataService();
-            Network = new NetworkService();
+            Meta = new MetaService();
             Assets = new AssetsService();
 
             DontDestroyOnLoad(gameObject);
@@ -65,28 +62,13 @@ public class Services : MonoBehaviour
 
     public async UniTaskVoid Init()
     {
-
         GameTime.Fix((int)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds);
 
         UpdateTextUI("Loading assets...");
-        await Assets.Init(Progress.Create<float>(x => UpdateProgressUI(x)));
-
-        //UpdateTextUI("Loading network...");
-        //await network.Init(Progress.Create<float>(x => UpdateProgressUI(x)));
-        HttpBatchServer.Init(
-            "3243",
-            "3434",
-            "gp",
-            serverTimestamp => GameTime.Fix(serverTimestamp),
-            GameTime.Get);
-
-        //UpdateTextUI("Loading game data...");
-        //await HttpBatchServer.Profile<PlayerVO>();
-
-        //HttpBatchServer.OpenConnection().Forget();
+        await Assets.Init("RU", Progress.Create<float>(x => UpdateProgressUI(x)));
 
         UpdateTextUI("Loading game data...");
-        await Data.Init(Progress.Create<float>(x => UpdateProgressUI(x)));
+        await Meta.Init(Progress.Create<float>(x => UpdateProgressUI(x)));
 
         UpdateTextUI("Loading profile...");
         await Player.Init(Progress.Create<float>(x => UpdateProgressUI(x)));
@@ -99,7 +81,6 @@ public class Services : MonoBehaviour
             await SceneManager.LoadSceneAsync("Main").ToUniTask(Progress.Create<float>(x => UpdateProgressUI(x)));
         }
 
-        LocalizationManager.Read();
         TimeFormat.Init();
 
         UpdateProgressUI(1);

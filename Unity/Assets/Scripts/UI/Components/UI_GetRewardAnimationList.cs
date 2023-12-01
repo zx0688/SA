@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 
 using DG.Tweening;
-using Meta;
+
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,7 +26,7 @@ public class UI_GetRewardAnimationList : ServiceBehaviour
     protected override void OnServicesInited()
     {
         base.OnServicesInited();
-        Services.Player.OnItemReceived += OnItemReceived;
+        //Services.Player.OnGetReward += OnItemReceived;
     }
 
     private void OnItemReceived(List<RewardMeta> items)

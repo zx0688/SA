@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using Meta;
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -44,7 +44,7 @@ public class UI_SKillBilder : MonoBehaviour
             _reward.SetActive(true);
             _rewardText.text = "Получите";
             _rewardValue.text = skill.Act.Reward[0].Count.ToString();
-            Services.Assets.SetSpriteIntoImageData(_rewardIcon, GameMeta.ITEM, skill.Act.Reward[0].Id, true).Forget();
+            Services.Assets.SetSpriteIntoImageData(_rewardIcon, ConditionMeta.ITEM, skill.Act.Reward[0].Id, true).Forget();
         }
 
         _time.SetActive(false);
@@ -91,7 +91,7 @@ public class UI_SKillBilder : MonoBehaviour
             if (c.Count > 1)
                 _conditionValue.gameObject.SetActive(true);
 
-            Services.Assets.SetSpriteIntoImageData(_conditionIcon, GameMeta.ITEM, c.Id, true).Forget();
+            Services.Assets.SetSpriteIntoImageData(_conditionIcon, ConditionMeta.ITEM, c.Id, true).Forget();
         }
 
         _chance.SetActive(false);

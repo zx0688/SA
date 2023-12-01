@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Meta;
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,40 +17,34 @@ namespace UI.Components
 
         public void SetItem(ConditionMeta cond)
         {
-            if (cond == null)
-            {
-                Hide();
-                return;
-            }
 
-            if (cond.Tp == GameMeta.ITEM)
+            if (cond.Type == ConditionMeta.ITEM)
             {
                 count.text = cond.Sign == ">" ? Math.Abs(cond.Count + 1).ToString() : Math.Abs(cond.Count).ToString();
                 count.gameObject.SetActive(true);
             }
-            else if (cond.Tp == GameMeta.SKILL)
+            else if (cond.Type == ConditionMeta.ITEM)
             {
                 count.gameObject.SetActive(false);
             }
 
-            if (Data != null && Data.Id == cond.Id && Data.Tp == cond.Tp)
+            if (Data.Id == cond.Id && Data.Type == cond.Type)
                 return;
 
             Data = cond;
             this.gameObject.SetActive(true);
 
-            //if (cond.Tp == GameMeta.ITEM)
+            //if (cond.Tp == ConditionMeta.ITEM)
             {
                 //    Services.Assets.SetSpriteIntoImage(icon, "UI/randomItem", true).Forget();
             }
             //else
             {
-                icon.SetImage(AssetsService.ITEM_ADDRESS(cond.Id));
+                icon.LoadItemIcon(cond.Id);
             }
         }
         public virtual void Hide()
         {
-            Data = null;
             icon.sprite = null;
             this.gameObject.SetActive(false);
         }

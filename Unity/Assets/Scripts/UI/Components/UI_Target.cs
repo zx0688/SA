@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Assets.SimpleLocalization;
-using Meta;
+
+using haxe.root;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,9 +11,9 @@ public class UI_Target : MonoBehaviour
     [HideInInspector] public UI_TargetItem[] items;
     [SerializeField] private UI_TargetItem _one;
 
-    public void SetItems(List<ConditionMeta> condition)
+    public void SetItems(ConditionMeta[] condition)
     {
-        if (condition == null || condition.Count == 0)
+        if (condition == null || condition.Length == 0)
         {
             gameObject.SetActive(false);
             return;
@@ -21,7 +21,7 @@ public class UI_Target : MonoBehaviour
 
         gameObject.SetActive(true);
 
-        if (condition.Count == 1)
+        if (condition.Length == 1)
         {
             foreach (UI_TargetItem item in items)
             {
@@ -40,7 +40,7 @@ public class UI_Target : MonoBehaviour
         for (int i = 0; i < items.Length; i++)
         {
             UI_TargetItem item = items[i];
-            if (i < condition.Count)
+            if (i < condition.Length)
             {
                 ConditionMeta r = condition[i];
                 item.gameObject.SetActive(true);

@@ -13,7 +13,7 @@ public class UI_EffectPanel : MonoBehaviour
         items = GetComponentsInChildren<UI_SkillItem>();
     }
 
-    public void UpdateItems(List<SkillVO> skills)
+    public void UpdateItems(List<ItemData> skills)
     {
 
         for (int i = 0; i < items.Length; i++)

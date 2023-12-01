@@ -31,9 +31,9 @@ public class UI_Inventory : MonoBehaviour, IPage
         if (!Services.isInited)
             return;
 
-        List<ItemVO> items = Services.Player.GetPlayerVO.Items;
+        //List<ItemData> items = Services.Player.Profile.Items;
 
-        _swiper.UpdateData(items);
+        _swiper.UpdateData(Services.Player.Profile.Items.Values.ToList());
     }
 
     public void Show()

@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Meta;
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,11 +18,11 @@ public class UI_SkillItem : MonoBehaviour
     private UI_SkillTooltip _tooltip;
 
     //private SkillMeta meta;
-    private SkillVO _vo;
+    private ItemData _vo;
     private bool _isEmpty;
     //protected Image[] stars;
 
-    public void SetItem(SkillVO item)
+    public void SetItem(ItemData item)
     {
         if (item == null)
         {
@@ -49,7 +49,7 @@ public class UI_SkillItem : MonoBehaviour
            meta.Act.Reward = new List<RewardMeta>();
            meta.Act.Reward.Add(new RewardMeta());
            meta.Act.Reward[0].Id = 4;
-           meta.Act.Reward[0].Tp = GameMeta.ITEM;
+           meta.Act.Reward[0].Tp = ConditionMeta.ITEM;
            meta.Act.Reward[0].Count = 23;
            meta.Act.Con = new List<ConditionMeta>();
            meta.Act.Tri = new List<TriggerMeta>();

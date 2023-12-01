@@ -2,21 +2,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Assets.SimpleLocalization;
+
 using Core;
-using Meta;
+
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace UI.Components
 {
-    public class UIConditions : MonoBehaviour, ISetData<List<ConditionMeta>>
+    public class UIConditions : MonoBehaviour, ISetData<ConditionMeta[]>
     {
-        [SerializeField] private LocalizedText header;
         [SerializeField] private UIConditionItem[] items;
 
-        public List<ConditionMeta> Data { get; private set; }
-
+        public ConditionMeta[] Data { get; private set; }
 
         void Awake()
         {
@@ -31,14 +29,14 @@ namespace UI.Components
 
         public bool ShowIfAvailable()
         {
-            if (Data == null || Data.Count == 0)
+            if (Data == null || Data.Length == 0)
                 return false;
 
             gameObject.SetActive(true);
             return true;
         }
 
-        public void SetItem(List<ConditionMeta> data)
+        public void SetItem(ConditionMeta[] data)
         {
             Data = data;
 
@@ -51,7 +49,7 @@ namespace UI.Components
             for (int i = 0; i < items.Length; i++)
             {
                 UIConditionItem item = items[i];
-                if (i < data.Count)
+                if (i < data.Length)
                 {
                     item.SetItem(data[i]);
                 }

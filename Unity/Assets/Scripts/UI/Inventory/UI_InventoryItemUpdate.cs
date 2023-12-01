@@ -12,7 +12,7 @@ public class UI_InventoryItemUpdate : UI_InventoryItem
     protected void Init()
     {
 
-        Services.OnInited -= Init;
+        //ervices.OnInited -= Init;
         // Services.Player.OnProfileUpdated += OnProfileUpdated;
         // OnProfileUpdated();
     }
@@ -39,7 +39,7 @@ public class UI_InventoryItemUpdate : UI_InventoryItem
         if (id == 0 || gameObject.activeInHierarchy == false)
             return;
 
-        ItemVO item = null;//Services.Player.itemHandler.GetVO(id, 3);
+        ItemData item = null;//Services.Player.itemHandler.GetVO(id, 3);
         SetItem(item);
 
     }

@@ -3,25 +3,22 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Assets.SimpleLocalization;
+
 using Core;
 using Cysharp.Threading.Tasks;
-using Meta;
+using GameServer;
+using haxe.lang;
 using UnityEngine;
 using UnityEngine.Networking;
 
 public partial class PlayerService : IService
 {
-
-    private static readonly string URL = "";
-
-    public event Action<List<RewardMeta>> OnItemReceived;
-    public event Action<ItemVO, int> OnItemChanged;
+    //public event Action<List<RewardMeta>> OnGetReward;
+    //public event Action<int, int> OnItemChanged;
 
     public event Action<CardMeta> OnChangedLocation;
 
-    public event Action<CardMeta, CardVO> OnCardExecuted;
-    public event Action<CardMeta, CardVO> OnCardActivated;
+    public event Action<CardMeta, CardData> OnCardExecuted;
 
     public event Action OnProfileUpdated;
     public event Action OnQuestComplete;
@@ -30,91 +27,56 @@ public partial class PlayerService : IService
     public event Action OnUpdated;
     public event Action OnDestroed;
 
-    private PlayerVO playerVO;
+    public ProfileData Profile;
 
-    public int currentChoise;
+    private GameRequest request = null;
 
-    public PlayerVO GetPlayerVO => playerVO;
+    //public List<CardMeta> QueueMeta => playerVO.Layers.ConvertAll(i => Services.Data.GetCardMetaByID(i));
+    // public bool DoesPlayerKnow(int id, int Tp) => Tp switch
+    // {
+    //     GameMeta.SKILL => playerVO.Skills.Find(i => i.Id == id) != null,
+    //     ConditionMeta.ITEM => playerVO.Items.Find(i => i.Id == id) != null,
+    //     _ => throw new NotImplementedException("Undefined type")
+    // };
 
-    public List<CardMeta> QueueMeta => playerVO.Layers.ConvertAll(i => Services.Data.GetCardMetaByID(i));
-    public CardVO GetCardVOByID(int id) => playerVO.Cards.Find(c => c.Id == id);
-    public CardVO GetCardVOByIDOrCreate(int id)
-    {
-        CardVO cardVO = playerVO.Cards.Find(c => c.Id == id);
-        if (cardVO == null)
-        {
-            cardVO = new CardVO(id, 0);
-            playerVO.Cards.Add(cardVO);
-        }
-        return cardVO;
-    }
-
-    public bool DoesPlayerKnow(int id, int Tp) => Tp switch
-    {
-        GameMeta.SKILL => playerVO.Skills.Find(i => i.Id == id) != null,
-        GameMeta.ITEM => playerVO.Items.Find(i => i.Id == id) != null,
-        _ => throw new NotImplementedException("Undefined type")
-    };
-
-    public SkillVO GetSkillVOByID(int id) => playerVO.Skills.Find(i => i.Id == id);
-    public ItemVO GetItemVOByID(int id) => playerVO.Items.Find(i => i.Id == id);
+    //public SkillVO GetSkillVOByID(int id) => playerVO.Skills.Find(i => i.Id == id);
+    //public ItemVO GetItemVOByID(int id) => playerVO.Items.Find(i => i.Id == id);
 
     //public List<RewardMeta> GetItemAsRewardList(int id) => new List<RewardMeta>() { GetItemVOByID(id).CreateReward() };
 
-    public int GetCountItemByID(int id)
-    {
-        ItemVO i = GetItemVOByID(id);
-        return i != null ? i.Count : 0;
-    }
+    // public int GetCountItemByID(int id)
+    // {
+    //     ItemVO i = GetItemVOByID(id);
+    //     return i != null ? i.Count : 0;
+    // }
 
     //public int SwipeCountLeft(int activate, int time) => (time + activate) - _playerVO.SwipeCount;
 
     public async UniTask Init(IProgress<float> progress = null)
     {
-        SwipeData = new SwipeData();
+        request = new GameRequest(Type: 0, Value: 0, Id: "");
 
-        RequestVO r = new RequestVO("profile");
-        //.network.AddRequestToPool(r);
+        HttpBatchServer.Init(
+            "3243",
+            "3434",
+            "gp",
+            true,
+            Services.Meta.Game,
+            serverTimestamp => GameTime.Fix(serverTimestamp),
+            GameTime.Get);
 
+        Profile = await HttpBatchServer.GetProfile(progress: progress);
 
-        await UniTask.DelayFrame(2);
-
-        //if the answer is none 
-        //if (!SecurePlayerPrefs.HasKey ("profile")) {
-        //Services.Data.game.profiles.timestamp = GameTime.GetTime ();
-        //string json = JsonUtility.ToJson (Services.Data.game.profiles);
-        // Debug.Log(json);
-        // PlayerData[] players = JsonUtility.FromJson<PlayerData[]> (json);
-
-        // foreach (PlayerData p in Services.Data.game.profiles) {
-        playerVO = await Services.Assets.GetProfile();
-
-        if (playerVO == null)
+        Profile.Cards.Values.ToList().ForEach(c =>
         {
-            playerVO = new PlayerVO();
-            playerVO.Items = Services.Data.GameMeta.Profile.Reward.ConvertAll(r => new ItemVO(r.Id, r.Count)).ToList();
-            playerVO.First = true;
-        }
-
-
-        //SecurePlayerPrefs.SetString ("profile", json);
-
-
-        for (int i = 0; i < Services.Data.GameMeta.Cards.Length; i++)
-        {
-            /*CardMeta cardMeta = Services.Data.GameMeta.Cards[i];
-            if (cardMeta.Once == true)
+            CardMeta cardMeta = Services.Meta.Game.Cards[c.Id];
+            if (cardMeta.CT > 0 && c.CT >= cardMeta.CT)
             {
-                CardVO cardVO = GetCardVOByID(cardMeta.Id);
-                if (cardVO != null && (cardVO.Executed > 0))
-                    Services.Data.GameMeta.Cards[i] = null;
-            }*/
-        }
-        Utils.ClearArray<CardMeta>(ref Services.Data.GameMeta.Cards);
+                Services.Meta.Game.Cards.Remove(c.Id);
+            }
+        });
 
-        //await Services.Assets.SetProfile(_playerVO);
-
-        //OnProfileUpdated?.Invoke ();
+        OnProfileUpdated?.Invoke();
     }
 
 
@@ -166,47 +128,56 @@ public partial class PlayerService : IService
     }*/
     public void Buy(int timestamp)
     {
-        List<RewardMeta> priceData = Services.Data.GameMeta.Config.PriceReroll;
+        //List<RewardMeta> priceData = Services.Data.GameMeta.Config.PriceReroll;
         List<RewardMeta> items = new List<RewardMeta>();
         //ItemVO i = (ItemVO) itemHandler.Add(Services.Data.ItemInfo(ItemData.ACCELERATE_ID), priceData[0].id, timestamp);
         RewardMeta r = new RewardMeta();
-        r.Id = ItemMeta.ACCELERATE_ID;
+        //r.Id = ItemMeta.ACCELERATE_ID;
         //r.Tp = DataService.ITEM_ID;
-        r.Count = priceData[0].Id;
+        //r.Count = priceData[0].Id;
         items.Add(r);
-        OnItemReceived?.Invoke(items);
+
         OnProfileUpdated?.Invoke();
 
     }
-    public void Accelerate(int timestamp, int count)
+
+    public void Swipe(SwipeData swipe)
     {
+        request.Id = swipe.Card.Id;
+        request.Type = TriggerMeta.SWIPE;
+        request.Value = swipe.Choice;
+        request.Hash = swipe.Choice == CardMeta.LEFT ? Profile.Left : Profile.Right;
 
-        //int timeAccelerate = Services.Data.GameMeta.Config.Accelerate * count;
+        HttpBatchServer.Change(request);
 
-        /*if (Deck.instance.waitingTimeLeft - timeAccelerate < 0)
-            timeAccelerate = Deck.instance.waitingTimeLeft;
+        if (swipe.Card.CT > 0 && swipe.Data.CT >= swipe.Card.CT)
+        {
+            Services.Meta.Game.Cards.Remove(swipe.Card.Id);
+        }
 
-        Deck.instance.waitingTimeLeft -= timeAccelerate;
+        OnCardExecuted?.Invoke(swipe.Card, swipe.Data);
+        OnProfileUpdated?.Invoke();
+    }
 
-        foreach (CardVO cardVO in playerVO.cards)
-            if (cardVO.executed > 0)
-                cardVO.executed = cardVO.executed - timeAccelerate;
-        foreach (BuildingVO buildingVO in playerVO.buildings)
-            if (buildingVO.executed > 0)
-                buildingVO.executed = buildingVO.executed - timeAccelerate;
+    public void ChangeLocation(CardMeta location)
+    {
+        request.Id = Profile.CurrentLocation;
+        request.Type = TriggerMeta.CHANGE_LOCATION;
+        request.Hash = location.Id;
 
-        List<RewardData> items = new List<RewardData>();
-        ItemData accelerateData = Services.Data.ItemInfo(ItemData.ACCELERATE_ID);
-        //ItemVO i = (ItemVO)itemHandler.Add(accelerateData, -count, timestamp);
-        RewardData r = new RewardData();
-        //r.id = i.id;
-        r.Tp = DataService.ITEM_ID;
-        //r.count = i.count;
-        items.Add(r);
-    */
-        // OnItemReceived?.Invoke(items);
+        HttpBatchServer.Change(request);
+
+        OnChangedLocation?.Invoke(location);
+        OnProfileUpdated?.Invoke();
+    }
+
+
+    public void Accelerate()
+    {
+        request.Type = TriggerMeta.REROLL;
+        HttpBatchServer.Change(request);
+
         OnProfileUpdated?.Invoke();
         OnAccelerated?.Invoke();
     }
-
 }

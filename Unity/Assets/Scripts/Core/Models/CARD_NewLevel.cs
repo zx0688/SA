@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Assets.SimpleLocalization;
+
 using DG.Tweening;
-using Meta;
+
 using UnityEngine;
 using UnityEngine.UI;
 

@@ -11,7 +11,7 @@ using UnityEngine.UI;
 
 namespace Core
 {
-    public class Swipe : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler, IBeginDragHandler, IEndDragHandler
+    public class Swipe : MonoBehaviour, IPointerUpHandler, IDragHandler, IBeginDragHandler, IEndDragHandler
     {
         public enum States
         {
@@ -19,11 +19,6 @@ namespace Core
             DRAG,
             IDLE
         }
-
-        public const int LEFT_CHOICE = 1;
-        public const int RIGHT_CHOICE = 2;
-        public const int UP_CHOICE = 3;
-        public const int DOWN_CHOICE = 4;
 
         [System.Serializable] public class mEvent : UnityEvent { }
 
@@ -34,7 +29,6 @@ namespace Core
         [HideInInspector] public static event Action OnReadySwipe;
         [HideInInspector] public static event Action OnEndSwipe;
         [HideInInspector] public static event Action OnDrop;
-        [HideInInspector] public static event Action OnDoubleTap;
         [HideInInspector] public static event Action OnRestoring;
 
         [HideInInspector] public float Deviation;
@@ -149,7 +143,7 @@ namespace Core
                         if (Time.time - lastTapThreshold <= doubleTapThreshold)
                         {
                             lastTapThreshold = 0;
-                            OnDoubleTapDetected();
+
                         }
                         else
                         {
@@ -165,13 +159,12 @@ namespace Core
             }
         }
 
-        private void OnDoubleTapDetected()
-        {
-            State = States.DISABLE;
-            waitTapMode = true;
-            card.FadeDown().Forget();
-            OnDoubleTap?.Invoke();
-        }
+        // public void EnableWaitMode(Action callback)
+        // {
+        //     State = States.DISABLE;
+        //     waitTapMode = true;
+        //     card.FadeDown(callback).Forget();
+        // }
 
         private void MovingDispatcher()
         {
@@ -204,9 +197,10 @@ namespace Core
 
             _direction = 0;
             _shake?.Kill();
+            State = States.DRAG;
 
             OnTakeCard?.Invoke();
-            State = States.DRAG;
+
         }
 
         public void OnEndDrag(PointerEventData eventData)
@@ -267,19 +261,19 @@ namespace Core
 
             if (_rectTransform.anchoredPosition.x > _pivotPoint.x)
             {
-                if (_direction != Swipe.RIGHT_CHOICE)
+                if (_direction != CardMeta.RIGHT)
                 {
-                    OnChangeDirection?.Invoke(Swipe.RIGHT_CHOICE);
+                    OnChangeDirection?.Invoke(CardMeta.RIGHT);
                 }
-                _direction = Swipe.RIGHT_CHOICE;
+                _direction = CardMeta.RIGHT;
             }
             else if (_rectTransform.anchoredPosition.x < _pivotPoint.x)
             {
-                if (_direction != Swipe.LEFT_CHOICE)
+                if (_direction != CardMeta.LEFT)
                 {
-                    OnChangeDirection?.Invoke(Swipe.LEFT_CHOICE);
+                    OnChangeDirection?.Invoke(CardMeta.LEFT);
                 }
-                _direction = Swipe.LEFT_CHOICE;
+                _direction = CardMeta.LEFT;
             }
 
             if (card != null)
@@ -342,14 +336,14 @@ namespace Core
             gameObject.SetActive(false);
         }
 
-        public void OnPointerDown(PointerEventData eventData)
-        {
-            // if (waitTapMode)
-            // {
-            //     card.FadeUp().Forget();
-            //     OnRestoring?.Invoke();
-            //     waitTapMode = false;
-            // }
-        }
+        // public void OnPointerDown(PointerEventData eventData)
+        // {
+        //     if (waitTapMode)
+        //     {
+        //         card.FadeUp().Forget();
+        //         OnRestoring?.Invoke();
+        //         waitTapMode = false;
+        //     }
+        // }
     }
 }

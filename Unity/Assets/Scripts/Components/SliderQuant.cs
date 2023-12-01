@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Controllers;
 using Core;
-using Meta;
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -54,9 +53,8 @@ public class SliderQuant : MonoBehaviour
         //if (showAction == false)
         //    return;
 
-        int resId = GetComponent<ItemStateController>().itemId;
 
-        ActionMeta choiseData = null;
+
         //if (cardItem.me == true)
         //   choiseData = direction == SwipeDirection.LEFT ? cardItem.data.left : cardItem.data.right;
         //else

@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Assets.SimpleLocalization;
+
 using Cysharp.Threading.Tasks;
-using Meta;
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,7 +15,7 @@ public class UI_SkillTooltip : MonoBehaviour
 
     private UI_SKillBilder _skillBilder;
     //private SkillMeta _meta;
-    private SkillVO _vo;
+    private ItemData data;
 
     void Awake()
     {
@@ -29,7 +29,7 @@ public class UI_SkillTooltip : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    public void ShowTooltip(SkillMeta meta, SkillVO vo)
+    public void ShowTooltip(SkillMeta meta, ItemData data)
     {
         /*
         _background.Show("pink", meta.Name);
@@ -58,7 +58,7 @@ public class UI_SkillTooltip : MonoBehaviour
         _skillBilder.Build(meta, vo);
         //_description.text = "";LocalizationManager.Localize(this._meta.Des);
 */
-        Services.Assets.SetSpriteIntoImage(_icon, "Skills/" + meta.Id + "/icon", true).Forget();
+        //Services.Assets.SetSpriteIntoImage(_icon, "Skills/" + meta. + "/icon", true).Forget();
         //   UpdateTime();
     }
 

@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Assets.SimpleLocalization;
+
 using Cysharp.Threading.Tasks;
-using Meta;
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,7 +20,7 @@ public class UI_QuestsTooltip : MonoBehaviour
     protected Text header;
 
     private CardMeta _meta;
-    private QuestVO _vo;
+    private CardData _vo;
 
     public void HideTooltip()
     {
@@ -30,7 +30,7 @@ public class UI_QuestsTooltip : MonoBehaviour
     }
 
 
-    public void ShowTooltip(CardMeta meta, QuestVO vo)
+    public void ShowTooltip(CardMeta meta, CardData vo)
     {
         _background.Show("green", meta.Name);
         _background.gameObject.SetActive(true);
@@ -44,10 +44,10 @@ public class UI_QuestsTooltip : MonoBehaviour
         this._meta = meta;
         this._vo = vo;
 
-        _target.SetItems(meta.Act.Con);
-        _reward.SetItems(meta.Act.Reward);
+        //_target.SetItems(meta.Act.Con);
+        //_reward.SetItems(meta.Act.Reward);
 
-        _description.text = _meta.Des;
+        //_description.text = _meta.Des;
         //header.text = LocalizationManager.Localize(this.itemData.Nam);
         //description.text = LocalizationManager.Localize(this._meta.descr);
 

@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Assets.SimpleLocalization;
+
 using Cysharp.Threading.Tasks;
-using Meta;
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -28,7 +28,7 @@ public class UI_InventoryTooltip : MonoBehaviour, ITick
 
     }
 
-    public void ShowTooltip(ItemMeta meta)
+    public void ShowTooltip(string id, ItemMeta meta)
     {
         _background.Show("red", meta.Name);
         _background.gameObject.SetActive(true);
@@ -37,8 +37,7 @@ public class UI_InventoryTooltip : MonoBehaviour, ITick
         this._meta = meta;
         //header.text = LocalizationManager.Localize(this.itemData.Nam);
         //description.text = LocalizationManager.Localize(this._meta.descr);
-
-        Services.Assets.SetSpriteIntoImage(icon, AssetsService.ITEM_ADDRESS(meta.Id), true).Forget();
+        icon.LoadItemIcon(id);
         // meta.Id, true).Forget();
         //LoadSprite ().Forget ();
     }

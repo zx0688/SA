@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Meta;
+
 using UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -23,8 +23,8 @@ public class PageSwiper : MonoBehaviour, IDragHandler, IEndDragHandler
     private int _prevPage = 0;
     private float _width;
 
-    private Dictionary<GameObject, ISetData<ItemVO>[]> _pages;
-    private List<ItemVO> _items;
+    private Dictionary<GameObject, ISetData<ItemData>[]> _pages;
+    private List<ItemData> _items;
     private List<GameObject> _panels;
     private int _countItemsPerPage;
     private Vector3 _panelLocation;
@@ -51,10 +51,10 @@ public class PageSwiper : MonoBehaviour, IDragHandler, IEndDragHandler
         _rect = _panels[2].GetComponent<RectTransform>();
         _rect.anchoredPosition = new Vector2(width * 2, 0);
 
-        _pages = new Dictionary<GameObject, ISetData<ItemVO>[]>();
-        _pages.Add(_panels[0], _panels[0].GetComponentsInChildren<ISetData<ItemVO>>());
-        _pages.Add(_panels[1], _panels[1].GetComponentsInChildren<ISetData<ItemVO>>());
-        _pages.Add(_panels[2], _panels[2].GetComponentsInChildren<ISetData<ItemVO>>());
+        _pages = new Dictionary<GameObject, ISetData<ItemData>[]>();
+        _pages.Add(_panels[0], _panels[0].GetComponentsInChildren<ISetData<ItemData>>());
+        _pages.Add(_panels[1], _panels[1].GetComponentsInChildren<ISetData<ItemData>>());
+        _pages.Add(_panels[2], _panels[2].GetComponentsInChildren<ISetData<ItemData>>());
 
         _countItemsPerPage = _pages[_panels[0]].Length;
     }
@@ -184,15 +184,15 @@ public class PageSwiper : MonoBehaviour, IDragHandler, IEndDragHandler
     {
         foreach (GameObject page in _pages.Keys)
         {
-            ISetData<ItemVO>[] _items = _pages[page];
-            foreach (ISetData<ItemVO> i in _items)
+            ISetData<ItemData>[] _items = _pages[page];
+            foreach (ISetData<ItemData> i in _items)
             {
                 i.Hide();
             }
         }
     }
 
-    public void UpdateData(List<ItemVO> items)
+    public void UpdateData(List<ItemData> items)
     {
         _items = items;
 
@@ -234,8 +234,8 @@ public class PageSwiper : MonoBehaviour, IDragHandler, IEndDragHandler
 
     private void ClearPage(GameObject page, int pageNumber)
     {
-        ISetData<ItemVO>[] items = _pages[page];
-        List<ItemVO> range = _items.Where((s, i) => i >= pageNumber *
+        ISetData<ItemData>[] items = _pages[page];
+        List<ItemData> range = _items.Where((s, i) => i >= pageNumber *
         items.Length && i < (pageNumber + 1) * items.Length).ToList();
 
         for (int i = 0; i < items.Length; i++)
@@ -246,8 +246,8 @@ public class PageSwiper : MonoBehaviour, IDragHandler, IEndDragHandler
 
     private void UpdatePage(GameObject page, int pageNumber)
     {
-        ISetData<ItemVO>[] items = _pages[page];
-        List<ItemVO> range = _items.Where((s, i) => i >= pageNumber *
+        ISetData<ItemData>[] items = _pages[page];
+        List<ItemData> range = _items.Where((s, i) => i >= pageNumber *
          items.Length && i < (pageNumber + 1) * items.Length).ToList();
 
         for (int i = 0; i < items.Length; i++)

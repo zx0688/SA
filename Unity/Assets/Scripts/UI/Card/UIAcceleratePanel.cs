@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Assets.SimpleLocalization;
-using Meta;
+using GameServer;
+using haxe.root;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -35,23 +35,23 @@ namespace Core
             if (!Services.isInited)
                 return;
 
-            Services.Player.OnItemReceived += OnItemReceived;
+            HttpBatchServer.ListenRewards += OnItemReceived;
             timer = StartCoroutine(Tick());
             timer = null;
         }
 
         void OnDisable()
         {
-            Services.Player.OnItemReceived -= OnItemReceived;
+            HttpBatchServer.ListenRewards -= OnItemReceived;
             StopAllCoroutines();
             timer = null;
         }
 
-        public void ShowMe()
+        public void Show()
         {
             gameObject.SetActive(true);
 
-            priceReroll.Count = Services.Data.GameMeta.Config.PriceReroll[0].Count;
+            priceReroll.Count = Services.Meta.Game.Config.PriceReroll[0].Count;
             item.SetItem(priceReroll);
         }
 
@@ -59,9 +59,11 @@ namespace Core
         {
             base.OnServicesInited();
 
-            duration = Services.Data.GameMeta.Config.DurationReroll;
-            priceReroll = Services.Data.GameMeta.Config.PriceReroll[0].Clone();
-
+            duration = Services.Meta.Game.Config.DurationReroll;
+            var r = Services.Meta.Game.Config.PriceReroll[0];
+            priceReroll = new RewardMeta();
+            priceReroll.Id = r.Id;
+            priceReroll.Count = r.Count;
             item.SetItem(priceReroll);
 
             //iconItemVO = new ItemVO(ItemMeta.ACCELERATE_ID, 0);
@@ -104,8 +106,7 @@ namespace Core
 
         private void TickUpdate(int time)
         {
-
-            int timeLeft = GameTime.Left(time, Services.Player.GetPlayerVO.TimestampStartReroll, duration);
+            int timeLeft = GameTime.Left(time, Services.Player.Profile.Cooldown, duration);
             if (timeLeft <= 0)
             {
                 buttonText.text = "Reroll";
@@ -114,7 +115,7 @@ namespace Core
             {
                 buttonText.text = TimeFormat.ONE_CELL_FULLNAME(timeLeft);
 
-                priceReroll.Count = Services.Data.GetPriceReroll(timeLeft);
+                priceReroll.Count = SL.GetPriceReroll(timeLeft, Services.Meta.Game);
                 item.SetItem(priceReroll);
             }
 
@@ -151,25 +152,11 @@ namespace Core
 
         private void Accelerate()
         {
-            Services.Player.ApplyReroll(GameTime.Current, 2);
-            /*if (accelerateItemVO.Count == 0)
-                return;
-            if (wait <= 0)
-                return;
-            if (wait <= timePerItem)
-                return;
-            //int available = Services.Player.AvailableItem(ItemMeta.ACCELERATE_ID);
-            //if (available <= 0)
-            //    return;
+            int price = SL.GetPriceReroll(GameTime.Left(GameTime.Current, Services.Player.Profile.Cooldown, duration), Services.Meta.Game);
 
-            int timestamp = GameTime.Current;
-            //SetItem(available, timestamp);
-
-            Services.Player.Accelerate(timestamp, accelerateItemVO.Count);
-            */
+            Services.Player.Accelerate();
 
             gameObject.SetActive(false);
-
         }
 
 

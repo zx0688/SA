@@ -2,8 +2,9 @@
 using System.Globalization;
 using System.Collections;
 using System.Collections.Generic;
-using Assets.SimpleLocalization;
+
 using UnityEngine;
+using Cysharp.Text;
 
 public static class TimeFormat
 {
@@ -18,10 +19,10 @@ public static class TimeFormat
 
     public static void Init()
     {
-        string second = ' ' + LocalizationManager.Localize("Time.Second").Substring(0, 3).ToLower() + ' ';
-        string day = ' ' + LocalizationManager.Localize("Time.Day").ToLower() + ' ';
-        string hour = ' ' + LocalizationManager.Localize("Time.Hour").Substring(0, 3).ToLower() + ' ';
-        string min = ' ' + LocalizationManager.Localize("Time.Minute").Substring(0, 3).ToLower() + ' ';
+        string second = ZString.Format(" {0} ", "Time.Second".Localize().Substring(0, 3).ToLower());
+        string day = ZString.Format(" {0} ", "Time.Day".ToLower());
+        string hour = ZString.Format(" {0} ", "Time.Hour".Substring(0, 3).ToLower());
+        string min = ZString.Format(" {0} ", "Time.Minute".Substring(0, 3).ToLower());
         timeNameLocalization = new string[4] { day, hour, min, second };
     }
     public static string ONE_CELL_FULLNAME(int timeLeft)

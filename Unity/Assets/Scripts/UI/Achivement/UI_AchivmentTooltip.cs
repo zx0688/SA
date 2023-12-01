@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Meta;
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -27,15 +27,10 @@ public class UI_AchivementTooltip : UI_InventoryTooltip, ITick
         _item = item;
 
         _name.text = item.Name;
-        description.text = item.Des;
+        description.text = item.Desc;
 
-        LoadSprite().Forget();
     }
 
-    async UniTaskVoid LoadSprite()
-    {
-        image.sprite = await Services.Assets.GetSprite("Items/" + _item.Id + "/icon", true);
-    }
 
     void Awake()
     {

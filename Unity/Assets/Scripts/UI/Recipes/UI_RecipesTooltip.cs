@@ -1,8 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Assets.SimpleLocalization;
 using Cysharp.Threading.Tasks;
-using Meta;
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,7 +19,7 @@ public class UI_RecipesTooltip : MonoBehaviour
     protected Text header;
 
     private CardMeta _meta;
-    private QuestVO _vo;
+    private CardData data;
 
     public void HideTooltip()
     {
@@ -30,7 +29,7 @@ public class UI_RecipesTooltip : MonoBehaviour
     }
 
 
-    public void ShowTooltip(CardMeta meta, QuestVO vo)
+    public void ShowTooltip(CardMeta meta, CardData vo)
     {
         _background.Show("yellow", meta.Name);
         _background.gameObject.SetActive(true);
@@ -42,12 +41,12 @@ public class UI_RecipesTooltip : MonoBehaviour
             return;
 
         this._meta = meta;
-        this._vo = vo;
+        this.data = vo;
 
-        _target.SetItems(meta.Act.Con);
-        _reward.SetItems(meta.Act.Reward);
+        //_target.SetItems(meta.Act.Con);
+        //_reward.SetItems(meta.Act.Reward);
 
-        _description.text = _meta.Des;
+        //_description.text = _meta.Des;
         //header.text = LocalizationManager.Localize(this.itemData.Nam);
         //description.text = LocalizationManager.Localize(this._meta.descr);
 

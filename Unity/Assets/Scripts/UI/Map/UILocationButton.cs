@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using Meta;
+
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -23,7 +23,7 @@ namespace UI.Map
         [SerializeField] private GameObject lockedBorder;
         [SerializeField] private GameObject locked;
 
-        public int Id => id;
+        public string Id => id.ToString();
 
         private UIMapTooltip tooltip;
         private CardMeta meta;
@@ -35,7 +35,7 @@ namespace UI.Map
             available.gameObject.SetActive(false);
             lockedBorder.gameObject.SetActive(false);
             locked.gameObject.SetActive(false);
-            image.SetImage($"Cards/{meta.Image}");
+            image.LoadCardImage(meta.Image);
 
             switch (status)
             {

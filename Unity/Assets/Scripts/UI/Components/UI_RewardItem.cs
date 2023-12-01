@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using Meta;
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -42,7 +42,7 @@ public class UI_RewardItem : MonoBehaviour, ITick
         //_up.gameObject.SetActive(reward.Count > 0);
         //_down.gameObject.SetActive(reward.Count < 0);
 
-        if (reward.Tp == GameMeta.ITEM)
+        if (reward.Type == ConditionMeta.ITEM)
         {
             if (reward.Random != null && reward.Random.Length > 0)
             {
@@ -55,7 +55,7 @@ public class UI_RewardItem : MonoBehaviour, ITick
                 count.color = reward.Count > 0 ? Color.green : Color.red;
             }
         }
-        else if (reward.Tp == GameMeta.CARD)
+        else if (reward.Type == ConditionMeta.CARD)
         {
             count.text = reward.Chance > 0 ? $"{reward.Chance}%" : "100%";
             count.color = Color.white;
@@ -63,7 +63,7 @@ public class UI_RewardItem : MonoBehaviour, ITick
 
         isEmpty = false;
 
-        if (this.data != null && this.data.Id == reward.Id && this.data.Tp == reward.Tp)
+        if (this.data != null && this.data.Id == reward.Id && this.data.Type == reward.Type)
             return;
 
         this.data = reward;
@@ -71,7 +71,7 @@ public class UI_RewardItem : MonoBehaviour, ITick
 
         //if (tooltip != null)
         //    showTooltipBtn.interactable = true;
-        if (reward.Tp == GameMeta.ITEM)
+        if (reward.Type == ConditionMeta.ITEM)
         {
             if (reward.Random != null && reward.Random.Length > 0)
             {
@@ -82,7 +82,7 @@ public class UI_RewardItem : MonoBehaviour, ITick
                 Services.Assets.SetSpriteIntoImage(icon, "Items/" + reward.Id, true).Forget();
             }
         }
-        else if (reward.Tp == GameMeta.CARD)
+        else if (reward.Type == ConditionMeta.CARD)
         {
             Services.Assets.SetSpriteIntoImage(icon, "UI/eventPic", true).Forget();
         }

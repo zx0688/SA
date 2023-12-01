@@ -34,14 +34,14 @@ public class UI_Character : MonoBehaviour, IPage
 
         //List<SkillVO> skills = Services.Player.playerVO.skills;
         //int time = GameTime.Get ();
-        _swipeCount.text = Services.Player.GetPlayerVO.SwipeCount.ToString();
+        _swipeCount.text = Services.Player.Profile.SwipeCount.ToString();
 
         for (int i = 0; i < _items.Length; i++)
         {
             UI_SkillItem item = _items[i];
-            SkillVO skillVO = new SkillVO(1, 2);//Services.Player.skillHandler.GetVO(skillItem.id, skillItem.type);
+            // SkillVO skillVO = new SkillVO(1, 2);//Services.Player.skillHandler.GetVO(skillItem.id, skillItem.type);
 
-            item.SetItem(skillVO);
+            //item.SetItem(skillVO);
         }
 
         //tick.UpdateTickList ();

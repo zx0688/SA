@@ -3,30 +3,41 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Cysharp.Text;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Diagnostics;
 using UnityEngine.Networking;
 using UnityEngine.UI;
+using UnityJSON;
 
 
 public class AssetsService
 {
-    public static string ITEM_ADDRESS(int Id) => $"Items/{Id}";
-    public static string CARD_ADDRESS(string Id) => $"Cards/{Id}";
+    private static readonly string GOOGLE_DRIVE_LOCALIZATION = "https://drive.google.com/uc?export=download&id=1Jwzs1es7S_hsdFoL76dov7_51c1gX-on";
+    // private static AssetsService _meta = null;
+    // public static AssetsService Meta
+    // {
+    //     get
+    //     {
+    //         if (_meta == null)
+    //             _meta = new MetaService();
+    //         return _meta;
+    //     }
+    // }
+
+    public Action OnBadConnection;
+    public string Localize(string key) => LocalDic.Dic.TryGetValue(key, out string res) ? res : $"[{key}";
+    private LocalizationData LocalDic;
 
     private static readonly string BASE_URL = "";
 
     private int saveCount;
 
-    void Awake()
-    {
-
-    }
 
     //private Dictionary<string, Sprite> spriteCache;
 
-    public async UniTask Init(IProgress<float> progress = null)
+    public async UniTask Init(string lang, IProgress<float> progress = null)
     {
 
         saveCount = PlayerPrefs.GetInt("savecount", 10);
@@ -45,70 +56,55 @@ public class AssetsService
 
                     Caching.currentCacheForWriting = Caching.AddCache (path);
         */
+
+        var json = await GetJson($"localization_{lang}", false, GOOGLE_DRIVE_LOCALIZATION, true, progress);
+        LocalDic = JSON.Deserialize<LocalizationData>(json);
+
         await UniTask.Yield();
     }
 
-
-
-    public async UniTask<PlayerVO> GetProfile(IProgress<float> progress = null)
+    public async UniTask<string> GetJson(string name, bool fromResources, string url, bool saveLocal, IProgress<float> progress = null)
     {
-        string json = SecurePlayerPrefs.GetString("profile") as string;
-        return null;//json == "" ? null : JsonUtility.FromJson<PlayerVO>(json);
-    }
-    public async UniTask<bool> SetProfile(object data, IProgress<float> progress = null)
-    {
-        //SecurePlayerPrefs.SetString("profile", JsonUtility.ToJson(data));
-
-        saveCount--;
-        if (saveCount <= 0)
-        {
-            //  SecurePlayerPrefs.Save();
-            //await 
-            saveCount = 10;
-            PlayerPrefs.SetInt("savecount", 10);
-        }
-
-        return true;
-    }
-
-    public async UniTask<string> GetJson(string name, bool fromResources, string url, bool usecache, IProgress<float> progress = null)
-    {
-
         if (fromResources)
         {
             var (isCanceled, asset) = await Resources.LoadAsync<TextAsset>(name).ToUniTask(progress: progress).SuppressCancellationThrow();
             if (asset != null && isCanceled == false)
-            {
                 return (asset as TextAsset).text;
-            }
         }
-
-        if (usecache == true)
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
-            string fromFile = GetJsonFromCache(name);
-            if (fromFile != null && fromFile.Length > 0)
+            request.SetRequestHeader("Content-Type", "application/json");
+            await request.SendWebRequest().ToUniTask(progress: progress).Timeout(TimeSpan.FromSeconds(5));
+            if (request.result != UnityWebRequest.Result.Success)
             {
-                return fromFile;
+                OnBadConnection?.Invoke();
+                Debug.LogWarning($"can't connect to {url}.. try again in 3 sec");
+                await UniTask.Delay(3000);
+                await request.SendWebRequest().ToUniTask(progress: progress).Timeout(TimeSpan.FromSeconds(3));
             }
-        }
+            switch (request.result)
+            {
+                case UnityWebRequest.Result.ConnectionError:
+                case UnityWebRequest.Result.DataProcessingError:
+                case UnityWebRequest.Result.ProtocolError:
+                    if (saveLocal == true)
+                    {
+                        Debug.LogWarning($"can't get data {name} from {url}.. trying to get from cache");
+                        string fromFile;
+                        if (TryGetJsonFromCache(name, out fromFile))
+                            return fromFile;
+                    }
+                    Debug.LogWarning($"can't get data {name} from cache.. hope this dont invoke an issue");
+                    break;
+                case UnityWebRequest.Result.Success:
+                    string json = request.downloadHandler.text;
+                    if (saveLocal)
+                        TryCacheJson(name, json);
 
-        if (usecache == false)
-            url += "&" + GameTime.Current;
-        Debug.Log(url);
-
-        UnityWebRequest request = UnityWebRequest.Get(url);
-        request.SetRequestHeader("Content-Type", "application/json");
-
-        await request.SendWebRequest().ToUniTask(progress: progress);
-
-        if (request.isNetworkError || request.isHttpError)
-        {
-            Debug.LogWarning("Cant find " + name);
+                    return json;
+            }
             return null;
         }
-
-        string jsonFromUrl = request.downloadHandler.text;
-        return jsonFromUrl;
     }
 
     public async UniTaskVoid SetSpriteIntoImageData(Image icon, int type, int id, bool fromResources, IProgress<float> progress = null)
@@ -184,7 +180,7 @@ public class AssetsService
             //}
         }
 
-        Sprite sprite = GetSpriteFromCache(name);
+        Sprite sprite = null;//GetSpriteFromCache(name);
         if (sprite != null)
         {
 
@@ -204,46 +200,70 @@ public class AssetsService
         }
 
         Texture texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
-        CacheTexture(name, request.downloadHandler.data);
+        //CacheTexture(name, request.downloadHandler.data);
 
         sprite = Sprite.Create((Texture2D)texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
 
         return sprite;
     }
-    private void CacheTexture(string name, byte[] data)
+    // private void CacheTexture(string name, byte[] data)
+    // {
+    //     var cacheFilePath = Path.Combine("CachePath", name + ".texture");
+    //     File.WriteAllBytes(cacheFilePath, data);
+    // }
+    private bool TryCacheJson(string name, string json)
     {
-        var cacheFilePath = Path.Combine("CachePath", name + ".texture");
-        File.WriteAllBytes(cacheFilePath, data);
-    }
-    private void CacheJson(string name, string json)
-    {
-        var cacheFilePath = Path.Combine("CachePath", name + ".json");
-        File.WriteAllText(cacheFilePath, json);
+        //SimpleDiskUtils.DiskUtils.CheckAvailableSpace ();
+        var cacheFilePath = Path.Combine(Application.persistentDataPath, ZString.Format("{0}.json", name));
+        File.WriteAllText(cacheFilePath, SecurePlayerPrefs.Encrypt(json));
+        try
+        {
+            File.WriteAllText(cacheFilePath, SecurePlayerPrefs.Encrypt(json));
+            return File.Exists(cacheFilePath);
+        }
+        catch (Exception)
+        {
+            Debug.LogError($"Couldn't save data {name} to file");
+            return false;
+        }
     }
 
-    private string GetJsonFromCache(string name)
+    private bool TryGetJsonFromCache(string name, out string json)
     {
-        var cacheFilePath = name; //Path.Combine ("", name + ".json");
+        var cacheFilePath = Path.Combine(Application.persistentDataPath, ZString.Format("{0}.json", name));
         if (!File.Exists(cacheFilePath))
-            return null;
-        return null; //File.ReadAllText (cacheFilePath);
+        {
+            json = "";
+            return false;
+        }
+        try
+        {
+            json = SecurePlayerPrefs.Decrypt(File.ReadAllText(cacheFilePath));
+        }
+        catch (Exception)
+        {
+            json = "";
+            return false;
+        }
+        return true;
     }
-    private Sprite GetSpriteFromCache(string name)
-    {
-        var cacheFilePath = Path.Combine("", name + ".texture");
-        if (!File.Exists(cacheFilePath))
-            return null;
+    // private Sprite GetSpriteFromCache(string name)
+    // {
+    //     var cacheFilePath = Path.Combine("", name + ".texture");
+    //     if (!File.Exists(cacheFilePath))
+    //         return null;
 
-        var data = File.ReadAllBytes(cacheFilePath);
-        Texture2D texture = new Texture2D(1, 1);
-        texture.LoadImage(data, true);
+    //     var data = File.ReadAllBytes(cacheFilePath);
+    //     Texture2D texture = new Texture2D(1, 1);
+    //     texture.LoadImage(data, true);
 
-        return Sprite.Create((Texture2D)texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
-    }
+    //     return Sprite.Create((Texture2D)texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
+    // }
+
 
     /*private float GetFreeSpace () {
 
-        var availableSpace = 10000000; //SimpleDiskUtils.DiskUtils.CheckAvailableSpace ();
+        var availableSpace = 10000000; //
 
         return availableSpace;
     }*/
@@ -287,4 +307,12 @@ public class AssetsService
 
 
     */
+}
+
+[Serializable]
+public class LocalizationData
+{
+    public string Lang;
+    public Dictionary<String, String> Dic;
+    public int Version;
 }

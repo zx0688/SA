@@ -4,11 +4,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
-using Meta;
+
 using UnityEngine;
 using UnityEngine.UI;
 using System.Threading.Tasks;
 using System.Linq;
+using GameServer;
 
 public class UI_DropReward : ServiceBehaviour
 {
@@ -18,12 +19,11 @@ public class UI_DropReward : ServiceBehaviour
     [SerializeField] private List<GameObject> _particalEffects = new List<GameObject>();
 
     private List<GameObject> items;
-    private List<RewardMeta> waiting;
+    private List<ItemData> waiting;
 
     private GameObject positionAddAnimation;
     private GameObject positionSpendAnimation;
     private GameObject positionSpecialAnimation;
-    private GameObject positionBuildingAnimation;
 
     protected override void Awake()
     {
@@ -40,9 +40,8 @@ public class UI_DropReward : ServiceBehaviour
         positionAddAnimation = transform.Find("Add").gameObject;
         positionSpendAnimation = transform.Find("Spend").gameObject;
         positionSpecialAnimation = transform.Find("Special").gameObject;
-        positionBuildingAnimation = transform.Find("Building").gameObject;
 
-        waiting = new List<RewardMeta>();
+        waiting = new List<ItemData>();
     }
 
     private void PlayParticle(int index)
@@ -79,7 +78,7 @@ public class UI_DropReward : ServiceBehaviour
             return;
         }
 
-        RewardMeta i = waiting[0];
+        ItemData i = waiting[0];
         waiting.RemoveAt(0);
 
         if (i.Count > 0)
@@ -88,7 +87,7 @@ public class UI_DropReward : ServiceBehaviour
             Spend(i, 0);
     }
 
-    private void Add(RewardMeta reward, Vector3 position)
+    private void Add(ItemData reward, Vector3 position)
     {
         GameObject item = items[items.Count - 1];
 
@@ -106,42 +105,15 @@ public class UI_DropReward : ServiceBehaviour
         item.SetActive(true);
         item.GetComponent<RectTransform>().anchoredPosition = new Vector3(0, 0, 0);
 
-        ItemMeta itemMeta = reward.Tp == GameMeta.ITEM ? Services.Data.ItemInfo(reward.Id) : null;
+        ItemMeta itemMeta = Services.Meta.Game.Items[reward.Id];
+        item.GetComponent<Image>().LoadItemIcon(reward.Id);
 
-        if (itemMeta != null)
+        if (itemMeta.Particle > 0)
         {
-            Services.Assets.SetSpriteIntoImage(item.GetComponent<Image>(), AssetsService.ITEM_ADDRESS(itemMeta.Id), true).Forget();
-
-            if (itemMeta.Particle > 0)
-            {
-                ScenarioSPECIAL(item, position, itemMeta.Particle);
-            }
-            else
-                ScenarioITEM(item, position);
+            ScenarioSPECIAL(item, position, itemMeta.Particle);
         }
         else
-        {
-            throw new NotImplementedException("Animation for drop only item");
-        }
-
-    }
-
-    private void ScenarioBUILDING(GameObject item, Vector3 position)
-    {
-
-
-        Vector3 p = positionBuildingAnimation.transform.position;
-        item.gameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-        item.gameObject.transform.DOScale(new Vector3(1.6f, 1.6f, 1.6f), 0.6f).SetEase(Ease.OutQuad).OnComplete(() =>
-        {
-            item.gameObject.transform.DOMove(p, 0.4f).SetDelay(2.5f).OnComplete(() =>
-            {
-                item.gameObject.SetActive(false);
-                item.gameObject.transform.DOKill();
-                CheckWaiting();
-            });
-            item.gameObject.transform.DOScale(new Vector3(0.2f, 0.2f, 0.2f), 0.4f).SetDelay(1f);
-        });
+            ScenarioITEM(item, position);
     }
 
     private void ScenarioSPECIAL(GameObject item, Vector3 position, int particleNumber)
@@ -152,7 +124,7 @@ public class UI_DropReward : ServiceBehaviour
         item.gameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
         item.gameObject.transform.DOScale(new Vector3(1.6f, 1.6f, 1.6f), 0.6f).SetEase(Ease.OutQuad).OnComplete(() =>
         {
-            item.gameObject.transform.DOMove(p, 0.4f).SetDelay(1.7f).OnComplete(() =>
+            item.gameObject.transform.DOMove(p, 0.4f, true).SetDelay(1.7f).OnComplete(() =>
             {
                 item.gameObject.SetActive(false);
                 item.gameObject.transform.DOKill();
@@ -170,9 +142,9 @@ public class UI_DropReward : ServiceBehaviour
     {
         Vector3 p = positionAddAnimation.transform.position;
         item.gameObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-        item.gameObject.transform.DOMove(position + item.gameObject.transform.position, 0.7f).SetEase(Ease.OutQuad).OnComplete(() =>
+        item.gameObject.transform.DOMove(position + item.gameObject.transform.position, 0.5f, true).SetEase(Ease.OutCirc).OnComplete(() =>
         {
-            item.gameObject.transform.DOMove(p, 0.4f).SetDelay(0.2f).OnComplete(() =>
+            item.gameObject.transform.DOMove(p, 0.4f, true).SetDelay(0.2f).OnComplete(() =>
             {
                 item.gameObject.SetActive(false);
                 item.gameObject.transform.DOKill();
@@ -181,15 +153,12 @@ public class UI_DropReward : ServiceBehaviour
             });
             item.gameObject.transform.DOScale(new Vector3(0.2f, 0.2f, 0.2f), 0.4f).SetDelay(0.2f);
         });
-        item.gameObject.transform.DOScale(new Vector3(1.2f, 1.2f, 1.2f), 0.7f);
+        item.gameObject.transform.DOScale(new Vector3(1.25f, 1.25f, 1.25f), 0.5f);
     }
 
-    private void Spend(RewardMeta cost, float delay)
+    private void Spend(ItemData cost, float delay)
     {
         GameObject item = items[items.Count - 1];
-
-        if (cost.Id == ItemMeta.ACCELERATE_ID || cost.Tp == GameMeta.BUILDING)
-            return;
 
         if (item.activeInHierarchy)
         {
@@ -198,7 +167,7 @@ public class UI_DropReward : ServiceBehaviour
         }
 
         gameObject.SetActive(true);
-        ItemMeta data = Services.Data.ItemInfo(cost.Id);
+        ItemMeta data = null;//Services.Meta.Game.Items[cost.Id.ToString()];
 
         items.RemoveAt(items.Count - 1);
         items.Insert(0, item);
@@ -207,13 +176,13 @@ public class UI_DropReward : ServiceBehaviour
         Vector3 targetPosition = positionAddAnimation.GetComponent<RectTransform>().anchoredPosition;
 
         item.GetComponent<RectTransform>().anchoredPosition = targetPosition;
-        Services.Assets.SetSpriteIntoImage(item.GetComponent<Image>(), "Items/" + data.Id, true).Forget();
+        item.GetComponent<Image>().LoadItemIcon(cost.Id);
 
         Vector3 position = positionSpendAnimation.transform.position;
 
         item.gameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
 
-        item.gameObject.transform.DOMove(position, 0.5f).SetDelay(delay).OnComplete(() =>
+        item.gameObject.transform.DOMove(position, 0.5f, true).SetDelay(delay).OnComplete(() =>
         {
             item.gameObject.SetActive(false);
             item.gameObject.transform.DOKill();
@@ -239,39 +208,38 @@ public class UI_DropReward : ServiceBehaviour
     protected override void OnServicesInited()
     {
         base.OnServicesInited();
-        Services.Player.OnItemReceived += OnItemReceived;
+        HttpBatchServer.ListenRewards += OnItemReceived;
     }
 
 
     private void OnItemReceived(List<RewardMeta> rewards)
     {
-        List<RewardMeta> items = rewards.Where(r => r.Tp == GameMeta.ITEM).ToList();
-        if (items.Count == 1)
+        List<ItemData> itemsData = rewards.Where(r => r.Type == ConditionMeta.ITEM).Select(r => new ItemData(Id: r.Id, Count: r.Count)).ToList();
+
+        if (itemsData.Count == 1)
         {
-            if (items[0].Count > 0)
-                Add(items[0], new Vector3(0, 0, 0));
+            if (itemsData[0].Count > 0)
+                Add(itemsData[0], new Vector3(0, 0, 0));
             else
             {
-                if (Services.Player.GetCountItemByID(items[0].Id) + Math.Abs(items[0].Count) + items[0].Count > 0)
-                    Spend(items[0], 0);
+                Spend(itemsData[0], 0);
             }
-
             return;
         }
 
         float angle = UnityEngine.Random.Range(0f, 6.28f);
-        float step = 6.28f / items.Count;
-        for (int i = 0; i < items.Count; i++)
+        float step = 6.28f / itemsData.Count;
+        for (int i = 0; i < itemsData.Count; i++)
         {
-            if (items[i].Count < 0)
+            if (itemsData[i].Count < 0)
             {
-                if (Services.Player.GetCountItemByID(items[i].Id) + Math.Abs(items[i].Count) + items[i].Count > 0)
-                    Spend(items[i], i * 0.4f);
+                ////if (Services.Player.Profile.Items[items[i].Id) + Math.Abs(items[i].Count) + items[i].Count > 0];
+                Spend(itemsData[i], i * 0.4f);
                 continue;
             }
             angle += step * i;
             Vector3 pos = new Vector3(Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius, 0f);
-            Add(items[i], pos);
+            Add(itemsData[i], pos);
         }
     }
 }

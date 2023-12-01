@@ -35,21 +35,21 @@ public class UI_Quests : MonoBehaviour, IPage
         if (!Services.isInited)
             return;
 
-        List<ItemVO> items = new List<ItemVO>();
+        List<ItemData> items = new List<ItemData>();
 
-        QuestVO q = new QuestVO(2, 2);
-        q.Activated = 1652134383;
-        q.Choice = 1;
-        q.Executed = 0;
-        q.Id = 2;
+        // QuestVO q = new QuestData(2, 2);
+        // q.Activated = 1652134383;
+        // q.Choice = 1;
+        // q.Executed = 0;
+        // q.Id = 2;
 
-        for (int i = 0; i < 1; i++)
-            items.Add(q);
+        // for (int i = 0; i < 1; i++)
+        //     items.Add(q);
 
 
         _empty.gameObject.SetActive(items.Count == 0);
         _swiper.gameObject.SetActive(items.Count != 0);
-        _swiper.UpdateData(items);
+        //_swiper.UpdateData(items);
 
         /*
         List<QuestVO> quests = Services.Player.playerVO.quests;

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Cysharp.Threading.Tasks;
-using Meta;
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -27,11 +27,11 @@ public class UI_TargetItem : MonoBehaviour
 
         _value.text = condition.Count.ToString();
 
-        if (this._data != null && this._data.Id == condition.Id && this._data.Tp == condition.Tp)
+        if (this._data != null && this._data.Id == condition.Id && this._data.Type == condition.Type)
             return;
 
         this._data = condition;
-        ItemVO current = Services.Player.GetItemVOByID(_data.Id);
+        ItemData current = Services.Player.Profile.Items[_data.Id];
 
         _icon.enabled = true;
         _value.enabled = true;

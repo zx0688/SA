@@ -26,27 +26,30 @@ namespace Core
         //private CARD_Quest _CARD_Quest;
         //private CARD_NewLevel _CARD_NewLevel;
 
-        public async UniTaskVoid FadeDown()
-        {
-            RectTransform rectTransform = GetComponent<RectTransform>();
-            DOTween.Kill(rectTransform);
-            Vector2 down = new Vector2(swipe.PivotPoint.x, swipe.PivotPoint.y - 135);
-            rectTransform.DOAnchorPos(down, 0.1f, false).SetEase(Ease.OutCirc);
-            rectTransform.DOScale(0.88f, 0.1f).SetEase(Ease.OutCirc);
-            RemoveListeners();
-        }
+        // public async UniTaskVoid FadeDown(Action callback)
+        // {
 
-        public async UniTaskVoid FadeUp()
-        {
-            RectTransform rectTransform = GetComponent<RectTransform>();
-            DOTween.Kill(rectTransform);
-            rectTransform.DOAnchorPos(swipe.PivotPoint, 0.1f, false).SetEase(Ease.OutCirc);
-            await rectTransform.DOScale(1f, 0.1f).SetEase(Ease.OutCirc).AsyncWaitForCompletion();
-            AddListeners();
-            GC.Collect();
-            swipe.ConstructNewSwipe();
-            swipe.WaitSwipe();
-        }
+        //     RectTransform rectTransform = GetComponent<RectTransform>();
+        //     DOTween.Kill(rectTransform);
+        //     Vector2 down = new Vector2(swipe.PivotPoint.x, swipe.PivotPoint.y - 150);
+
+        //     await UniTask.DelayFrame(10);
+        //     rectTransform.DOAnchorPos(down, 0.2f, false).SetEase(Ease.OutCirc);
+        //     rectTransform.DOScale(0.97f, 0.2f).SetEase(Ease.OutCirc).OnComplete(() => callback());
+        //     RemoveListeners();
+        // }
+
+        // public async UniTaskVoid FadeUp()
+        // {
+        //     RectTransform rectTransform = GetComponent<RectTransform>();
+        //     DOTween.Kill(rectTransform);
+        //     rectTransform.DOAnchorPos(swipe.PivotPoint, 0.1f, false).SetEase(Ease.OutCirc);
+        //     await rectTransform.DOScale(1f, 0.1f).SetEase(Ease.OutCirc).AsyncWaitForCompletion();
+        //     AddListeners();
+        //     GC.Collect();
+        //     swipe.ConstructNewSwipe();
+        //     swipe.WaitSwipe();
+        // }
 
 
         public void UpdateData(SwipeData data)
@@ -56,7 +59,7 @@ namespace Core
             Input.simulateMouseWithTouches = true;
         }
 
-        public async UniTaskVoid FadeIn()
+        public async UniTaskVoid FadeIn(Action callback)
         {
             canvasGroup.alpha = 0f;
             canvasGroup.DOFade(1f, 0.2f);
@@ -67,6 +70,8 @@ namespace Core
             AddListeners();
             GC.Collect();
             swipe.WaitSwipe();
+
+            callback?.Invoke();
 
             /*if (!Services.Player.playerVO.tutorVO.swipeCard)
             {

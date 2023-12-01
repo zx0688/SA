@@ -1,0 +1,19 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "hxml",
+			"file": "cs.hxml",
+			"group": "build",
+			"problemMatcher": [],
+			"label": "hxml: cs.hxml"
+		},
+		{
+			"type": "haxe",
+			"args": "active configuration",
+			"group": "build",
+			"problemMatcher": [],
+			"label": "haxe: active configuration"
+		}
+	]
+}

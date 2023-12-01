@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Linq;
 using Cysharp.Threading.Tasks;
-using Meta;
 using DG.Tweening;
 using UnityEditor;
 using UnityEngine;
@@ -14,6 +13,8 @@ using UI.ActionPanel;
 using Core;
 using UI.Components;
 using haxe.root;
+using Unity.Collections;
+using GameServer;
 
 namespace Core
 {
@@ -25,16 +26,13 @@ namespace Core
             WAITING
         }
 
-        //public event Action OnQueueTrigger;
-        //public event Action OnNewItem;
-
-        //[HideInInspector]
-        //public event Action<GameObject> OnNewCard;
         [SerializeField] private PagePanel pagePanel;
         [SerializeField] private UIActionPanel action;
         [SerializeField] private UIAcceleratePanel acceleratePanel;
         [SerializeField] private UIConditions conditionPanel;
         [SerializeField] private Text name;
+        [SerializeField] private Text description;
+        [SerializeField] private GameObject descPanel;
 
         // [SerializeField]
         //public List<CardData> queue;
@@ -42,37 +40,32 @@ namespace Core
         //private Coroutine waitingTrigger;
 
         //public GameObject backCard;
-        //public UI_AcceleratePanel acceleratePanel;
 
         // private CardIconQueue cardIconQueue;
-        private List<GameObject> _cards;
-        private GameObject currentCard;
+        private List<GameObject> cards;
+        private GameObject currentCardObject;
 
-        private List<CardMeta> Queue => Services.Player.QueueMeta;
-        private PlayerService Player => Services.Player;
-        private SwipeData SwipeData => Services.Player.SwipeData;
+        private SwipeData swipeData;
 
-        private Swipe CurrentSwipe => currentCard.GetComponent<Swipe>() ?? throw new Exception("card doesn't exists");
-        private Card Card => currentCard.GetComponent<Card>() ?? throw new Exception("card doesn't exists");
+        private Swipe currentSwipe => currentCardObject.GetComponent<Swipe>() ?? throw new Exception("card doesn't exists");
+        private Card currentCard => currentCardObject.GetComponent<Card>() ?? throw new Exception("card doesn't exists");
 
         protected override void Awake()
         {
             State = States.WAITING;
-            SL.GetNewRandom(0, 0, 0);
-
-
             base.Awake();
         }
 
         protected override void OnServicesInited()
         {
             base.OnServicesInited();
+            swipeData = new SwipeData();
 
-            _cards = new List<GameObject>();
+            cards = new List<GameObject>();
             foreach (Card c in transform.GetComponentsInChildren<Card>())
             {
                 c.gameObject.SetActive(false);
-                _cards.Add(c.gameObject);
+                cards.Add(c.gameObject);
             }
 
             State = States.IDLE;
@@ -112,19 +105,20 @@ namespace Core
             //_rerollBtn.gameObject.SetActive(false);
             Swipe.OnDrop += OnDrop;
             Swipe.OnTakeCard += OnTake;
+
+            descPanel.gameObject.SetActive(false);
+            description.gameObject.SetActive(false);
         }
-
-
 
         private void OnTake()
         {
-            name.gameObject.SetActive(false);
+            description.gameObject.SetActive(false);
+            descPanel.gameObject.SetActive(false);
         }
 
         private void OnDrop()
         {
-            name.text = SwipeData.CurrentCardMeta.Name;
-            name.gameObject.SetActive(true);
+            descPanel.gameObject.SetActive(true);
         }
 
         void OnEnable()
@@ -179,37 +173,25 @@ namespace Core
         async UniTaskVoid Loop()
         {
             await UniTask.WaitUntil(() => State == States.IDLE);
-
-            //await FadeIn();
-
-            int time = GameTime.Current;
-
-            Player.ApplyReroll(GameTime.Current, 0);
-
+            HttpBatchServer.Change(new GameRequest(TriggerMeta.START_GAME));
             OpenCard();
 
             while (true)
             {
                 await UniTask.WaitUntil(() => State == States.IDLE);
-                Swipe swipe = CurrentSwipe;
-
+                Swipe swipe = currentSwipe;
                 await UniTask.WaitUntil(() => swipe.CurrentChoise != -1);
-
-                time = GameTime.Current;
-                SwipeData.Choice = swipe.CurrentChoise;
-
-                Player.ApplySwipe(SwipeData, () => acceleratePanel.ShowMe());
-
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-
-                //await UniTask.WaitUntil(() => queue.Count > 0);
-
-                State = States.IDLE;
-
+                swipeData.Choice = swipe.CurrentChoise;
+                Services.Player.Swipe(swipeData);
                 StopAllCoroutines();
 
-                await UniTask.WaitUntil(() => Player.GetPlayerVO.Layers.Count > 0);
+                if (Services.Player.Profile.Deck.Count == 0)
+                {
+                    acceleratePanel.Show();
+                }
+
+
+                await UniTask.WaitUntil(() => Services.Player.Profile.Deck.Count > 0);
 
                 /*if (background.activeInHierarchy)
                 {
@@ -273,42 +255,36 @@ namespace Core
 
         private void OpenCard()
         {
-            int time = GameTime.Current;
+            string nextCardId = Services.Player.Profile.Deck[0];
+            swipeData.Choice = -1;
+            swipeData.Data = Services.Player.Profile.Cards.GetValueOrDefault(nextCardId);
+            swipeData.Card = Services.Meta.Game.Cards.GetValueOrDefault(nextCardId);
 
-            Player.CreateSwipeData();
+            swipeData.Left = Services.Player.Profile.Left != null ? Services.Meta.Game.Cards.GetValueOrDefault(Services.Player.Profile.Left) : null;
+            swipeData.Right = Services.Player.Profile.Right != null ? Services.Meta.Game.Cards.GetValueOrDefault(Services.Player.Profile.Right) : null;
+            swipeData.LastCard = swipeData.Left == null && swipeData.Right == null && Services.Player.Profile.Deck.Count <= 1;
 
-            /*string q = '(' + SwipeData.CurrentCardMeta.Id.ToString() + ')';
-            foreach (CardMeta c in Queue)
+            int i = currentCardObject != null ? cards.IndexOf(currentCardObject) + 1 : 0;
+            i = i >= cards.Count ? 0 : i;
+
+            currentCardObject = cards[i];
+            currentCardObject.SetActive(true);
+            currentSwipe.ConstructNewSwipe();
+            currentCard.UpdateData(swipeData);
+
+            //name.text = swipeData.Card.Name.Localize();
+            if (swipeData.Data == null || swipeData.Data.CT == 0)
             {
-                q += " " + c.Id;
+                description.gameObject.SetActive(true);
+                description.text = swipeData.Card.Desc.Localize();
             }
-            Debug.Log(q);
-*/
-            //List<CardData> _queue = new List<CardData>(queue);
-            //Services.Data.TriggerNewCard (_queue, currentData.cardData, Swipe.LEFT_CHOICE, time);
-            //currentData.left.nextCard = _queue.Count > 0 ? _queue[0] : null;
-
-            //_queue = new List<CardData>(queue);
-            //Services.Data.TriggerNewCard (_queue, currentData.cardData, Swipe.RIGHT_CHOICE, time);
-            //currentData.right.nextCard = _queue.Count > 0 ? _queue[0] : null;
-            //_queue.Clear();
-            //*/
-
-            int i = currentCard != null ? _cards.IndexOf(currentCard) + 1 : 0;
-            i = i >= _cards.Count ? 0 : i;
-
-            currentCard = _cards[i];
-            currentCard.SetActive(true);
-            CurrentSwipe.ConstructNewSwipe();
-            Card.UpdateData(SwipeData);
-            Card.FadeIn().Forget();
-
+            action.UpdateData(swipeData);
+            currentCard.FadeIn(null).Forget();
             OnDrop();
 
-            action.UpdateData(SwipeData);
             //desc.gameObject.SetActive(true);
 
-            conditionPanel.SetItem(SwipeData.Conditions);
+            //conditionPanel.SetItem(SwipeData.Conditions);
             /*if (currentData.CardData.sound != null && currentData.CardData.sound.Length > 0)
             {
                 int r = UnityEngine.Random.Range(0, currentData.CardData.sound.Length);

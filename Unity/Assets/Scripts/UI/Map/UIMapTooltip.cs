@@ -2,13 +2,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Assets.SimpleLocalization;
+
 using Cysharp.Threading.Tasks;
-using Meta;
+
 using UI.Components;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using haxe.root;
 
 namespace UI.Map
 {
@@ -28,7 +29,7 @@ namespace UI.Map
 
         private void OnClick()
         {
-            Services.Player.ApplyChangeLocation(meta);
+            Services.Player.ChangeLocation(meta);
             HideTooltip();
         }
 
@@ -51,23 +52,22 @@ namespace UI.Map
             background.Show("blue", meta.Name);
             background.gameObject.SetActive(true);
             gameObject.SetActive(true);
-            description.Localize(meta.Des);
+            description.Localize(meta.Desc);
 
-            icon.SetImage($"Cards/{meta.Image}");
-
+            icon.LoadCardImage(meta.Image);
 
             textYouHere.gameObject.SetActive(false);
             button.gameObject.SetActive(false);
 
-            conditionText.gameObject.SetActive(meta.Act.Con != null && meta.Act.Con.Count > 0);
-            conditions.gameObject.SetActive(meta.Act.Con != null && meta.Act.Con.Count > 0);
-            conditions.SetItem(meta.Act.Con);
+            conditionText.gameObject.SetActive(meta.Con.Length > 0);
+            conditions.gameObject.SetActive(meta.Con.Length > 0);
+            conditions.SetItem(meta.Con);
 
-            if (Services.Player.GetPlayerVO.Location == meta.Id)
+            if (Services.Player.Profile.CurrentLocation == meta.Id)
             {
                 textYouHere.gameObject.SetActive(true);
             }
-            else if (Services.Data.CheckConditions(meta.Act.Con, meta, null, Services.Player, DataService.EMPTY_REWARD))
+            else if (SL.CheckCondition(meta.Con, Services.Meta.Game, Services.Player.Profile, null))
             {
                 button.gameObject.SetActive(true);
                 button.interactable = true;//SetActiveButton(true);

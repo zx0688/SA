@@ -1,56 +1,77 @@
+
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using Cysharp.Threading.Tasks;
+using haxe.root;
+
 using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityJSON;
 
 namespace GameServer
 {
     public class HttpBatchServer
     {
-        public static readonly string URL = "http";
-        public static Action ListenExceptions;
-        public static Action<GameServerEvent> ListenEvents;
+        public static Action<GameResponse> OnResponse;
+        public static Action<List<RewardMeta>> ListenRewards;
+
+        public delegate int ExternalTimeManager();
         public static bool HasFatal { get; private set; }
 
         // private static string uid = null;
         // private static string token = null;
         // private static string platform = null;
-        private static int rid = 0;
+
         private static WWWForm form = null;
+        private static readonly string URL = "http";
 
         private static readonly float cooldownTimer = 30f; //seconds
         private static readonly int cooldownChangesCount = 20;
         private static float timer = 0f;
 
-        private static List<GameServerTrigger> batch = null;
+        private static List<GameRequest> batch = null;
         private static Action<int> fixGlobalTime;
-        public delegate int ExternalTimeManager();
-        private static ExternalTimeManager GetTimestamp;
+        private static ExternalTimeManager getTimestamp;
+        private static bool enableConnection = false;
+        private static GameResponse response = default;
+
+        private static ProfileData profile = null;
+        private static GameMeta meta = null;
+        private static bool noServer = false;
 
         public static void Init(
             string uid,
             string token,
             string platform,
+            bool _noServer,
+            GameMeta _meta,
             Action<int> fixTime,
-            ExternalTimeManager getTimestamp)
+            ExternalTimeManager timeManager)
         {
-            //uid = uid;
-            //token = token;
-            //platform = platform;
             HasFatal = false;
             fixGlobalTime = fixTime;
-            GetTimestamp = getTimestamp;
+            getTimestamp = timeManager;
+            enableConnection = false;
+            response = new GameResponse();
+            meta = _meta;
+            noServer = _noServer;
 
             timer = 0f;
-            batch = SecurePlayerPrefs.GetListOrEmpty<GameServerTrigger>("batch");
 
             form = new WWWForm();
             form.AddField("token", token);
             form.AddField("uid", uid);
             form.AddField("pt", platform);
+            form.AddField("v", meta.Version);
+
+
+            //restore changes
+            batch = SecurePlayerPrefs.GetListOrEmpty<GameRequest>("batch");
         }
 
         public static async UniTask ForceSendBatch()
@@ -61,7 +82,6 @@ namespace GameServer
 
             SecurePlayerPrefs.ClearList("batch");
             SecurePlayerPrefs.Save();
-
             timer = cooldownTimer;
 
             using (UnityWebRequest request = UnityWebRequest.Post($"{URL}/change", form))
@@ -77,36 +97,67 @@ namespace GameServer
                     case UnityWebRequest.Result.ProtocolError:
                         break;
                     case UnityWebRequest.Result.Success:
-                        string json = SecurePlayerPrefs.GetString("profile") as string;
+                        string json = request.downloadHandler.text;
 
-                        GameServerEvent t = null;
-                        ListenEvents?.Invoke(t);
+                        GameResponse data = JSON.Deserialize<GameResponse>(json);
+
+                        fixGlobalTime?.Invoke(data.Timestamp);
+                        profile.Events = data.Events.ToDictionary(e => e.Hash, e => e);
+                        OnResponse?.Invoke(data);
                         break;
                 }
             }
         }
 
-        public static async UniTask OpenConnection()
+        public static void CloseConnection()
+        {
+            enableConnection = false;
+        }
+
+        public static void OpenConnection()
+        {
+            if (noServer)
+                return;
+
+            enableConnection = true;
+            connectionTask().AsAsyncUnitUniTask().Forget();
+        }
+
+        private static async UniTask connectionTask()
         {
             await ForceSendBatch();
-            while (true && !HasFatal)
+
+            do
             {
                 await UniTask.Delay(TimeSpan.FromSeconds(5));
                 if (timer > 0)
                     timer -= 5;
-                if (timer <= 0)
+                if (timer <= 0 && enableConnection)
                 {
                     await ForceSendBatch();
                 }
-            }
+
+            } while (!HasFatal && enableConnection);
         }
 
-        public static async UniTask<T> Profile<T>() where T : GameServerData
+        public static async UniTask<ProfileData> GetProfile(IProgress<float> progress = null)
         {
+            if (noServer)
+            {
+                // if (SecurePlayerPrefs.HasKey("profile"))
+                // {
+                //     profile = JSON.Deserialize<ProfileData>(SecurePlayerPrefs.GetString("profile"));
+                //     return profile;
+                // 
+                profile = SL.CreateProfile(meta, GameTime.Current, SL.GetRandomInstance());
+                return profile;
+            }
+
+
             using (UnityWebRequest request = UnityWebRequest.Post($"{URL}/profile", form))
             {
                 request.SetRequestHeader("Content-Type", "application/json");
-                await request.SendWebRequest().ToUniTask();
+                await request.SendWebRequest().ToUniTask(progress: progress);
 
                 switch (request.result)
                 {
@@ -116,55 +167,56 @@ namespace GameServer
                     case UnityWebRequest.Result.ProtocolError:
                         break;
                     case UnityWebRequest.Result.Success:
-                        string json = SecurePlayerPrefs.GetString("profile") as string;
-                        T data = JsonUtility.FromJson<T>(json);
-                        rid = data.rid;
+                        string json = request.downloadHandler.text;
+                        GameResponse r = JsonUtility.FromJson<GameResponse>(json);
+                        profile = r.Profile;
 
-                        fixGlobalTime?.Invoke(23);
-
-                        return data;
+                        fixGlobalTime?.Invoke(r.Timestamp);
+                        return profile;
                 }
             }
-
-            return null;
+            return default;
         }
 
-        public static void Change(GameServerTrigger data)
+        public static void Change(GameRequest request)
         {
-            //SL.change({ });
-            batch.Add(data);
-            data.time = GetTimestamp();
+            request.Timestamp = getTimestamp();
+            request.Rid = profile.Rid;
+            request.Version = meta.Version;
 
+            //local profile changing
+            response.Error = null;
+            List<RewardMeta> reward = new List<RewardMeta>();
 
+            SL.Change(request, meta, profile, request.Timestamp, response, reward, SL.GetRandomInstance());
+            if (response.Error != null)
+                throw new Exception(response.Error);
+
+            if (reward.Count > 0)
+                ListenRewards?.Invoke(reward);
+
+            if (noServer)
+            {
+                string json = JsonUtility.ToJson(profile);
+                SecurePlayerPrefs.SetString("profile", json);
+                SecurePlayerPrefs.Save();
+                return;
+            }
+
+            //send change to server
+            batch.Add(request);
+
+            //data.time = GetTimestamp();
             if (batch.Count >= cooldownChangesCount)
             {
                 ForceSendBatch().Forget();
             }
             else
             {
-                SecurePlayerPrefs.AddToList("batch", data);
+
+                SecurePlayerPrefs.AddToList("batch", request);
                 SecurePlayerPrefs.Save();
             }
         }
-    }
-
-    [Serializable]
-    public class GameServerData
-    {
-        public int rid = 0;
-        public int timestamp = 0;
-    }
-    [Serializable]
-    public class GameServerEvent
-    {
-        public int rid = 0;
-        public string hash = null;
-    }
-
-    [Serializable]
-    public class GameServerTrigger
-    {
-        public int rid = 0;
-        public int time = 0;
     }
 }

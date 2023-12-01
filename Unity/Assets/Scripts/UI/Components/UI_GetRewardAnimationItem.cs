@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Assets.SimpleLocalization;
+
 using Cysharp.Threading.Tasks;
 
 using DG.Tweening;
-using Meta;
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -45,7 +45,7 @@ public class UI_GetRewardAnimationItem : ServiceBehaviour
     {
         base.OnServicesInited();
 
-        Services.Player.OnItemReceived += OnItemReceived;
+        //Services.Player.OnGetReward += OnItemReceived;
         //ResourceItem r = new ResourceItem ();
         //r.id = 1;
         //r.count = 34;
@@ -108,14 +108,10 @@ public class UI_GetRewardAnimationItem : ServiceBehaviour
         });
     }
 
-    async UniTaskVoid LoadSprite()
-    {
-        icon.sprite = await Services.Assets.GetSprite("Items/" + data.Id + "/icon", true);
-    }
 
     private void Show(RewardMeta reward)
     {
-        data = Services.Data.ItemInfo(reward.Id);
+        data = null;//Services.Meta.Game.Items[];//[reward.Id.ToString()];
 
         //current = Services.Player.itemHandler.AvailableItem(reward.id);
         newValue = current + reward.Count;
@@ -125,7 +121,7 @@ public class UI_GetRewardAnimationItem : ServiceBehaviour
 
         itemAction.text = GetActionText(data, current, newValue);
 
-        LoadSprite().Forget();
+        icon.LoadItemIcon(reward.Id);
 
         gameObject.SetActive(true);
 
@@ -172,7 +168,7 @@ public class UI_GetRewardAnimationItem : ServiceBehaviour
             //    key = "Reward.GetSub";
         }
 
-        return LocalizationManager.Localize(key);
+        return key.Localize();
     }
 
     // Update is called once per frame

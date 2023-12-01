@@ -2,8 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Assets.SimpleLocalization;
-using Meta;
+
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,16 +11,16 @@ public class UI_Reward : MonoBehaviour
 {
     [SerializeField] private UI_RewardItem[] _items;
 
-    public void SetItems(List<RewardMeta> rewards)
+    public void SetItems(RewardMeta[] rewards)
     {
-        if (rewards == null || rewards.Count == 0)
+        if (rewards == null || rewards.Length == 0)
         {
             gameObject.SetActive(false);
             return;
         }
 
-        List<RewardMeta> prepared = rewards.Where(r => r.Tp == GameMeta.ITEM).ToList();
-        RewardMeta cardItem = rewards.Find(r => r.Tp == GameMeta.CARD);
+        List<RewardMeta> prepared = rewards.Where(r => r.Type == ConditionMeta.ITEM).ToList();
+        RewardMeta cardItem = ArrayUtility.Find(rewards, r => r.Type == ConditionMeta.CARD);
         if (cardItem != null)
             prepared.Add(cardItem);
 

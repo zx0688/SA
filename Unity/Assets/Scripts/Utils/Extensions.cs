@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Assets.SimpleLocalization;
-using Meta;
+
+using Cysharp.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,32 +14,39 @@ public static class Extensions
         public T[] Items;
     }
 
-    public static string Localize(this string key) => LocalizationManager.Localize(key);
-    public static void Localize(this Text textField, string key) => textField.text = LocalizationManager.Localize(key);
+    public static string Localize(this string key) => Services.Assets.Localize(key);
+    public static void Localize(this Text textField, string key) => textField.text = Services.Assets.Localize(key);
+
+    //public static List<RewardMeta> MakeCopy(this List<RewardMeta> key) => Services.Assets.Localize(key);
 
     public static List<RewardMeta> Merge(this List<RewardMeta> reward, List<RewardMeta> concated)
     {
-        for (int i = 0; i < concated.Count; i++)
-        {
-            RewardMeta c = concated[i];
-            RewardMeta r = reward.Find(_r => _r.Id == c.Id && _r.Tp == c.Tp);
-            if (r == null)
-            {
-                r = c.Clone();
-                reward.Add(r);
-            }
-            else
-            {
-                // r.chance = r.chance > 0 ? (r.chance + c.chance) / 2 : 0;
-                r.Count += c.Count; //Mathf.FloorToInt (c.count * multi);
-            }
-        }
+        // for (int i = 0; i < concated.Count; i++)
+        // {
+        //     RewardMeta c = concated[i];
+        //     RewardMeta r = reward.Find(_r => _r.id == c.id && _r.tp == c.tp);
+        //     if (r == null)
+        //     {
+        //         r = c.
+        //         reward.Add(r);
+        //     }
+        //     else
+        //     {
+        //         // r.chance = r.chance > 0 ? (r.chance + c.chance) / 2 : 0;
+        //         r.count += c.count; //Mathf.FloorToInt (c.count * multi);
+        //     }
+        // }
         return reward;
     }
 
-    public static void SetImage(this Image icon, string address)
+    public static void LoadItemIcon(this Image icon, string id)
     {
-        Services.Assets.SetSpriteIntoImage(icon, address, true).Forget();
+        Services.Assets.SetSpriteIntoImage(icon, ZString.Format("Items/{0}", id), true).Forget();
+    }
+
+    public static void LoadCardImage(this Image icon, string name)
+    {
+        Services.Assets.SetSpriteIntoImage(icon, ZString.Format("Cards/{0}", name), true).Forget();
     }
 
     public static string ToJson<T>(this T[] array)
@@ -52,16 +59,6 @@ public static class Extensions
     public static bool HasText(this string text)
     {
         return text != null && text.Length > 0;
-    }
-
-    public static string Translate(this string key)
-    {
-        return LocalizationManager.HasKey(key) ? LocalizationManager.Localize(key) : key;
-    }
-
-    public static string Translate(this string key, object arg1)
-    {
-        return LocalizationManager.HasKey(key) ? LocalizationManager.Localize(key, arg1) : key;
     }
 
     public static T PickRandomOrNull<T>(this IEnumerable<T> source) where T : class

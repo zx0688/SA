@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Cysharp.Text;
+using haxe.lang;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,8 +15,9 @@ public static class Extensions
         public T[] Items;
     }
 
-    public static string Localize(this string key) => Services.Assets.Localize(key);
-    public static void Localize(this Text textField, string key) => textField.text = Services.Assets.Localize(key);
+
+    public static string Localize(this string key, LocalizePartEnum part = LocalizePartEnum.GUI) => Services.Assets.Localize(key, part);
+    public static void Localize(this Text textField, string key, LocalizePartEnum part = LocalizePartEnum.GUI) => textField.text = Services.Assets.Localize(key, part);
 
     //public static List<RewardMeta> MakeCopy(this List<RewardMeta> key) => Services.Assets.Localize(key);
 
@@ -39,12 +41,21 @@ public static class Extensions
         return reward;
     }
 
-    public static void LoadItemIcon(this Image icon, string id)
+
+    public static T Find<T>(this T[] array, Predicate<T> match) where T : class
+    {
+        foreach (T i in array)
+            if (match.Invoke(i))
+                return i;
+        return null;
+    }
+
+    public static void LoadItemIcon(this Image icon, string id, Action callback = null)
     {
         Services.Assets.SetSpriteIntoImage(icon, ZString.Format("Items/{0}", id), true).Forget();
     }
 
-    public static void LoadCardImage(this Image icon, string name)
+    public static void LoadCardImage(this Image icon, string name, Action callback = null)
     {
         Services.Assets.SetSpriteIntoImage(icon, ZString.Format("Cards/{0}", name), true).Forget();
     }

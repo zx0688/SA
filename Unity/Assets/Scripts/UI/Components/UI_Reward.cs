@@ -20,7 +20,7 @@ public class UI_Reward : MonoBehaviour
         }
 
         List<RewardMeta> prepared = rewards.Where(r => r.Type == ConditionMeta.ITEM).ToList();
-        RewardMeta cardItem = ArrayUtility.Find(rewards, r => r.Type == ConditionMeta.CARD);
+        RewardMeta cardItem = rewards.Find(r => r.Type == ConditionMeta.CARD);
         if (cardItem != null)
             prepared.Add(cardItem);
 

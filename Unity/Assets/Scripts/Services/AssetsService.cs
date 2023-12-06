@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using Cysharp.Text;
 using Cysharp.Threading.Tasks;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Diagnostics;
 using UnityEngine.Networking;
@@ -27,7 +28,14 @@ public class AssetsService
     // }
 
     public Action OnBadConnection;
-    public string Localize(string key) => LocalDic.Dic.TryGetValue(key, out string res) ? res : $"[{key}";
+    public string Localize(string key, LocalizePartEnum part) => part switch
+    {
+        LocalizePartEnum.GUI => LocalDic.GUI.TryGetValue(key, out string res) ? res : $"[{key}]",
+        LocalizePartEnum.CardDescription => LocalDic.CardDescription.TryGetValue(key, out string res) ? res : $"[{key}]",
+        LocalizePartEnum.CardName => LocalDic.CardName.TryGetValue(key, out string res) ? res : $"[{key}]",
+        _ => $"[{key}]"
+    };
+
     private LocalizationData LocalDic;
 
     private static readonly string BASE_URL = "";
@@ -57,52 +65,94 @@ public class AssetsService
                     Caching.currentCacheForWriting = Caching.AddCache (path);
         */
 
-        var json = await GetJson($"localization_{lang}", false, GOOGLE_DRIVE_LOCALIZATION, true, progress);
+        string json = await GetJson($"localization_{lang}", GOOGLE_DRIVE_LOCALIZATION, progress, LoadContentOption.UseVersion);
         LocalDic = JSON.Deserialize<LocalizationData>(json);
 
         await UniTask.Yield();
     }
 
-    public async UniTask<string> GetJson(string name, bool fromResources, string url, bool saveLocal, IProgress<float> progress = null)
+    public async UniTask<string> GetJson(string name, string url, IProgress<float> progress = null, LoadContentOption option = LoadContentOption.KeepInResources)
     {
-        if (fromResources)
+
+#if UNITY_EDITOR
+        option = LoadContentOption.DoNotSave;
+#endif
+        if (option == LoadContentOption.KeepInResources)
         {
             var (isCanceled, asset) = await Resources.LoadAsync<TextAsset>(name).ToUniTask(progress: progress).SuppressCancellationThrow();
             if (asset != null && isCanceled == false)
                 return (asset as TextAsset).text;
         }
+
+        string namev = null;
+        string version = null;
+        if (option == LoadContentOption.UseVersion)
+        {
+            namev = ZString.Format($"{0}_version", name);
+            version = "3434";//await GetJson(namev, "", progress, LoadContentOption.DoNotSave);
+            if (version == PlayerPrefs.GetString(namev))
+            {
+                var cacheFilePath = Path.Combine(Application.persistentDataPath, ZString.Format("{0}.json", name));
+                if (File.Exists(cacheFilePath))
+                {
+                    if (TryGetJson(name, out string fromFile))
+                        return fromFile;
+                    else
+                        Debug.LogWarning($"can't parse data {name} from cache.. trying to download from {url}");
+                }
+                else
+                {
+                    Debug.Log($"file {name} doesn't exist.. trying to download from {url}");
+                }
+            }
+        }
+
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
             request.SetRequestHeader("Content-Type", "application/json");
-            await request.SendWebRequest().ToUniTask(progress: progress).Timeout(TimeSpan.FromSeconds(5));
-            if (request.result != UnityWebRequest.Result.Success)
+
+            try
+            {
+                await request.SendWebRequest().ToUniTask(progress: progress).Timeout(TimeSpan.FromSeconds(20));
+            }
+            catch (Exception)
             {
                 OnBadConnection?.Invoke();
-                Debug.LogWarning($"can't connect to {url}.. try again in 3 sec");
-                await UniTask.Delay(3000);
-                await request.SendWebRequest().ToUniTask(progress: progress).Timeout(TimeSpan.FromSeconds(3));
             }
+
+            // if (request.result != UnityWebRequest.Result.Success)
+            // {
+            //     request.Abort();
+            //     OnBadConnection?.Invoke();
+            //     Debug.LogWarning($"can't connect to {url}.. try again in 3 sec");
+            //     await UniTask.Delay(3000);
+            //     await request.SendWebRequest().ToUniTask(progress: progress).Timeout(TimeSpan.FromSeconds(20));
+            // }
             switch (request.result)
             {
                 case UnityWebRequest.Result.ConnectionError:
                 case UnityWebRequest.Result.DataProcessingError:
                 case UnityWebRequest.Result.ProtocolError:
-                    if (saveLocal == true)
+                    if (option == LoadContentOption.KeepInFile)
                     {
-                        Debug.LogWarning($"can't get data {name} from {url}.. trying to get from cache");
-                        string fromFile;
-                        if (TryGetJsonFromCache(name, out fromFile))
+                        Debug.LogWarning($"can't download data {name} from {url}.. trying to get from cache");
+                        if (TryGetJson(name, out string fromFile))
                             return fromFile;
                     }
-                    Debug.LogWarning($"can't get data {name} from cache.. hope this dont invoke an issue");
+                    Debug.LogWarning($"can't download data {name} from cache.. hope this won't invoke an issue");
                     break;
                 case UnityWebRequest.Result.Success:
                     string json = request.downloadHandler.text;
-                    if (saveLocal)
-                        TryCacheJson(name, json);
-
+                    if (option != LoadContentOption.DoNotSave)
+                    {
+                        if (TrySaveJson(name, json) && option == LoadContentOption.UseVersion)
+                        {
+                            PlayerPrefs.SetString(namev, version);
+                        }
+                    }
                     return json;
             }
+            throw new Exception($"Http request RESULT:{request.result.ToString()} CODE:{request.responseCode} name:{name} url:{url}");
             return null;
         }
     }
@@ -127,10 +177,11 @@ public class AssetsService
         icon.sprite = await Services.Assets.GetSprite(name, fromResources, progress);
     }
 
-    public async UniTaskVoid SetSpriteIntoImage(Image icon, string name, bool fromResources, IProgress<float> progress = null)
+    public async UniTaskVoid SetSpriteIntoImage(Image icon, string name, bool fromResources, IProgress<float> progress = null, Action callback = null)
     {
         //Debug.Log($"load:{name}");
         icon.sprite = await Services.Assets.GetSprite(name, fromResources, progress);
+        callback?.Invoke();
     }
 
     public async UniTaskVoid PlaySound(string name, AudioSource source)
@@ -211,7 +262,7 @@ public class AssetsService
     //     var cacheFilePath = Path.Combine("CachePath", name + ".texture");
     //     File.WriteAllBytes(cacheFilePath, data);
     // }
-    private bool TryCacheJson(string name, string json)
+    private bool TrySaveJson(string name, string json)
     {
         //SimpleDiskUtils.DiskUtils.CheckAvailableSpace ();
         var cacheFilePath = Path.Combine(Application.persistentDataPath, ZString.Format("{0}.json", name));
@@ -228,7 +279,7 @@ public class AssetsService
         }
     }
 
-    private bool TryGetJsonFromCache(string name, out string json)
+    private bool TryGetJson(string name, out string json)
     {
         var cacheFilePath = Path.Combine(Application.persistentDataPath, ZString.Format("{0}.json", name));
         if (!File.Exists(cacheFilePath))
@@ -309,10 +360,25 @@ public class AssetsService
     */
 }
 
+public enum LoadContentOption
+{
+    DoNotSave,
+    KeepInResources,
+    UseVersion,
+    KeepInFile
+}
+
+public enum LocalizePartEnum
+{
+    GUI, CardName, CardDescription
+}
+
 [Serializable]
 public class LocalizationData
 {
     public string Lang;
-    public Dictionary<String, String> Dic;
+    public Dictionary<String, String> GUI;
+    public Dictionary<String, String> CardName;
+    public Dictionary<String, String> CardDescription;
     public int Version;
 }

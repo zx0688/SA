@@ -39,10 +39,10 @@ public class SliderQuant : MonoBehaviour
             items[i].SetActive(true);
         }
 
-        Swipe.OnReadySwipe += OnStartShake;
-        Swipe.OnEndSwipe += OnStopShake;
-        Swipe.OnDrop += OnStopShake;
-        Swipe.OnChangeDirection += OnChangeDirection;
+        // Swipe.OnReadySwipe += OnStartShake;
+        // Swipe.OnEndSwipe += OnStopShake;
+        // Swipe.OnDrop += OnStopShake;
+        // Swipe.OnChangeDirection += OnChangeDirection;
 
         SetValue(defaultValue);
     }

@@ -8,7 +8,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using haxe.root;
 
-using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityJSON;
@@ -103,6 +102,7 @@ namespace GameServer
 
                         fixGlobalTime?.Invoke(data.Timestamp);
                         profile.Events = data.Events.ToDictionary(e => e.Hash, e => e);
+
                         OnResponse?.Invoke(data);
                         break;
                 }
@@ -188,6 +188,7 @@ namespace GameServer
             response.Error = null;
             List<RewardMeta> reward = new List<RewardMeta>();
 
+            Debug.Log($"REQUEST:{JSON.Serialize(request)}");
             SL.Change(request, meta, profile, request.Timestamp, response, reward, SL.GetRandomInstance());
             if (response.Error != null)
                 throw new Exception(response.Error);

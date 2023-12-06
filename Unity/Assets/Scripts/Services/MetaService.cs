@@ -205,10 +205,8 @@ public class MetaService
 
     public async UniTask Init(IProgress<float> progress = null)
     {
-        var asset = await Services.Assets.GetJson("meta", false, GOOGLE_DRIVE, true, progress);
-
+        string asset = await Services.Assets.GetJson("meta", GOOGLE_DRIVE, progress, LoadContentOption.UseVersion);
         Debug.Log(asset);
-
         Game = JSON.Deserialize<GameMeta>(asset);
     }
 

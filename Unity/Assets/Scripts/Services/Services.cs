@@ -85,7 +85,8 @@ public class Services : MonoBehaviour
 
         UpdateProgressUI(1);
 
-        await UniTask.DelayFrame(2);
+        UpdateTextUI("Scene awakening...");
+        await UniTask.DelayFrame(5);
 
         _state = State.INITED;
         OnInited?.Invoke();

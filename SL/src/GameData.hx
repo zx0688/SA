@@ -31,6 +31,7 @@ class ProfileData {
 
 	public var OpenedLocations:List_1<String>;
 	public var CurrentLocation:String;
+	public var LastRequstTimestamp:Int;
 	// public var left:Int;
 	// public int?Right;
 }

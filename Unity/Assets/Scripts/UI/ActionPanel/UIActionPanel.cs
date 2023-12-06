@@ -7,103 +7,125 @@ using UnityEngine;
 using UnityEngine.UI;
 using Core;
 using System.Data;
+using Cysharp.Text;
 
 namespace UI.ActionPanel
 {
     public class UIActionPanel : MonoBehaviour
     {
         [SerializeField] private UI_Reward reward;
-        [SerializeField] private Text action;
-        [SerializeField] private Image icon;
-        [SerializeField] private Text skipText;
+        [SerializeField] private UIChoice choice;
+        //[SerializeField] private Text skipText;
+        private int ch = -10;
 
-        private CanvasGroup canvasGroup;
         private SwipeData data;
 
         void Awake()
         {
-            Swipe.OnChangeDirection += OnChangeDirection;
+            Swipe.OnChangeDeviation += OnChangeDeviation;
             Swipe.OnDrop += OnDrop;
             Swipe.OnTakeCard += OnTakeCard;
             Swipe.OnEndSwipe += Hide;
-
-            canvasGroup = GetComponent<CanvasGroup>();
         }
 
         void Start()
         {
             Hide();
-            Services.OnInited += () => { skipText.text = "Продолжить".Localize(); };
-            canvasGroup.alpha = 0f;
+            //Services.OnInited += () => { skipText.text = "Продолжить".Localize(); };
         }
 
         void OnTakeCard()
         {
-            if (data == null || Swipe.State != Swipe.States.DRAG) return;
 
-            OnChangeDirection(CardMeta.LEFT);
+            if (data.Left != null && data.Left.Id == data.Right.Id)
+            {
+                ch = -1;
+                choice.Show(data.Left);
+                reward.SetItems(data.Left.Reward);
+            }
+            else if (data.Right == null && data.Left == null)
+            {
+                choice.Hide();
+                ch = -1;
+                //action.gameObject.SetActive(false);
+                //icon.gameObject.SetActive(false);
+                // skipText.gameObject.SetActive(true);
+            }
 
-            gameObject.SetActive(true);
-            canvasGroup.DOFade(1f, 0.1f);
+            //if (data == null || Swipe.State != Swipe.States.DRAG) return;
+
+            //OnChangeDirection(CardMeta.LEFT);
+
+            //gameObject.SetActive(true);
+            //canvasGroup.DOFade(1f, 0.1f);
         }
 
         void OnDrop()
         {
-            canvasGroup.DOFade(0.4f, 0.05f).OnComplete(() =>
-            {
-                reward.SetItems(null);
-                //action.gameObject.SetActive(false);
-                gameObject.SetActive(false);
-            });
+            Hide();
+            ch = -10;
+            // canvasGroup.DOFade(0.4f, 0.05f).OnComplete(() =>
+            // {
+            //     reward.SetItems(null);
+            //     //action.gameObject.SetActive(false);
+            //     //gameObject.SetActive(false);
+            // });
         }
 
         void Hide()
         {
             reward.SetItems(null);
-            skipText.gameObject.SetActive(false);
-            gameObject.SetActive(false);
-            canvasGroup.DOKill();
+            choice.Hide();
+            ch = -10;
+            //skipText.gameObject.SetActive(false);
+            //gameObject.SetActive(false);
+            //canvasGroup.DOKill();
         }
 
-        void OnChangeDirection(int direction)
+        void OnChangeDeviation(float dev)
         {
             if (data == null || Swipe.State != Swipe.States.DRAG) return;
 
-            action.gameObject.SetActive(true);
-            icon.gameObject.SetActive(true);
-            skipText.gameObject.SetActive(false);
+            //only one choice
+            if (ch == -1)
+                return;
+            else if (Math.Abs(dev) < 0.9)
+            {
+                choice.Hide();
+                reward.SetItems(null);
+                ch = -10;
+                return;
+            }
+            else if (dev < -0.9f)
+            {
+                if (ch == CardMeta.LEFT)
+                    return;
+                ch = CardMeta.LEFT;
+            }
+            else if (dev > 0.9f)
+            {
+                if (ch == CardMeta.RIGHT)
+                    return;
+                ch = CardMeta.RIGHT;
+            }
 
-            if (data.LastCard)
+            if (data.Left != null && ch == CardMeta.LEFT)
             {
-                action.text = "Привал".Localize();
-                icon.LoadCardImage("endturn");
-            }
-            else if (data.Right == null && data.Left == null)
-            {
-                action.gameObject.SetActive(false);
-                icon.gameObject.SetActive(false);
-                skipText.gameObject.SetActive(true);
-            }
-            else if (direction == CardMeta.LEFT || data.Right == null)
-            {
-                action.text = data.Left.Name.Localize();
-                icon.LoadCardImage(data.Left.Image);
+                choice.Show(data.Left);
                 reward.SetItems(data.Left.Reward);
             }
-            else
+            else if (data.Right != null && ch == CardMeta.RIGHT)
             {
-                action.text = data.Right.Name.Localize();
-                icon.LoadCardImage(data.Right.Image);
+                choice.Show(data.Right);
                 reward.SetItems(data.Right.Reward);
             }
-
-
 
         }
 
         public void UpdateData(SwipeData data)
         {
             this.data = data;
+            ch = -10;
             Hide();
         }
 

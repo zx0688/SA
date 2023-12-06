@@ -150,6 +150,7 @@ class TriggerMeta {
 	public var Type:Int;
 	public var Tags:NativeArray<String>;
 	public var Value:Int;
+	public var Chance:Int;
 }
 
 @:nativeGen
@@ -196,7 +197,6 @@ class CardMeta {
 
 	public var Con:NativeArray<ConditionMeta>;
 	public var Text:String;
-	public var Chance:Int;
 
 	public var Sound:NativeArray<String>;
 }

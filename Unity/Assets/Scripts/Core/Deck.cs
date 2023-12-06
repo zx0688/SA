@@ -260,8 +260,8 @@ namespace Core
             swipeData.Data = Services.Player.Profile.Cards.GetValueOrDefault(nextCardId);
             swipeData.Card = Services.Meta.Game.Cards.GetValueOrDefault(nextCardId);
 
-            swipeData.Left = Services.Player.Profile.Left != null ? Services.Meta.Game.Cards.GetValueOrDefault(Services.Player.Profile.Left) : null;
-            swipeData.Right = Services.Player.Profile.Right != null ? Services.Meta.Game.Cards.GetValueOrDefault(Services.Player.Profile.Right) : null;
+            swipeData.Left = Services.Player.Profile.Left != null ? Services.Meta.Game.Cards[Services.Player.Profile.Left] : null;
+            swipeData.Right = Services.Player.Profile.Right != null ? Services.Meta.Game.Cards[Services.Player.Profile.Right] : swipeData.Left;
             swipeData.LastCard = swipeData.Left == null && swipeData.Right == null && Services.Player.Profile.Deck.Count <= 1;
 
             int i = currentCardObject != null ? cards.IndexOf(currentCardObject) + 1 : 0;
@@ -269,17 +269,19 @@ namespace Core
 
             currentCardObject = cards[i];
             currentCardObject.SetActive(true);
+            currentCardObject.GetComponent<RectTransform>().SetAsFirstSibling();
+
             currentSwipe.ConstructNewSwipe();
             currentCard.UpdateData(swipeData);
 
-            //name.text = swipeData.Card.Name.Localize();
+            name.text = swipeData.Card.Name.Localize(LocalizePartEnum.CardName);
             if (swipeData.Data == null || swipeData.Data.CT == 0)
             {
                 description.gameObject.SetActive(true);
-                description.text = swipeData.Card.Desc.Localize();
+                description.text = swipeData.Card.Desc.Localize(LocalizePartEnum.CardDescription);
             }
             action.UpdateData(swipeData);
-            currentCard.FadeIn(null).Forget();
+            currentCard.FadeIn(() => GC.Collect());
             OnDrop();
 
             //desc.gameObject.SetActive(true);
@@ -299,7 +301,7 @@ namespace Core
             pagePanel.HideArrow();
         }
 
-        public string GetName() => "Приключение";
+        public string GetName() => "Swipe Adv".Localize(LocalizePartEnum.GUI);
 
         public GameObject GetGameObject() => gameObject;
 

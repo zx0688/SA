@@ -59,16 +59,22 @@ class SL {
 		profile.Sid = 0;
 		profile.SwipeCount = 0;
 		profile.Items = new Dictionary_2<String, ItemData>();
+		profile.LastRequstTimestamp = 0;
 
-		profile.Deck.push(meta.Locations.get("28354825").Over[0].Id);
-		LeftRight(meta.Cards.get(profile.Deck[0]).Next, meta, profile, random);
+		// profile.Deck.push(meta.Locations.tryGet("28354825").Over[0].Id);
+		profile.Deck.push("28362188");
+		LeftRight(meta.Cards.tryGet(profile.Deck[0]).Next, meta, profile, random);
 		return profile;
 	}
 
 	public static function Change(request:GameRequest, meta:GameMeta, profile:ProfileData, timestamp:Int, response:GameResponse, reward:List_1<RewardMeta>,
 			random:Random):Void {
 		if (request.Timestamp > timestamp) {
-			response.Error = "trigger can be newer then server time";
+			response.Error = "request can't be created later than the current time";
+			return;
+		}
+		if (request.Timestamp < profile.LastRequstTimestamp) {
+			response.Error = "request can't be created earlier than the last executed request";
 			return;
 		}
 		if (request.Rid != profile.Rid) {
@@ -85,7 +91,7 @@ class SL {
 					response.Error = "error next location " + request.Value;
 					return;
 				}
-				var location:CardMeta = meta.Locations.get(request.Hash);
+				var location:CardMeta = meta.Locations.tryGet(request.Hash);
 				// if (!CheckCondition(location.Act.Con, null, profile)) {
 				// 	response.Error = "error loc condition " + request.Value;
 				// 	return;
@@ -102,7 +108,7 @@ class SL {
 					response.Error = "error current card " + request.Id;
 					return;
 				}
-				if ((profile.Left != null || profile.Right != null) && request.Hash == null) {
+				if (request.Hash == null && (profile.Left != null || profile.Right != null)) {
 					response.Error = "hash should not be empty ";
 					return;
 				}
@@ -110,22 +116,29 @@ class SL {
 					response.Error = "hash should be empty" + request.Hash;
 					return;
 				}
-				if (request.Hash != profile.Left && request.Hash != profile.Right) {
+				if (request.Hash != profile.Left && ((profile.Right != null && request.Hash != profile.Right) || profile.Right == null)) {
 					response.Error = "hash should match with choice" + request.Hash;
 					return;
 				}
+
+				// // Apply card
+				var card:CardData = profile.Cards.getOrCreate(request.Id, f -> new CardData(request.Id));
+				card.CT++;
+				card.Choice = request.Value;
+				card.Executed = request.Timestamp;
+
 				random.setStringSeed(Std.string(request.Timestamp));
 				deck.pop();
 
 				if (request.Hash != null) {
-					var nextCard:CardMeta = meta.Cards.get(request.Hash);
+					var nextCard:CardMeta = meta.Cards.tryGet(request.Hash);
 					deck.push(nextCard.Id);
 					if (nextCard.Over != null) {
 						var over:NativeArray<TriggerMeta> = nextCard.Over;
 						var candidates:Array<CardMeta> = GetTempArray();
 						for (o in over) {
-							var oc:CardMeta = meta.Cards.get(o.Id);
-							if (CheckCard(oc, meta, profile, random))
+							var oc:CardMeta = meta.Cards.tryGet(o.Id);
+							if (CheckCard(oc, o, meta, profile, random))
 								candidates.push(oc);
 						}
 						candidates.sort((a, b) -> b.Pri - a.Pri);
@@ -136,7 +149,7 @@ class SL {
 				profile.Left = null;
 				profile.Right = null;
 				if (deck.getCount() > 0) {
-					var nextCard:CardMeta = meta.Cards.get(deck[0]);
+					var nextCard:CardMeta = meta.Cards.tryGet(deck[0]);
 					if (nextCard.Next != null) {
 						var next:NativeArray<TriggerMeta> = nextCard.Next;
 						LeftRight(next, meta, profile, random);
@@ -147,18 +160,13 @@ class SL {
 								continue;
 							var i:ItemData = profile.Items.getOrCreate(r.Id, f -> new ItemData(r.Id, 0));
 							i.Count += r.Count;
+							i.Count = i.Count < 0 ? 0 : i.Count;
 							reward?.push(r);
 						}
 					}
 				} else {
 					profile.Cooldown = timestamp;
 				}
-
-				// // Apply card
-				var card:CardData = profile.Cards.getOrCreate(request.Id, f -> new CardData(request.Id));
-				card.CT++;
-				card.Choice = request.Value;
-				card.Executed = request.Timestamp;
 
 			case TriggerMeta.REROLL:
 				if (profile.Deck.getCount() > 0) {
@@ -179,10 +187,11 @@ class SL {
 					return;
 				}
 				i.Count -= price;
+				i.Count = i.Count < 0 ? 0 : i.Count;
 				profile.Items.set(id, i);
-				profile.Deck.push(meta.Locations.get(profile.CurrentLocation).Over[0].Id);
+				profile.Deck.push(meta.Locations.tryGet(profile.CurrentLocation).Over[0].Id);
 				profile.Cooldown = 0;
-				LeftRight(meta.Cards.get(profile.Deck[0]).Next, meta, profile, random);
+				LeftRight(meta.Cards.tryGet(profile.Deck[0]).Next, meta, profile, random);
 
 			case TriggerMeta.START_GAME:
 
@@ -192,8 +201,7 @@ class SL {
 					return;
 				}
 				var events:Dictionary_2<String, GameRequest> = profile.Events;
-				var r:GameRequest = null;
-				events.get(request.Hash);
+				var r:GameRequest = events.tryGet(request.Hash);
 				if (r == null) {
 					response.Error = "profile should have an event with the same hash";
 					return;
@@ -209,17 +217,19 @@ class SL {
 				response.Error = "unexpected trigger ";
 				return;
 		}
+
+		profile.LastRequstTimestamp = request.Timestamp;
 		profile.Rid += 1;
 	}
 
-	public static function CheckCard(cardMeta:CardMeta, data:GameMeta, profile:ProfileData, random:Random):Bool {
+	public static function CheckCard(cardMeta:CardMeta, triggerMeta:TriggerMeta, data:GameMeta, profile:ProfileData, random:Random):Bool {
 		if (cardMeta.CT > 0 || cardMeta.CR > 0) {
-			var cardData:CardData = profile.Cards.get(cardMeta.Id);
+			var cardData:CardData = profile.Cards.tryGet(cardMeta.Id);
 			if (cardData != null && cardData.Executed > 0)
 				return false;
 		}
 
-		if (cardMeta.Chance > 0 && random.randomInt(0, 100) > cardMeta.Chance)
+		if (triggerMeta.Chance > 0 && random.randomInt(0, 100) > triggerMeta.Chance)
 			return false;
 
 		if (!CheckCondition(cardMeta.Con, data, profile, random))
@@ -245,12 +255,12 @@ class SL {
 		for (c in con) {
 			switch (c.Type) {
 				case ConditionMeta.CARD:
-					var card:CardData = profile.Cards.get(c.Id);
+					var card:CardData = profile.Cards.tryGet(c.Id);
 					if (card == null || card.CT < c.Count)
 						return false;
 
 				case ConditionMeta.ITEM:
-					var item:ItemData = profile.Items.get(c.Id);
+					var item:ItemData = profile.Items.tryGet(c.Id);
 					var count:Int = item != null ? item.Count : 0;
 
 					switch (c.Sign) {
@@ -271,8 +281,8 @@ class SL {
 	private static function LeftRight(next:NativeArray<TriggerMeta>, meta:GameMeta, profile:ProfileData, random:Random):Void {
 		var candidates:Array<CardMeta> = GetTempArray();
 		for (n in next) {
-			var nc:CardMeta = meta.Cards.get(n.Id);
-			if (CheckCard(nc, meta, profile, random))
+			var nc:CardMeta = meta.Cards.tryGet(n.Id);
+			if (CheckCard(nc, n, meta, profile, random))
 				candidates.push(nc);
 		}
 		if (candidates.length == 0) {
@@ -281,7 +291,7 @@ class SL {
 			return;
 		} else if (candidates.length == 1) {
 			profile.Left = candidates[0].Id;
-			profile.Right = candidates[0].Id;
+			profile.Right = null;
 			return;
 		} else if (candidates.length == 2) {
 			profile.Left = candidates[0].Id;
@@ -347,8 +357,12 @@ class CSExtension {
 		_this.Sort(f);
 	}
 
-	@:generic public static function get<K, T>(_this:cs.system.collections.generic.Dictionary_2<K, T>, key:K):T {
-		return _this.get_Item(key);
+	@:generic public static function tryGet<K, T>(_this:cs.system.collections.generic.Dictionary_2<K, T>, key:K):Null<T> {
+		var i:T = null;
+		if (_this.TryGetValue(key, i)) {
+			return i;
+		}
+		return null;
 	}
 
 	@:generic public static function getOrCreate<K, T>(_this:cs.system.collections.generic.Dictionary_2<K, T>, key:K, f:T->T):T {
@@ -400,6 +414,14 @@ class CSExtension {
 
 	@:generic public static function getCount<T>(_this:Array<T>):Int {
 		return _this.length;
+	}
+
+	@:generic public static function tryGet<K, T>(_this:Map<K, T>, key:K):Null<T> {
+		var i:T = _this.get(key);
+		if (i != null) {
+			return i;
+		}
+		return null;
 	}
 
 	@:generic public static function getOrCreate<K, T>(_this:Map<K, T>, key:K, f:T->T):T {

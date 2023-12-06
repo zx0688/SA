@@ -122,6 +122,7 @@ namespace Core
                     {
                         _rectTransform.anchoredPosition = Vector2.MoveTowards(_rectTransform.anchoredPosition, _pivotPoint, _fMovingSpeed);
                         _rectTransform.localScale = Vector3.MoveTowards(_rectTransform.localScale, new Vector3(1, 1, 1), 0.1f);
+                        //_rectTransform.localScale = Vector3.MoveTowards(_rectTransform.localScale, new Vector3(0.9f, 0.9f, 0.9f), 0.1f);
                         _rectTransform.rotation = Quaternion.Euler(0, 0, (_rectTransform.anchoredPosition.x - _pivotPoint.x) * _fRotation);
                         MovingDispatcher();
                     }

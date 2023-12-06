@@ -146,11 +146,13 @@ public partial class PlayerService : IService
         request.Id = swipe.Card.Id;
         request.Type = TriggerMeta.SWIPE;
         request.Value = swipe.Choice;
-        request.Hash = swipe.Choice == CardMeta.LEFT ? Profile.Left : Profile.Right;
+        request.Hash = swipe.Left != null ? (swipe.Choice == CardMeta.LEFT ? swipe.Left.Id : swipe.Right.Id) : null;
+
 
         HttpBatchServer.Change(request);
 
-        if (swipe.Card.CT > 0 && swipe.Data.CT >= swipe.Card.CT)
+        CardData data = null;
+        if (swipe.Card.CT > 0 && Profile.Cards.TryGetValue(swipe.Card.Id, out data) && data.CT >= swipe.Card.CT)
         {
             Services.Meta.Game.Cards.Remove(swipe.Card.Id);
         }

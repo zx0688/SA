@@ -10,36 +10,28 @@ using UnityEngine.UI;
 using System.Threading.Tasks;
 using System.Linq;
 using GameServer;
+using Cysharp.Threading.Tasks;
 
-public class UI_DropReward : ServiceBehaviour
+public class UIDropReward : ServiceBehaviour
 {
     public float radius = 300f;
 
     [SerializeField] private BlackLayer layer;
     [SerializeField] private List<GameObject> _particalEffects = new List<GameObject>();
 
-    private List<GameObject> items;
+    [SerializeField] private List<GameObject> items;
     private List<ItemData> waiting;
 
-    private GameObject positionAddAnimation;
-    private GameObject positionSpendAnimation;
-    private GameObject positionSpecialAnimation;
+    [SerializeField] private GameObject positionAddAnimation;
+    [SerializeField] private GameObject positionSpendAnimation;
+    [SerializeField] private GameObject positionSpecialAnimation;
 
     protected override void Awake()
     {
         base.Awake();
 
-        items = new List<GameObject>();
-        Image[] images = GetComponentsInChildren<Image>();
-        foreach (Image i in images)
-        {
+        foreach (GameObject i in items)
             i.gameObject.SetActive(false);
-            items.Add(i.gameObject);
-        }
-
-        positionAddAnimation = transform.Find("Add").gameObject;
-        positionSpendAnimation = transform.Find("Spend").gameObject;
-        positionSpecialAnimation = transform.Find("Special").gameObject;
 
         waiting = new List<ItemData>();
     }
@@ -97,30 +89,37 @@ public class UI_DropReward : ServiceBehaviour
             return;
         }
 
-        gameObject.SetActive(true);
 
         items.RemoveAt(items.Count - 1);
         items.Insert(0, item);
 
-        item.SetActive(true);
         item.GetComponent<RectTransform>().anchoredPosition = new Vector3(0, 0, 0);
-
+        gameObject.SetActive(true);
         ItemMeta itemMeta = Services.Meta.Game.Items[reward.Id];
         item.GetComponent<Image>().LoadItemIcon(reward.Id);
 
         if (itemMeta.Particle > 0)
         {
-            ScenarioSPECIAL(item, position, itemMeta.Particle);
+            ScenarioSPECIAL(item, position, itemMeta.Particle).Forget();
         }
         else
+        {
+            item.SetActive(true);
             ScenarioITEM(item, position);
+        }
+
     }
 
-    private void ScenarioSPECIAL(GameObject item, Vector3 position, int particleNumber)
+    private async UniTaskVoid ScenarioSPECIAL(GameObject item, Vector3 position, int particleNumber)
     {
         layer.Show();
+        item.SetActive(false);
+        await UniTask.DelayFrame(20);
+        item.SetActive(true);
+
         PlayParticle(particleNumber - 1);
         Vector3 p = positionSpecialAnimation.transform.position;
+        item.gameObject.transform.DOKill();
         item.gameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
         item.gameObject.transform.DOScale(new Vector3(1.6f, 1.6f, 1.6f), 0.6f).SetEase(Ease.OutQuad).OnComplete(() =>
         {
@@ -142,6 +141,7 @@ public class UI_DropReward : ServiceBehaviour
     {
         Vector3 p = positionAddAnimation.transform.position;
         item.gameObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+        item.gameObject.transform.DOKill();
         item.gameObject.transform.DOMove(position + item.gameObject.transform.position, 0.5f, true).SetEase(Ease.OutCirc).OnComplete(() =>
         {
             item.gameObject.transform.DOMove(p, 0.4f, true).SetDelay(0.2f).OnComplete(() =>
@@ -234,7 +234,7 @@ public class UI_DropReward : ServiceBehaviour
             if (itemsData[i].Count < 0)
             {
                 ////if (Services.Player.Profile.Items[items[i].Id) + Math.Abs(items[i].Count) + items[i].Count > 0];
-                Spend(itemsData[i], i * 0.4f);
+                Spend(itemsData[i], i * 0.1f);
                 continue;
             }
             angle += step * i;

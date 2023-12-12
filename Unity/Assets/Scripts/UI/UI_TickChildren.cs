@@ -33,7 +33,7 @@ public class UI_TickChildren : MonoBehaviour
 
     void TickAll()
     {
-        int timestamp = GameTime.Current;
+        int timestamp = GameTime.Get();
         for (int i = 0; i < tickList.Length; i++)
         {
             ITick tick = tickList[i];

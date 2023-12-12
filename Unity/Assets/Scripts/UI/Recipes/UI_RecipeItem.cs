@@ -90,7 +90,7 @@ public class UI_RecipeItem : MonoBehaviour, ITick, ISetData<ItemData>
         //     Services.Assets.SetSpriteIntoImage(_rewards[i], "Items/" + _data.Act.Reward[i].Id + "/icon", true).Forget();
         // }
 
-        if (IsTickble()) { Tick(GameTime.Current); }
+        if (IsTickble()) { Tick(GameTime.Get()); }
 
         gameObject.SetActive(true);
     }

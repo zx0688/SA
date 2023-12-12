@@ -12,7 +12,7 @@ namespace Core
     {
         [SerializeField] private Button accelerateBtn;
         [SerializeField] private Text buttonText;
-        [SerializeField] private UI_RewardItem item;
+        [SerializeField] private UIRewardItem item;
 
         private int duration = 0;
         private RewardMeta priceReroll;
@@ -35,14 +35,12 @@ namespace Core
             if (!Services.isInited)
                 return;
 
-            HttpBatchServer.ListenRewards += OnItemReceived;
             timer = StartCoroutine(Tick());
             timer = null;
         }
 
         void OnDisable()
         {
-            HttpBatchServer.ListenRewards -= OnItemReceived;
             StopAllCoroutines();
             timer = null;
         }
@@ -145,14 +143,14 @@ namespace Core
         {
             while (true)
             {
-                TickUpdate(GameTime.Current);
+                TickUpdate(GameTime.Get());
                 yield return new WaitForSeconds(1f);
             }
         }
 
         private void Accelerate()
         {
-            int price = SL.GetPriceReroll(GameTime.Left(GameTime.Current, Services.Player.Profile.Cooldown, duration), Services.Meta.Game);
+            int price = SL.GetPriceReroll(GameTime.Left(GameTime.Get(), Services.Player.Profile.Cooldown, duration), Services.Meta.Game);
 
             Services.Player.Accelerate();
 

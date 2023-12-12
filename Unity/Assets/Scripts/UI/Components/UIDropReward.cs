@@ -112,9 +112,9 @@ public class UIDropReward : ServiceBehaviour
 
     private async UniTaskVoid ScenarioSPECIAL(GameObject item, Vector3 position, int particleNumber)
     {
-        layer.Show();
+        layer.Show(0.1f);
         item.SetActive(false);
-        await UniTask.DelayFrame(20);
+        await UniTask.DelayFrame(10);
         item.SetActive(true);
 
         PlayParticle(particleNumber - 1);
@@ -142,18 +142,18 @@ public class UIDropReward : ServiceBehaviour
         Vector3 p = positionAddAnimation.transform.position;
         item.gameObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
         item.gameObject.transform.DOKill();
-        item.gameObject.transform.DOMove(position + item.gameObject.transform.position, 0.5f, true).SetEase(Ease.OutCirc).OnComplete(() =>
+        item.gameObject.transform.DOMove(position + item.gameObject.transform.position, 0.6f).OnComplete(() =>
         {
-            item.gameObject.transform.DOMove(p, 0.4f, true).SetDelay(0.2f).OnComplete(() =>
+            item.gameObject.transform.DOMove(p, 0.4f, true).SetDelay(0.4f).OnComplete(() =>
             {
                 item.gameObject.SetActive(false);
                 item.gameObject.transform.DOKill();
 
                 CheckWaiting();
             });
-            item.gameObject.transform.DOScale(new Vector3(0.2f, 0.2f, 0.2f), 0.4f).SetDelay(0.2f);
+            item.gameObject.transform.DOScale(new Vector3(0.2f, 0.2f, 0.2f), 0.4f).SetDelay(0.4f);
         });
-        item.gameObject.transform.DOScale(new Vector3(1.25f, 1.25f, 1.25f), 0.5f);
+        item.gameObject.transform.DOScale(new Vector3(1.21f, 1.21f, 1.21f), 0.6f);
     }
 
     private void Spend(ItemData cost, float delay)
@@ -208,7 +208,7 @@ public class UIDropReward : ServiceBehaviour
     protected override void OnServicesInited()
     {
         base.OnServicesInited();
-        HttpBatchServer.ListenRewards += OnItemReceived;
+        Services.Player.OnGetReward += OnItemReceived;
     }
 
 

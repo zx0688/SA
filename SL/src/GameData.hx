@@ -20,9 +20,10 @@ class ProfileData {
 
 	public var Cards:Dictionary_2<String, CardData>;
 	public var Items:Dictionary_2<String, ItemData>;
-	public var Events:Dictionary_2<String, GameRequest>;
+	public var Accept:Dictionary_2<String, GameRequest>;
 
-	// public List<QuestVO> Quests = new List<QuestVO>();
+	public var ActiveQuests:List_1<String>;
+
 	// public List<SkillVO> Skills;
 	public var Sid:Int;
 	public var Rid:Int;
@@ -32,8 +33,10 @@ class ProfileData {
 	public var OpenedLocations:List_1<String>;
 	public var CurrentLocation:String;
 	public var LastRequstTimestamp:Int;
-	// public var left:Int;
-	// public int?Right;
+
+	// TEMP
+	public var RewardEvent:List_1<RewardMeta>;
+	public var QuestEvent:String;
 }
 
 @:nativeGen
@@ -43,14 +46,14 @@ class CardData {
 		this.Id = Id;
 		this.CT = 0;
 		this.CR = 0;
-		this.Choice = 0;
+		this.Choice = null;
 	}
 
 	public var Id:String;
 	public var CR:Int;
 	public var CT:Int;
 	public var Executed:Int;
-	public var Choice:Int;
+	public var Choice:String;
 }
 
 @:nativeGen

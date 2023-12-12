@@ -13,8 +13,9 @@ import cs.system.Attribute;
 class GameMeta {
 	public var Cards:Dictionary_2<String, CardMeta>;
 	// public var All:NativeArray<CardMeta>;
-	public var Quests:NativeArray<CardMeta>;
+	public var Quests:Dictionary_2<String, QuestMeta>;
 	public var Items:Dictionary_2<String, ItemMeta>;
+	public var Heroes:Dictionary_2<String, ItemMeta>;
 	public var Skills:Dictionary_2<String, SkillMeta>;
 	public var Locations:Dictionary_2<String, CardMeta>;
 
@@ -49,26 +50,6 @@ class RewardMeta {
 	public var Count:Int;
 	public var Random:NativeArray<Int>;
 	public var Con:NativeArray<ConditionMeta>;
-	// public RewardMeta Clone()
-	// {
-	// 	RewardMeta r = new RewardMeta();
-	// 	r.Id = Id;
-	// 	r.Tp = Tp;
-	// 	r.Tags = Tags != null ? (string[])Tags.Clone() : new string[0];
-	// 	r.Chance = Chance;
-	// 	r.Count = Count;
-	// 	r.Random = Random != null ? (int[])Random.Clone() : new int[0];
-	// 	r.Condi = Condi != null ? new List<ConditionMeta>(Condi) : null;
-	// 	return r;
-	// }
-	// public ConditionMeta ToCondition()
-	// {
-	// 	ConditionMeta c = new ConditionMeta();
-	// 	c.Id = Id;
-	// 	c.Tp = Tp;
-	// 	c.Count = Math.Abs(Count);
-	// 	return c;
-	// }
 }
 
 @:nativeGen
@@ -90,37 +71,6 @@ class ItemMeta {
 	public var Hide:Bool;
 	public var Type:Int;
 }
-
-// @:nativeGen
-// @:strict(SerializableAttribute)
-// class ActionMeta {
-// 	public var Reward:NativeArray<RewardMeta>;
-// 	public var Tri:NativeArray<TriggerMeta>;
-// 	public var Con:NativeArray<ConditionMeta>;
-// 	public var Text:String;
-// 	public var Chance:Int;
-// 	// public ActionMeta Clone()
-// 	// {
-// 	// 	ActionMeta action = new ActionMeta();
-// 	// 	/*action.Time = Time;
-// 	// 	action.Text = Text;
-// 	// 	action.image = image;
-// 	// 	action.Chance = Chance;
-// 	// 	action.reward = new List<RewardData>(reward);
-// 	// 	action.trigg = new List<TriggerData>(trigg);
-// 	// 	action.Con = new List<ConditionData>(Con);
-// 	// 	*/
-// 	// 	return action;
-// 	// }
-// 	// public List<RewardMeta> GetCost()
-// 	// {
-// 	// 	return new List<RewardMeta>();//reward != null && reward.Count > 0 ? reward.FindAll(r => r.count < 0) : new List<RewardData>();
-// 	// }
-// 	// public List<RewardMeta> GetReward()
-// 	// {
-// 	// 	return new List<RewardMeta>();//reward != null && reward.Count > 0 ? reward.FindAll(r => r.count > 0) : new List<RewardData>();
-// 	// }
-// }
 
 @:nativeGen
 @:strict(SerializableAttribute)
@@ -160,6 +110,7 @@ class ConditionMeta {
 	public static inline var CARD:Int = 1;
 	public static inline var ITEM:Int = 2;
 	public static inline var LOCATION:Int = 3;
+	public static inline var QUEST:Int = 4;
 
 	public var Id:String;
 	public var Type:Int;
@@ -173,6 +124,24 @@ class ConditionMeta {
 
 @:nativeGen
 @:strict(SerializableAttribute)
+class QuestMeta {
+	public static inline var ACTIVE:Int = 0;
+	public static inline var SUCCESS:Int = 1;
+	public static inline var FAIL:Int = 2;
+
+	public var Id:String;
+	public var SR:NativeArray<RewardMeta>;
+	public var FR:NativeArray<RewardMeta>;
+	public var Duration:Int;
+
+	public var SC:NativeArray<ConditionMeta>;
+	public var FC:NativeArray<ConditionMeta>;
+	public var ST:NativeArray<TriggerMeta>;
+	public var FT:NativeArray<TriggerMeta>;
+}
+
+@:nativeGen
+@:strict(SerializableAttribute)
 class CardMeta {
 	public static inline var LEFT:Int = 0;
 	public static inline var RIGHT:Int = 1;
@@ -180,12 +149,17 @@ class CardMeta {
 	public static inline var ACTIVATED:Int = 0;
 	public static inline var EXECUTED:Int = 1;
 
+	public static inline var TYPE_CARD:Int = 0;
+	public static inline var TYPE_SKILL:Int = 1;
+	public static inline var TYPE_QUEST:Int = 2;
+
 	public var Id:String;
 	public var Tags:NativeArray<String>;
 	public var Pri:Int;
 	public var CT:Int;
 	public var CR:Int;
-	public var Group:Bool;
+	public var Hero:String;
+	public var Type:Int;
 
 	public var Name:String;
 	public var Desc:String;

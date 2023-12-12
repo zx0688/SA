@@ -17,7 +17,6 @@ namespace GameServer
     public class HttpBatchServer
     {
         public static Action<GameResponse> OnResponse;
-        public static Action<List<RewardMeta>> ListenRewards;
 
         public delegate int ExternalTimeManager();
         public static bool HasFatal { get; private set; }
@@ -34,8 +33,8 @@ namespace GameServer
         private static float timer = 0f;
 
         private static List<GameRequest> batch = null;
-        private static Action<int> fixGlobalTime;
-        private static ExternalTimeManager getTimestamp;
+        private static Action<int> OnFixClientTime;
+        private static ExternalTimeManager getFixedTimestamp;
         private static bool enableConnection = false;
         private static GameResponse response = default;
 
@@ -43,18 +42,18 @@ namespace GameServer
         private static GameMeta meta = null;
         private static bool noServer = false;
 
-        public static void Init(
-            string uid,
-            string token,
-            string platform,
-            bool _noServer,
-            GameMeta _meta,
-            Action<int> fixTime,
-            ExternalTimeManager timeManager)
+        public static async UniTask Init(
+           string uid,
+           string token,
+           string platform,
+           bool _noServer,
+           GameMeta _meta,
+           Action<int> fixTime,
+           ExternalTimeManager timeManager)
         {
             HasFatal = false;
-            fixGlobalTime = fixTime;
-            getTimestamp = timeManager;
+            OnFixClientTime = fixTime;
+            getFixedTimestamp = timeManager;
             enableConnection = false;
             response = new GameResponse();
             meta = _meta;
@@ -68,13 +67,22 @@ namespace GameServer
             form.AddField("pt", platform);
             form.AddField("v", meta.Version);
 
-
-            //restore changes
             batch = SecurePlayerPrefs.GetListOrEmpty<GameRequest>("batch");
+            if (noServer == false && batch.Count > 0)
+                await ForceSendBatch();
         }
 
-        public static async UniTask ForceSendBatch()
+        public static async UniTask ForceSendBatch(float addDelaySeconds = 0f)
         {
+            if (noServer)
+                return;
+
+            //try to fix some specific issues with connection platform->server
+            if (addDelaySeconds > 0)
+            {
+                await UniTask.Delay(TimeSpan.FromSeconds(addDelaySeconds));
+            }
+
             form.AddField("batch", JsonUtility.ToJson(batch));
 
             batch.Clear();
@@ -100,8 +108,10 @@ namespace GameServer
 
                         GameResponse data = JSON.Deserialize<GameResponse>(json);
 
-                        fixGlobalTime?.Invoke(data.Timestamp);
-                        profile.Events = data.Events.ToDictionary(e => e.Hash, e => e);
+                        OnFixClientTime?.Invoke(data.Timestamp);
+
+                        //callbacks from server
+                        profile.Accept = data.Events.ToDictionary(e => e.Hash, e => e);
 
                         OnResponse?.Invoke(data);
                         break;
@@ -149,7 +159,7 @@ namespace GameServer
                 //     profile = JSON.Deserialize<ProfileData>(SecurePlayerPrefs.GetString("profile"));
                 //     return profile;
                 // 
-                profile = SL.CreateProfile(meta, GameTime.Current, SL.GetRandomInstance());
+                profile = SL.CreateProfile(meta, GameTime.Get(), SL.GetRandomInstance());
                 return profile;
             }
 
@@ -163,38 +173,37 @@ namespace GameServer
                 {
                     case UnityWebRequest.Result.ConnectionError:
                     case UnityWebRequest.Result.DataProcessingError:
-                        break;
                     case UnityWebRequest.Result.ProtocolError:
+                        //resend request...
                         break;
                     case UnityWebRequest.Result.Success:
                         string json = request.downloadHandler.text;
                         GameResponse r = JsonUtility.FromJson<GameResponse>(json);
                         profile = r.Profile;
 
-                        fixGlobalTime?.Invoke(r.Timestamp);
+                        OnFixClientTime?.Invoke(r.Timestamp);
                         return profile;
                 }
             }
-            return default;
+            throw new Exception("can't get profile");
         }
 
         public static void Change(GameRequest request)
         {
-            request.Timestamp = getTimestamp();
+            request.Timestamp = getFixedTimestamp();
             request.Rid = profile.Rid;
             request.Version = meta.Version;
 
             //local profile changing
             response.Error = null;
-            List<RewardMeta> reward = new List<RewardMeta>();
 
             Debug.Log($"REQUEST:{JSON.Serialize(request)}");
-            SL.Change(request, meta, profile, request.Timestamp, response, reward, SL.GetRandomInstance());
+            SL.Change(request, meta, profile, request.Timestamp, response, SL.GetRandomInstance());
             if (response.Error != null)
                 throw new Exception(response.Error);
 
-            if (reward.Count > 0)
-                ListenRewards?.Invoke(reward);
+            Debug.Log($"DECK:{JSON.Serialize(profile.Deck)} LEFT:{profile.Left} RIGHT:{profile.Right}");
+
 
             if (noServer)
             {
@@ -207,7 +216,6 @@ namespace GameServer
             //send change to server
             batch.Add(request);
 
-            //data.time = GetTimestamp();
             if (batch.Count >= cooldownChangesCount)
             {
                 ForceSendBatch().Forget();

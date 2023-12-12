@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Runtime.CompilerServices;
 using Cysharp.Text;
 using haxe.lang;
 using UnityEngine;
@@ -15,31 +15,22 @@ public static class Extensions
         public T[] Items;
     }
 
-
-    public static string Localize(this string key, LocalizePartEnum part = LocalizePartEnum.GUI) => Services.Assets.Localize(key, part);
-    public static void Localize(this Text textField, string key, LocalizePartEnum part = LocalizePartEnum.GUI) => textField.text = Services.Assets.Localize(key, part);
+    public static string Localize(this string key, LocalizePartEnum part = LocalizePartEnum.GUI) => Services.Assets.Localize(key ?? "", part);
+    public static void Localize(this Text textField, string key, LocalizePartEnum part = LocalizePartEnum.GUI) => textField.text = Services.Assets.Localize(key ?? "", part);
 
     //public static List<RewardMeta> MakeCopy(this List<RewardMeta> key) => Services.Assets.Localize(key);
 
-    public static List<RewardMeta> Merge(this List<RewardMeta> reward, List<RewardMeta> concated)
+    public static List<ConditionMeta> Merge(this List<ConditionMeta> conditions, List<ConditionMeta> other)
     {
-        // for (int i = 0; i < concated.Count; i++)
-        // {
-        //     RewardMeta c = concated[i];
-        //     RewardMeta r = reward.Find(_r => _r.id == c.id && _r.tp == c.tp);
-        //     if (r == null)
-        //     {
-        //         r = c.
-        //         reward.Add(r);
-        //     }
-        //     else
-        //     {
-        //         // r.chance = r.chance > 0 ? (r.chance + c.chance) / 2 : 0;
-        //         r.count += c.count; //Mathf.FloorToInt (c.count * multi);
-        //     }
-        // }
-        return reward;
+        foreach (ConditionMeta m in other)
+        {
+            ConditionMeta c = conditions.Find(c => c.Id == m.Id);
+            if (c == null)
+                conditions.Add(m);
+        }
+        return conditions;
     }
+
 
 
     public static T Find<T>(this T[] array, Predicate<T> match) where T : class
@@ -58,6 +49,11 @@ public static class Extensions
     public static void LoadCardImage(this Image icon, string name, Action callback = null)
     {
         Services.Assets.SetSpriteIntoImage(icon, ZString.Format("Cards/{0}", name), true).Forget();
+    }
+
+    public static void LoadHeroImage(this Image icon, string name, Action callback = null)
+    {
+        Services.Assets.SetSpriteIntoImage(icon, ZString.Format("Heroes/{0}", name), true).Forget();
     }
 
     public static string ToJson<T>(this T[] array)

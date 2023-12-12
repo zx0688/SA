@@ -15,19 +15,15 @@ namespace UI.ActionPanel
     {
         [SerializeField] private Text action;
         [SerializeField] private Image icon;
+        [SerializeField] private Image hero;
 
-        private CanvasGroup canvasGroup;
-
-        void Start()
-        {
-            canvasGroup = GetComponent<CanvasGroup>();
-            Hide();
-        }
+        [SerializeField] private CanvasGroup canvasGroup;
 
         public void Hide()
         {
-            canvasGroup.DOKill(false);
-            canvasGroup.DOFade(0, 0.2f);
+            //canvasGroup.DOKill();
+
+            //canvasGroup.DOFade(0, 0.2f);
             gameObject.SetActive(false);
         }
 
@@ -36,9 +32,19 @@ namespace UI.ActionPanel
             action.text = meta.Name.Localize(LocalizePartEnum.CardName);
             icon.LoadCardImage(meta.Image);
 
-            canvasGroup.DOKill(false);
-            canvasGroup.alpha = 0f;
-            canvasGroup.DOFade(1f, 0.2f).SetEase(Ease.OutExpo);
+            if (meta.Hero != null)
+            {
+                hero.LoadHeroImage(meta.Hero);
+                hero.gameObject.SetActive(true);
+            }
+            else
+            {
+                hero.gameObject.SetActive(false);
+            }
+
+            //canvasGroup.DOKill();
+            //canvasGroup.alpha = 0f;
+            //canvasGroup.DOFade(1f, 0.2f);
             gameObject.SetActive(true);
         }
     }

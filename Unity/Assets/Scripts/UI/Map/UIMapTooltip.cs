@@ -61,7 +61,7 @@ namespace UI.Map
 
             conditionText.gameObject.SetActive(meta.Con.Length > 0);
             conditions.gameObject.SetActive(meta.Con.Length > 0);
-            conditions.SetItem(meta.Con);
+            //conditions.SetItem(meta.Con);
 
             if (Services.Player.Profile.CurrentLocation == meta.Id)
             {

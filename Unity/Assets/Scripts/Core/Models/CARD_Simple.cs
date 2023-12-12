@@ -17,7 +17,7 @@ namespace Core
         private SwipeData data = null;
 
         [SerializeField] private Image art;
-        [SerializeField] private Text name;
+        [SerializeField] private Image hero;
         [SerializeField] private GameObject eventIcon;
 
         private CardMeta card => data.Card;
@@ -117,22 +117,7 @@ namespace Core
         public void UpdateData(SwipeData data)
         {
             this.data = data;
-            name.gameObject.SetActive(false);
-            UpdateHUD();
-        }
 
-        protected void UpdateHUD()
-        {
-            // description.gameObject.SetActive(false);
-            art.gameObject.SetActive(false);
-
-            //name.Localize(card.Name, LocalizePartEnum.CardName);
-
-            if (card.Desc != null)
-            {
-                //description.Localize(card.Desc);
-                //description.gameObject.SetActive(true);
-            }
 
             if (card.Image != null)
             {
@@ -140,8 +125,23 @@ namespace Core
                 art.LoadCardImage(card.Image);
                 art.gameObject.SetActive(true);
             }
+            else
+            {
+                art.gameObject.SetActive(false);
+            }
 
-            //eventIcon.SetActive(card.Event == true);
+
+            if (card.Hero != null && data.Hero != null)
+            {
+                hero.LoadHeroImage(data.Hero.Id);
+                hero.gameObject.SetActive(true);
+            }
+            else
+            {
+                hero.gameObject.SetActive(false);
+            }
+
+
         }
     }
 

@@ -11,7 +11,7 @@ public class UI_QuestsTooltip : MonoBehaviour
     [SerializeField] private TooltipBack _background;
     [SerializeField] private Image _icon;
     [SerializeField] private UI_Target _target;
-    [SerializeField] private UI_Reward _reward;
+    [SerializeField] private UIReward _reward;
     [SerializeField] private Text _timer;
     [SerializeField] private GameObject _timerBox;
     [SerializeField] private Text _description;

@@ -10,15 +10,15 @@ using UnityEngine.UI;
 
 namespace UI.Components
 {
-    public class UIConditions : MonoBehaviour, ISetData<ConditionMeta[]>
+    public class UIConditions : MonoBehaviour, ISetData<List<ConditionMeta>>
     {
         [SerializeField] private UIConditionItem[] items;
 
-        public ConditionMeta[] Data { get; private set; }
+        public List<ConditionMeta> Data { get; private set; }
 
         void Awake()
         {
-            Swipe.OnDrop += () => ShowIfAvailable();
+            Swipe.OnDrop += () => Show();
             Swipe.OnTakeCard += Hide;
         }
 
@@ -27,20 +27,20 @@ namespace UI.Components
             gameObject.SetActive(false);
         }
 
-        public bool ShowIfAvailable()
+        public bool Show()
         {
-            if (Data == null || Data.Length == 0)
+            if (Data == null || Data.Count == 0)
                 return false;
 
             gameObject.SetActive(true);
             return true;
         }
 
-        public void SetItem(ConditionMeta[] data)
+        public void SetItem(List<ConditionMeta> data)
         {
             Data = data;
 
-            if (!ShowIfAvailable())
+            if (!Show())
             {
                 Hide();
                 return;
@@ -49,7 +49,7 @@ namespace UI.Components
             for (int i = 0; i < items.Length; i++)
             {
                 UIConditionItem item = items[i];
-                if (i < data.Length)
+                if (i < data.Count)
                 {
                     item.SetItem(data[i]);
                 }

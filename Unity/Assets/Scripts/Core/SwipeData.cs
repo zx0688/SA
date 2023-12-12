@@ -9,9 +9,14 @@ namespace Core
 
         public CardMeta Left;
         public CardMeta Right;
+        public ItemMeta Hero;
         public bool LastCard;
 
+        public QuestMeta Quest;
+
+
         public CardData Data;
+        public List<ConditionMeta> Conditions;
 
         // public ConditionMeta[] Conditions;
 

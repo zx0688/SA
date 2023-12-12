@@ -17,6 +17,7 @@ public partial class PlayerService : IService
     //public event Action<int, int> OnItemChanged;
 
     public event Action<CardMeta> OnChangedLocation;
+    public event Action<List<RewardMeta>> OnGetReward;
 
     public event Action<CardMeta, CardData> OnCardExecuted;
 
@@ -28,7 +29,7 @@ public partial class PlayerService : IService
     public event Action OnDestroed;
 
     public ProfileData Profile;
-
+    private GameMeta Meta => Services.Meta.Game;
     private GameRequest request = null;
 
     //public List<CardMeta> QueueMeta => playerVO.Layers.ConvertAll(i => Services.Data.GetCardMetaByID(i));
@@ -56,23 +57,14 @@ public partial class PlayerService : IService
     {
         request = new GameRequest(Type: 0, Value: 0, Id: "");
 
-        HttpBatchServer.Init(
-            "3243",
-            "3434",
-            "gp",
-            true,
-            Services.Meta.Game,
-            serverTimestamp => GameTime.Fix(serverTimestamp),
-            GameTime.Get);
-
         Profile = await HttpBatchServer.GetProfile(progress: progress);
 
         Profile.Cards.Values.ToList().ForEach(c =>
         {
-            CardMeta cardMeta = Services.Meta.Game.Cards[c.Id];
+            CardMeta cardMeta = Meta.Cards[c.Id];
             if (cardMeta.CT > 0 && c.CT >= cardMeta.CT)
             {
-                Services.Meta.Game.Cards.Remove(c.Id);
+                Meta.Cards.Remove(c.Id);
             }
         });
 
@@ -141,21 +133,33 @@ public partial class PlayerService : IService
 
     }
 
+
+    public void StartGame()
+    {
+        if (Profile.RewardEvent.Count > 0)
+            OnGetReward?.Invoke(Profile.RewardEvent);
+
+        HttpBatchServer.Change(new GameRequest(TriggerMeta.START_GAME));
+        OnProfileUpdated?.Invoke();
+    }
+
     public void Swipe(SwipeData swipe)
     {
-        request.Id = swipe.Card.Id;
+        request.Hash = swipe.Card.Id;
         request.Type = TriggerMeta.SWIPE;
         request.Value = swipe.Choice;
-        request.Hash = swipe.Left != null ? (swipe.Choice == CardMeta.LEFT ? swipe.Left.Id : swipe.Right.Id) : null;
-
+        request.Id = swipe.Left != null ? (swipe.Choice == CardMeta.LEFT ? swipe.Left.Id : swipe.Right.Id) : null;
 
         HttpBatchServer.Change(request);
 
         CardData data = null;
         if (swipe.Card.CT > 0 && Profile.Cards.TryGetValue(swipe.Card.Id, out data) && data.CT >= swipe.Card.CT)
         {
-            Services.Meta.Game.Cards.Remove(swipe.Card.Id);
+            Meta.Cards.Remove(swipe.Card.Id);
         }
+
+        if (Profile.RewardEvent.Count > 0)
+            OnGetReward?.Invoke(Profile.RewardEvent);
 
         OnCardExecuted?.Invoke(swipe.Card, swipe.Data);
         OnProfileUpdated?.Invoke();
@@ -181,5 +185,27 @@ public partial class PlayerService : IService
 
         OnProfileUpdated?.Invoke();
         OnAccelerated?.Invoke();
+    }
+
+
+    public void CreateSwipeData(SwipeData swipeData)
+    {
+        swipeData.Choice = -1;
+
+        //default card
+        string nextCardId = Profile.Deck[Profile.Deck.Count - 1];
+        swipeData.Data = Profile.Cards.GetValueOrDefault(nextCardId);
+        swipeData.Card = Meta.Cards.GetValueOrDefault(nextCardId);
+        swipeData.Left = Profile.Left != null ? Meta.Cards[Profile.Left] : null;
+        swipeData.Right = Profile.Right != null ? Meta.Cards[Profile.Right] : swipeData.Left;
+        swipeData.LastCard = swipeData.Left == null && swipeData.Right == null && Profile.Deck.Count <= 1;
+        swipeData.Hero = swipeData.Card.Hero != null ? Meta.Heroes[swipeData.Card.Hero] : null;
+        swipeData.Quest = swipeData.Card.Type == CardMeta.TYPE_QUEST ? Meta.Quests[nextCardId] : null;
+
+        swipeData.Conditions = new List<ConditionMeta>();
+        if (swipeData.Card.Next != null && swipeData.Card.Next.Length > 0)
+            foreach (TriggerMeta t in swipeData.Card.Next)
+                if (Services.Meta.Game.Cards.TryGetValue(t.Id, out CardMeta c) && c.Con != null && c.Con.Length > 0)
+                    swipeData.Conditions.Merge(c.Con.ToList());
     }
 }

@@ -92,7 +92,7 @@ public class UI_QuestsItem : MonoBehaviour, ITick, ISetData<CardData>
         //     Services.Assets.SetSpriteIntoImage(rewards[i], "Items/" + data.Act.Reward[i].Id + "/icon", true).Forget();
         // }
 
-        if (IsTickble()) { Tick(GameTime.Current); }
+        if (IsTickble()) { Tick(GameTime.Get()); }
 
         gameObject.SetActive(true);
     }

@@ -31,8 +31,8 @@ public class AssetsService
     public string Localize(string key, LocalizePartEnum part) => part switch
     {
         LocalizePartEnum.GUI => LocalDic.GUI.TryGetValue(key, out string res) ? res : $"[{key}]",
-        LocalizePartEnum.CardDescription => LocalDic.CardDescription.TryGetValue(key, out string res) ? res : $"[{key}]",
-        LocalizePartEnum.CardName => LocalDic.CardName.TryGetValue(key, out string res) ? res : $"[{key}]",
+        LocalizePartEnum.CardDescription => LocalDic.CardDescription.TryGetValue(key, out string res) ? res : key,////$"[{key}]",
+        LocalizePartEnum.CardName => LocalDic.CardName.TryGetValue(key, out string res) ? res : key,//$"[{key}]",
         _ => $"[{key}]"
     };
 
@@ -65,7 +65,7 @@ public class AssetsService
                     Caching.currentCacheForWriting = Caching.AddCache (path);
         */
 
-        string json = await GetJson($"localization_{lang}", GOOGLE_DRIVE_LOCALIZATION, progress, LoadContentOption.UseVersion);
+        string json = await GetJson($"localization_{lang}", GOOGLE_DRIVE_LOCALIZATION, progress, LoadContentOption.UseFileVersion);
         LocalDic = JSON.Deserialize<LocalizationData>(json);
 
         await UniTask.Yield();
@@ -74,9 +74,8 @@ public class AssetsService
     public async UniTask<string> GetJson(string name, string url, IProgress<float> progress = null, LoadContentOption option = LoadContentOption.KeepInResources)
     {
 
-#if UNITY_EDITOR
         option = LoadContentOption.DoNotSave;
-#endif
+
         if (option == LoadContentOption.KeepInResources)
         {
             var (isCanceled, asset) = await Resources.LoadAsync<TextAsset>(name).ToUniTask(progress: progress).SuppressCancellationThrow();
@@ -86,7 +85,7 @@ public class AssetsService
 
         string namev = null;
         string version = null;
-        if (option == LoadContentOption.UseVersion)
+        if (option == LoadContentOption.UseFileVersion)
         {
             namev = ZString.Format($"{0}_version", name);
             version = "3434";//await GetJson(namev, "", progress, LoadContentOption.DoNotSave);
@@ -145,7 +144,8 @@ public class AssetsService
                     string json = request.downloadHandler.text;
                     if (option != LoadContentOption.DoNotSave)
                     {
-                        if (TrySaveJson(name, json) && option == LoadContentOption.UseVersion)
+                        //CheckFreeSpace ()
+                        if (TrySaveJson(name, json) && option == LoadContentOption.UseFileVersion)
                         {
                             PlayerPrefs.SetString(namev, version);
                         }
@@ -153,7 +153,6 @@ public class AssetsService
                     return json;
             }
             throw new Exception($"Http request RESULT:{request.result.ToString()} CODE:{request.responseCode} name:{name} url:{url}");
-            return null;
         }
     }
 
@@ -312,7 +311,7 @@ public class AssetsService
     // }
 
 
-    /*private float GetFreeSpace () {
+    /*private float  GetFreeSpace (){
 
         var availableSpace = 10000000; //
 
@@ -364,7 +363,7 @@ public enum LoadContentOption
 {
     DoNotSave,
     KeepInResources,
-    UseVersion,
+    UseFileVersion,
     KeepInFile
 }
 

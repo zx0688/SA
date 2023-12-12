@@ -11,7 +11,7 @@ public class BlackLayer : MonoBehaviour
 
     private Image _blackBack;
 
-    public void Show()
+    public void Show(float delay)
     {
         this.gameObject.SetActive(true);
 
@@ -20,7 +20,7 @@ public class BlackLayer : MonoBehaviour
         _blackBack.DOKill();
         _blackBack.color = c;
 
-        _blackBack.DOFade(0.6f, 0.25f);
+        _blackBack.DOFade(0.6f, 0.25f).SetDelay(delay);
     }
 
     public void Hide(Action callback = null)

@@ -28,17 +28,17 @@ namespace UI.Components
                 count.gameObject.SetActive(false);
             }
 
-            if (Data.Id == cond.Id && Data.Type == cond.Type)
+            if (Data != null && Data.Id == cond.Id && Data.Type == cond.Type)
                 return;
 
             Data = cond;
             this.gameObject.SetActive(true);
 
-            //if (cond.Tp == ConditionMeta.ITEM)
+            if (cond.Type == ConditionMeta.ITEM)
             {
-                //    Services.Assets.SetSpriteIntoImage(icon, "UI/randomItem", true).Forget();
+                icon.LoadItemIcon(cond.Id);
             }
-            //else
+            else
             {
                 icon.LoadItemIcon(cond.Id);
             }

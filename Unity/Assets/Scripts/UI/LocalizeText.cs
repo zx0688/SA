@@ -16,6 +16,6 @@ public class LocalizeText : ServiceBehaviour
         if (!TryGetComponent<Text>(out c))
             throw new Exception("failed localization process: no TextComponent found");
 
-        c.Localize(key);
+        c.Localize(key, LocalizePartEnum.GUI);
     }
 }

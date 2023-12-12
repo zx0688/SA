@@ -22,12 +22,8 @@ namespace Core
 
         [SerializeField] private List<ICard> huds;
 
-        private CARD_Simple CARD_Simple;
-        //private CARD_Quest _CARD_Quest;
-        //private CARD_NewLevel _CARD_NewLevel;
-
-
-
+        [SerializeField] private CARD_Simple CARD_Simple;
+        [SerializeField] private CARD_Quest CARD_Quest;
 
         public void UpdateData(SwipeData data)
         {
@@ -72,23 +68,12 @@ namespace Core
             canvasGroup = GetComponent<CanvasGroup>();
             rectTransform = GetComponent<RectTransform>();
 
-            CARD_Simple = transform.Find("CARD_Simple").GetComponent<CARD_Simple>();
-            //_CARD_Quest = transform.Find("CARD_Quest").GetComponent<CARD_Quest>();
-            //_CARD_NewLevel = transform.Find("CARD_NewLevel").GetComponent<CARD_NewLevel>();
-
-            huds = new List<ICard>() { CARD_Simple };
+            huds = new List<ICard>() { CARD_Simple, CARD_Quest };
         }
         void Start()
         {
             foreach (ICard hud in huds)
                 hud.SetActive(false);
-
-            //UI_Timer = transform.Find ("UI_Timer").gameObject;
-            //lockText = UI_Timer.transform.Find("Timer").GetComponent<Text>();
-            //lockSlider = UI_Timer.transform.GetComponentInChildren<Slider>();
-
-            // Swipe.OnChangeDirection += OnChangeDirection;
-            //Swipe.OnEndSwipe += OnEndSwipe;
         }
 
         private void AddListeners()
@@ -161,22 +146,10 @@ namespace Core
         {
             hud?.SetActive(false);
 
-            switch (10)
-            {
-                case 1:
-                    //cardHUD = (ICard)_CARD_Quest;
-                    break;
-                case 2:
-                    break;
-                case 3:
-                    break;
-                case 4:
-                    //cardHUD = (ICardHUD)_CARD_NewLevel;
-                    break;
-                default:
-                    hud = CARD_Simple;
-                    break;
-            }
+            if (data.Card.Type == CardMeta.TYPE_QUEST)
+                hud = CARD_Quest;
+            else
+                hud = CARD_Simple;
             hud?.UpdateData(data);
             hud?.SetActive(true);
         }

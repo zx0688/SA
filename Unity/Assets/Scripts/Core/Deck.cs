@@ -26,13 +26,10 @@ namespace Core
             WAITING
         }
 
-        [SerializeField] private PagePanel pagePanel;
+        [SerializeField] private PagePanel pages;
         [SerializeField] private UIActionPanel action;
-        [SerializeField] private UIAcceleratePanel acceleratePanel;
-        [SerializeField] private UIConditions conditionPanel;
+        [SerializeField] private UIAcceleratePanel accelerate;
         [SerializeField] private Text name;
-        [SerializeField] private Text description;
-        [SerializeField] private GameObject descPanel;
 
         // [SerializeField]
         //public List<CardData> queue;
@@ -105,43 +102,14 @@ namespace Core
             //_rerollBtn.gameObject.SetActive(false);
             Swipe.OnDrop += OnDrop;
             Swipe.OnTakeCard += OnTake;
-
-            descPanel.gameObject.SetActive(false);
-            description.gameObject.SetActive(false);
         }
 
         private void OnTake()
         {
-            description.gameObject.SetActive(false);
-            descPanel.gameObject.SetActive(false);
         }
 
         private void OnDrop()
         {
-            descPanel.gameObject.SetActive(true);
-        }
-
-        void OnEnable()
-        {
-
-            int time = GameTime.Current;
-            /*if (queue.Count == 0 && State == States.WAITING && startTimeLeft > 0)
-            {
-                int timeLeft = GameTime.Left(time, startTimeLeft, waitingTimeLeft);
-                if (timeLeft > 0)
-                {
-                    waitingTrigger = StartCoroutine(Tick());
-                    waitingTrigger = null;
-                    noCardTimer.text = TimeFormat.ONE_CELL_FULLNAME(timeLeft > 0 ? timeLeft : 0);
-                }
-                else
-                {
-                    startTimeLeft = 0;
-                    background.SetActive(false);
-                    Services.Player.Trigger(queue,
-                        new TriggerVO(TriggerData.START_GAME, 0, 0, null, null, null, null), new List<RewardData>(), time);
-                }
-            }*/
         }
 
         /*async UniTask FadeIn()
@@ -170,10 +138,12 @@ namespace Core
 
             return;
         }*/
+
+        //GAME LOOP
         async UniTaskVoid Loop()
         {
             await UniTask.WaitUntil(() => State == States.IDLE);
-            HttpBatchServer.Change(new GameRequest(TriggerMeta.START_GAME));
+            Services.Player.StartGame();
             OpenCard();
 
             while (true)
@@ -187,9 +157,9 @@ namespace Core
 
                 if (Services.Player.Profile.Deck.Count == 0)
                 {
-                    acceleratePanel.Show();
+                    action.Hide();
+                    accelerate.Show();
                 }
-
 
                 await UniTask.WaitUntil(() => Services.Player.Profile.Deck.Count > 0);
 
@@ -255,14 +225,7 @@ namespace Core
 
         private void OpenCard()
         {
-            string nextCardId = Services.Player.Profile.Deck[0];
-            swipeData.Choice = -1;
-            swipeData.Data = Services.Player.Profile.Cards.GetValueOrDefault(nextCardId);
-            swipeData.Card = Services.Meta.Game.Cards.GetValueOrDefault(nextCardId);
-
-            swipeData.Left = Services.Player.Profile.Left != null ? Services.Meta.Game.Cards[Services.Player.Profile.Left] : null;
-            swipeData.Right = Services.Player.Profile.Right != null ? Services.Meta.Game.Cards[Services.Player.Profile.Right] : swipeData.Left;
-            swipeData.LastCard = swipeData.Left == null && swipeData.Right == null && Services.Player.Profile.Deck.Count <= 1;
+            Services.Player.CreateSwipeData(swipeData);
 
             int i = currentCardObject != null ? cards.IndexOf(currentCardObject) + 1 : 0;
             i = i >= cards.Count ? 0 : i;
@@ -274,19 +237,21 @@ namespace Core
             currentSwipe.ConstructNewSwipe();
             currentCard.UpdateData(swipeData);
 
-            name.text = swipeData.Card.Name.Localize(LocalizePartEnum.CardName);
-            if (swipeData.Data == null || swipeData.Data.CT == 0)
+            if (swipeData.Card.Hero == null)
             {
-                description.gameObject.SetActive(true);
-                description.text = swipeData.Card.Desc.Localize(LocalizePartEnum.CardDescription);
+                name.text = swipeData.Card.Name.Localize(LocalizePartEnum.CardName);
             }
-            action.UpdateData(swipeData);
+            else
+            {
+                name.text = swipeData.Hero.Name.Localize(LocalizePartEnum.CardName);
+            }
+
+
+            action.Show(swipeData);
             currentCard.FadeIn(() => GC.Collect());
             OnDrop();
 
             //desc.gameObject.SetActive(true);
-
-            //conditionPanel.SetItem(SwipeData.Conditions);
             /*if (currentData.CardData.sound != null && currentData.CardData.sound.Length > 0)
             {
                 int r = UnityEngine.Random.Range(0, currentData.CardData.sound.Length);
@@ -297,8 +262,8 @@ namespace Core
 
         public void Show()
         {
-            pagePanel.SetActivePageCounter(false);
-            pagePanel.HideArrow();
+            pages.SetActivePageCounter(false);
+            pages.HideArrow();
         }
 
         public string GetName() => "Swipe Adv".Localize(LocalizePartEnum.GUI);

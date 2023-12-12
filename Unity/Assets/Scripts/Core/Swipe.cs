@@ -128,7 +128,7 @@ namespace Core
                     }
 
                     break;
-
+                    // for the future features!
                     bool tapDetected = false;
 #if PLATFORM_ARCH_64 || UNITY_EDITOR || PLATFORM_STANDALONE
                     tapDetected = Input.GetMouseButtonDown(0);

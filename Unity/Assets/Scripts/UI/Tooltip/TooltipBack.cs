@@ -19,7 +19,7 @@ public class TooltipBack : MonoBehaviour
 
         gameObject.SetActive(true);
 
-        blackBack.Show();
+        blackBack.Show(0f);
 
         yellow.SetActive(false);
         red.SetActive(false);

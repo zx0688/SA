@@ -19,6 +19,7 @@ typedef Dictionary_2<T, K> = Map<T, K>;
 class SL {
 	private static var random:Random;
 
+	// random based on shared timestamp
 	public static function GetRandomInstance():Random {
 		if (random == null)
 			random = new Random();
@@ -27,7 +28,7 @@ class SL {
 
 	private static var tempArray:Array<CardMeta> = null;
 
-	private static function GetTempArray():Array<CardMeta> {
+	private static function GetTempArrayUnsafe():Array<CardMeta> {
 		if (tempArray == null)
 			tempArray = new Array<CardMeta>();
 		else
@@ -48,27 +49,33 @@ class SL {
 	public static function CreateProfile(meta:GameMeta, timestamp:Int, random:Random):ProfileData {
 		random.setStringSeed(Std.string(timestamp));
 
+		// there should be getting profile from Mongo database on server side
 		var profile:ProfileData = new ProfileData();
 		profile.Cards = new Dictionary_2<String, CardData>();
 		profile.Cooldown = 0;
 		profile.CurrentLocation = "28354825";
 		profile.Deck = new List_1();
-		profile.Events = new Dictionary_2<String, GameRequest>();
+		profile.Accept = new Dictionary_2<String, GameRequest>();
 		profile.OpenedLocations = new List_1();
 		profile.Rid = 0;
 		profile.Sid = 0;
 		profile.SwipeCount = 0;
 		profile.Items = new Dictionary_2<String, ItemData>();
 		profile.LastRequstTimestamp = 0;
+		profile.ActiveQuests = new List_1();
 
-		// profile.Deck.push(meta.Locations.tryGet("28354825").Over[0].Id);
-		profile.Deck.push("28362188");
-		LeftRight(meta.Cards.tryGet(profile.Deck[0]).Next, meta, profile, random);
+		profile.RewardEvent = new List_1();
+		profile.QuestEvent = null;
+
+		profile.Deck.push("28366105");
+		profile.Deck.push("28366091");
+
+		CreateLeftRight(meta.Cards.tryGet(GetCurrentCard(profile)).Next, meta, profile, random);
+
 		return profile;
 	}
 
-	public static function Change(request:GameRequest, meta:GameMeta, profile:ProfileData, timestamp:Int, response:GameResponse, reward:List_1<RewardMeta>,
-			random:Random):Void {
+	public static function Change(request:GameRequest, meta:GameMeta, profile:ProfileData, timestamp:Int, response:GameResponse, random:Random):Void {
 		if (request.Timestamp > timestamp) {
 			response.Error = "request can't be created later than the current time";
 			return;
@@ -78,9 +85,14 @@ class SL {
 			return;
 		}
 		if (request.Rid != profile.Rid) {
-			response.Error = "the trigger should have rid " + profile.Rid;
+			response.Error = "request should have rid " + profile.Rid;
 			return;
 		}
+
+		// just temp events for client, we can delete these safty
+		profile.RewardEvent = new List_1();
+		profile.QuestEvent = null;
+
 		switch (request.Type) {
 			case TriggerMeta.CHANGE_LOCATION:
 				if (profile.CurrentLocation != request.Id) {
@@ -101,68 +113,107 @@ class SL {
 			case TriggerMeta.SWIPE:
 				var deck:List_1<String> = profile.Deck;
 				if (deck.getCount() == 0) {
-					response.Error = "error deck is empty " + request.Id;
+					response.Error = "error deck is empty " + request.Hash;
 					return;
 				}
-				if (deck[0] != request.Id) {
-					response.Error = "error current card " + request.Id;
+				if (GetCurrentCard(profile) != request.Hash) {
+					response.Error = "error current card " + request.Hash;
 					return;
 				}
-				if (request.Hash == null && (profile.Left != null || profile.Right != null)) {
+				if (request.Id == null && (profile.Left != null || profile.Right != null)) {
 					response.Error = "hash should not be empty ";
 					return;
 				}
-				if (request.Hash != null && profile.Left == null && profile.Right == null) {
-					response.Error = "hash should be empty" + request.Hash;
+				if (request.Id != null && profile.Left == null && profile.Right == null) {
+					response.Error = "hash should be empty" + request.Id;
 					return;
 				}
-				if (request.Hash != profile.Left && ((profile.Right != null && request.Hash != profile.Right) || profile.Right == null)) {
-					response.Error = "hash should match with choice" + request.Hash;
+				if (request.Id != profile.Left && ((profile.Right != null && request.Id != profile.Right) || profile.Right == null)) {
+					response.Error = "hash should match with choice" + request.Id;
 					return;
 				}
 
-				// // Apply card
-				var card:CardData = profile.Cards.getOrCreate(request.Id, f -> new CardData(request.Id));
+				// Apply card
+				var card:CardData = profile.Cards.getOrCreate(request.Hash, f -> new CardData(request.Hash));
 				card.CT++;
-				card.Choice = request.Value;
+				card.Choice = request.Id;
 				card.Executed = request.Timestamp;
 
 				random.setStringSeed(Std.string(request.Timestamp));
 				deck.pop();
 
-				if (request.Hash != null) {
-					var nextCard:CardMeta = meta.Cards.tryGet(request.Hash);
-					deck.push(nextCard.Id);
+				if (request.Id != null) {
+					var nextCard:CardMeta = meta.Cards.tryGet(request.Id);
+
+					if (nextCard.Type == CardMeta.TYPE_CARD || nextCard.Type == CardMeta.TYPE_QUEST) {
+						deck.push(nextCard.Id);
+					} else {
+						if (nextCard.Next != null) {
+							var candidates:Array<CardMeta> = GetTempArrayUnsafe();
+							for (n in nextCard.Next) {
+								var nc:CardMeta = meta.Cards.tryGet(n.Id);
+								if (CheckCard(nc, n, meta, profile, random))
+									candidates.push(nc);
+							}
+							if (candidates.length > 0) {
+								deck.push(candidates[random.randomInt(0, candidates.length - 1)].Id);
+							}
+						}
+						ApplyReward(nextCard.Reward, meta, profile, random);
+					}
+
 					if (nextCard.Over != null) {
 						var over:NativeArray<TriggerMeta> = nextCard.Over;
-						var candidates:Array<CardMeta> = GetTempArray();
+						var candidates:Array<CardMeta> = GetTempArrayUnsafe();
 						for (o in over) {
 							var oc:CardMeta = meta.Cards.tryGet(o.Id);
 							if (CheckCard(oc, o, meta, profile, random))
 								candidates.push(oc);
 						}
-						candidates.sort((a, b) -> b.Pri - a.Pri);
-						for (c in candidates)
-							deck.push(c.Id);
+						if (candidates.length > 0) {
+							candidates.sort((a, b) -> b.Pri - a.Pri);
+							for (c in candidates)
+								deck.push(c.Id);
+						}
+					}
+
+					for (qID in profile.ActiveQuests) {
+						var qm:QuestMeta = meta.Quests.tryGet(qID);
+						if (qm.ST != null
+							&& qm.ST.find(qms -> qms.Id == nextCard.Id) != null
+							&& CheckCondition(qm.SC, meta, profile, random)) {
+							var qp:CardData = profile.Cards.tryGet(qID);
+							qp.Executed = QuestMeta.SUCCESS;
+							profile.QuestEvent = qp.Id;
+							profile.ActiveQuests.removeItem(qID);
+							ApplyReward(qm.SR, meta, profile, random);
+							deck.push(qID);
+						} else if (qm.FT != null
+							&& qm.FT.find(qms -> qms.Id == nextCard.Id) != null
+							&& CheckCondition(qm.FC, meta, profile, random)) {
+							var qp:CardData = profile.Cards.tryGet(qID);
+							qp.Executed = QuestMeta.FAIL;
+							profile.QuestEvent = qp.Id;
+							profile.ActiveQuests.removeItem(qID);
+							ApplyReward(qm.FR, meta, profile, random);
+							deck.push(qID);
+						}
 					}
 				}
+
 				profile.Left = null;
 				profile.Right = null;
 				if (deck.getCount() > 0) {
-					var nextCard:CardMeta = meta.Cards.tryGet(deck[0]);
+					var nextCard:CardMeta = meta.Cards.tryGet(GetCurrentCard(profile));
 					if (nextCard.Next != null) {
 						var next:NativeArray<TriggerMeta> = nextCard.Next;
-						LeftRight(next, meta, profile, random);
+						CreateLeftRight(next, meta, profile, random);
 					}
-					if (nextCard.Reward != null) {
-						for (r in nextCard.Reward) {
-							if (!CheckReward(r, meta, profile, random))
-								continue;
-							var i:ItemData = profile.Items.getOrCreate(r.Id, f -> new ItemData(r.Id, 0));
-							i.Count += r.Count;
-							i.Count = i.Count < 0 ? 0 : i.Count;
-							reward?.push(r);
-						}
+					ApplyReward(nextCard.Reward, meta, profile, random);
+
+					if (nextCard.Type == CardMeta.TYPE_QUEST) {
+						profile.ActiveQuests.push(nextCard.Id);
+						profile.QuestEvent = nextCard.Id;
 					}
 				} else {
 					profile.Cooldown = timestamp;
@@ -170,7 +221,7 @@ class SL {
 
 			case TriggerMeta.REROLL:
 				if (profile.Deck.getCount() > 0) {
-					response.Error = "cards are available ";
+					response.Error = "cards are available";
 					return;
 				}
 				if (profile.Cooldown == 0) {
@@ -191,7 +242,7 @@ class SL {
 				profile.Items.set(id, i);
 				profile.Deck.push(meta.Locations.tryGet(profile.CurrentLocation).Over[0].Id);
 				profile.Cooldown = 0;
-				LeftRight(meta.Cards.tryGet(profile.Deck[0]).Next, meta, profile, random);
+				CreateLeftRight(meta.Cards.tryGet(profile.Deck[0]).Next, meta, profile, random);
 
 			case TriggerMeta.START_GAME:
 
@@ -200,8 +251,8 @@ class SL {
 					response.Error = "an event trigger should have a hash";
 					return;
 				}
-				var events:Dictionary_2<String, GameRequest> = profile.Events;
-				var r:GameRequest = events.tryGet(request.Hash);
+				var accepts:Dictionary_2<String, GameRequest> = profile.Accept;
+				var r:GameRequest = accepts.tryGet(request.Hash);
 				if (r == null) {
 					response.Error = "profile should have an event with the same hash";
 					return;
@@ -212,9 +263,9 @@ class SL {
 				var i:ItemData = items.getOrCreate(r.Id, f -> new ItemData(r.Id, 0));
 				i.Count += r.Value;
 				// items[r.Id] = i;
-				events.remove(request.Hash);
+				accepts.remove(request.Hash);
 			default:
-				response.Error = "unexpected trigger ";
+				response.Error = "unexpected request";
 				return;
 		}
 
@@ -223,6 +274,12 @@ class SL {
 	}
 
 	public static function CheckCard(cardMeta:CardMeta, triggerMeta:TriggerMeta, data:GameMeta, profile:ProfileData, random:Random):Bool {
+		if (cardMeta == null)
+			return false;
+
+		if (!CheckCondition(cardMeta.Con, data, profile, random))
+			return false;
+
 		if (cardMeta.CT > 0 || cardMeta.CR > 0) {
 			var cardData:CardData = profile.Cards.tryGet(cardMeta.Id);
 			if (cardData != null && cardData.Executed > 0)
@@ -232,8 +289,19 @@ class SL {
 		if (triggerMeta.Chance > 0 && random.randomInt(0, 100) > triggerMeta.Chance)
 			return false;
 
-		if (!CheckCondition(cardMeta.Con, data, profile, random))
-			return false;
+		// check related card
+		if (cardMeta.Type == CardMeta.TYPE_SKILL && cardMeta.Next != null && cardMeta.Next.length > 0) {
+			var f:Bool = false;
+			for (c in cardMeta.Next) {
+				var cm:CardMeta = data.Cards.tryGet(c.Id);
+				if (CheckCard(cm, c, data, profile, random)) {
+					f = true;
+					break;
+				}
+			}
+			if (f == false)
+				return false;
+		}
 
 		return true;
 	}
@@ -278,8 +346,29 @@ class SL {
 		return true;
 	}
 
-	private static function LeftRight(next:NativeArray<TriggerMeta>, meta:GameMeta, profile:ProfileData, random:Random):Void {
-		var candidates:Array<CardMeta> = GetTempArray();
+	private static function ApplyReward(reward:NativeArray<RewardMeta>, meta:GameMeta, profile:ProfileData, random:Random):Void {
+		if (reward == null)
+			return;
+		for (r in reward) {
+			if (!CheckReward(r, meta, profile, random))
+				continue;
+			switch (r.Type) {
+				case ConditionMeta.ITEM:
+					var i:ItemData = profile.Items.getOrCreate(r.Id, f -> new ItemData(r.Id, 0));
+					i.Count += r.Count;
+					i.Count = i.Count < 0 ? 0 : i.Count;
+			}
+
+			profile.RewardEvent.push(r);
+		}
+	}
+
+	private static function GetCurrentCard(profile:ProfileData):String {
+		return profile.Deck[profile.Deck.getCount() - 1];
+	}
+
+	private static function CreateLeftRight(next:NativeArray<TriggerMeta>, meta:GameMeta, profile:ProfileData, random:Random):Void {
+		var candidates:Array<CardMeta> = GetTempArrayUnsafe();
 		for (n in next) {
 			var nc:CardMeta = meta.Cards.tryGet(n.Id);
 			if (CheckCard(nc, n, meta, profile, random))
@@ -343,13 +432,17 @@ class CSExtension {
 		return _this.Count;
 	}
 
+	@:generic public static function removeItem<T>(_this:cs.system.collections.generic.List_1<T>, x:T):Void {
+		_this.Remove(x);
+	}
+
 	@:generic public static function contains<T>(_this:cs.system.collections.generic.List_1<T>, x:T):Bool {
 		return _this.Contains(x);
 	}
 
 	public static function pop<T>(_this:cs.system.collections.generic.List_1<T>):T {
 		var i:T = _this[0];
-		_this.RemoveAt(0);
+		_this.RemoveAt(_this.Count - 1);
 		return i;
 	}
 
@@ -408,6 +501,10 @@ class IEnumerableIterator<T> {
 }
 #else
 class CSExtension {
+	@:generic public static function removeItem<T>(_this:Array<T>, x:T):Void {
+		_this.remove(x);
+	}
+
 	@:generic public static function find<T>(_this:NativeArray<T>, f:T->Bool):Null<T> {
 		return Lambda.find(_this, f);
 	}

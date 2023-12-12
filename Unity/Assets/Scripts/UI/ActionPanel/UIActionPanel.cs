@@ -8,15 +8,20 @@ using UnityEngine.UI;
 using Core;
 using System.Data;
 using Cysharp.Text;
+using UI.Components;
+using System.Linq;
 
 namespace UI.ActionPanel
 {
     public class UIActionPanel : MonoBehaviour
     {
-        [SerializeField] private UI_Reward reward;
-        [SerializeField] private UIChoice choice;
-        //[SerializeField] private Text skipText;
-        private int ch = -10;
+
+        [SerializeField] private UIReward reward;
+        [SerializeField] private UIChoice uiChoice;
+        [SerializeField] private UIConditions conditions;
+        [SerializeField] private Text description;
+
+        private int choice = -10;
 
         private SwipeData data;
 
@@ -28,105 +33,127 @@ namespace UI.ActionPanel
             Swipe.OnEndSwipe += Hide;
         }
 
-        void Start()
-        {
-            Hide();
-            //Services.OnInited += () => { skipText.text = "Продолжить".Localize(); };
-        }
-
         void OnTakeCard()
         {
+            conditions.Hide();
 
-            if (data.Left != null && data.Left.Id == data.Right.Id)
+            if (data.Left == null && data.Right == null || (data.Left.Id == Services.Player.Profile.Deck.Last()))
             {
-                ch = -1;
-                choice.Show(data.Left);
+                choice = -1;
+                reward.Hide();
+                uiChoice.Hide();
+            }
+            else if (data.Left.Id == data.Right.Id)
+            {
+                choice = -1;
                 reward.SetItems(data.Left.Reward);
+
+                if (data.Card.Hero != null && data.Card.Hero == data.Left.Hero)
+                {
+                    description.gameObject.SetActive(true);
+                    description.text = data.Left.Name.Localize(LocalizePartEnum.CardName);
+                }
+                else
+                {
+                    uiChoice.Show(data.Left);
+                    description.gameObject.SetActive(false);
+                }
             }
-            else if (data.Right == null && data.Left == null)
+            else
             {
-                choice.Hide();
-                ch = -1;
-                //action.gameObject.SetActive(false);
-                //icon.gameObject.SetActive(false);
-                // skipText.gameObject.SetActive(true);
+                reward.Hide();
+                uiChoice.Hide();
+                description.gameObject.SetActive(false);
             }
 
-            //if (data == null || Swipe.State != Swipe.States.DRAG) return;
-
-            //OnChangeDirection(CardMeta.LEFT);
-
-            //gameObject.SetActive(true);
-            //canvasGroup.DOFade(1f, 0.1f);
         }
 
         void OnDrop()
         {
-            Hide();
-            ch = -10;
-            // canvasGroup.DOFade(0.4f, 0.05f).OnComplete(() =>
-            // {
-            //     reward.SetItems(null);
-            //     //action.gameObject.SetActive(false);
-            //     //gameObject.SetActive(false);
-            // });
-        }
+            choice = -10;
+            conditions.Hide();
+            uiChoice.Hide();
+            reward.Hide();
 
-        void Hide()
-        {
-            reward.SetItems(null);
-            choice.Hide();
-            ch = -10;
-            //skipText.gameObject.SetActive(false);
-            //gameObject.SetActive(false);
-            //canvasGroup.DOKill();
+            description.gameObject.SetActive(true);
+            description.text = data.Card.Desc.Localize(LocalizePartEnum.CardDescription);
+
+            if (data.Conditions.Count > 0)
+            {
+                conditions.SetItem(data.Conditions);
+            }
         }
 
         void OnChangeDeviation(float dev)
         {
-            if (data == null || Swipe.State != Swipe.States.DRAG) return;
+            if (data == null || Swipe.State != Swipe.States.DRAG || choice == -1) return;
 
-            //only one choice
-            if (ch == -1)
-                return;
             else if (Math.Abs(dev) < 0.9)
             {
-                choice.Hide();
+                uiChoice.Hide();
                 reward.SetItems(null);
-                ch = -10;
+                choice = -10;
                 return;
             }
             else if (dev < -0.9f)
             {
-                if (ch == CardMeta.LEFT)
+                if (choice == CardMeta.LEFT)
                     return;
-                ch = CardMeta.LEFT;
+                choice = CardMeta.LEFT;
             }
             else if (dev > 0.9f)
             {
-                if (ch == CardMeta.RIGHT)
+                if (choice == CardMeta.RIGHT)
                     return;
-                ch = CardMeta.RIGHT;
+                choice = CardMeta.RIGHT;
             }
 
-            if (data.Left != null && ch == CardMeta.LEFT)
+            if (data.Left != null && choice == CardMeta.LEFT)
             {
-                choice.Show(data.Left);
+                if (data.Left.Image == null)
+                {
+                    description.gameObject.SetActive(true);
+                    description.text = data.Left.Desc.Localize(LocalizePartEnum.CardDescription);
+                    uiChoice.Hide();
+                }
+                else
+                {
+                    description.gameObject.SetActive(false);
+                    uiChoice.Show(data.Left);
+                }
                 reward.SetItems(data.Left.Reward);
             }
-            else if (data.Right != null && ch == CardMeta.RIGHT)
+            else if (data.Right != null && choice == CardMeta.RIGHT)
             {
-                choice.Show(data.Right);
+                if (data.Right.Image == null)
+                {
+                    description.gameObject.SetActive(true);
+                    description.text = data.Right.Desc.Localize(LocalizePartEnum.CardDescription);
+                    uiChoice.Hide();
+                }
+                else
+                {
+                    description.gameObject.SetActive(false);
+                    uiChoice.Show(data.Right);
+                }
                 reward.SetItems(data.Right.Reward);
             }
 
         }
 
-        public void UpdateData(SwipeData data)
+        public void Show(SwipeData data)
         {
             this.data = data;
-            ch = -10;
-            Hide();
+
+            OnDrop();
+        }
+
+        public void Hide()
+        {
+            conditions.Hide();
+            reward.Hide();
+            description.gameObject.SetActive(false);
+            uiChoice.Hide();
         }
 
     }

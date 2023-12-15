@@ -12,9 +12,6 @@ namespace Core
         public ItemMeta Hero;
         public bool LastCard;
 
-        public QuestMeta Quest;
-
-
         public CardData Data;
         public List<ConditionMeta> Conditions;
 

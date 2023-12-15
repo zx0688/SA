@@ -6,7 +6,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIRewardItem : MonoBehaviour, ITick
+public class UIRewardItem : MonoBehaviour
 {
 
     [SerializeField] private Text count;
@@ -14,6 +14,8 @@ public class UIRewardItem : MonoBehaviour, ITick
 
     [SerializeField] private Image up;
     [SerializeField] private Image down;
+
+
 
 
     private RewardMeta data;
@@ -31,7 +33,19 @@ public class UIRewardItem : MonoBehaviour, ITick
 
     //protected Image back;
 
-    public virtual void SetItem(RewardMeta reward)
+    // public bool SetCountVisible
+    // {
+    //     get
+    //     {
+    //         return count.gameObject.activeInHierarchy && count.gameObject.activeSelf;
+    //     }
+    //     set
+    //     {
+    //         count.gameObject.SetActive(value);
+    //     }
+    // }
+
+    public virtual void SetItem(RewardMeta reward, Color32[] colors = null)
     {
         if (reward == null)
         {
@@ -42,7 +56,7 @@ public class UIRewardItem : MonoBehaviour, ITick
         //_up.gameObject.SetActive(reward.Count > 0);
         //_down.gameObject.SetActive(reward.Count < 0);
 
-        if (reward.Type == ConditionMeta.ITEM)
+        if (reward.Type == ConditionMeta.ITEM && count != null)
         {
             if (reward.Random != null && reward.Random.Length > 0)
             {
@@ -52,10 +66,10 @@ public class UIRewardItem : MonoBehaviour, ITick
             else
             {
                 count.text = reward.Count > 0 ? $"+{Math.Abs(reward.Count)}" : $"-{Math.Abs(reward.Count)}";
-                count.color = reward.Count > 0 ? Color.green : Color.red;
+                count.color = reward.Count > 0 ? (colors == null || colors.Length == 0 ? Color.green : colors[0]) : (colors == null || colors.Length == 0 ? Color.red : colors[1]);
             }
         }
-        else if (reward.Type == ConditionMeta.CARD)
+        else if (reward.Type == ConditionMeta.CARD && count != null)
         {
             count.text = reward.Chance > 0 ? $"{reward.Chance}%" : "100%";
             count.color = Color.white;
@@ -117,24 +131,9 @@ public class UIRewardItem : MonoBehaviour, ITick
         Clear();
     }
 
-    protected virtual void UpdateView(int timestamp)
-    {
-
-    }
-
     protected virtual void OnClick()
     {
         //tooltip.ShowTooltip (data);
-    }
-
-    public virtual void Tick(int timestamp)
-    {
-
-    }
-
-    public virtual bool IsTickble()
-    {
-        return false;
     }
 
     public void SetTooltip(UI_InventoryTooltip tooltip)

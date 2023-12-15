@@ -5,63 +5,95 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ClickButton : Button//, IPointerClickHandler
+public class ClickButton : MonoBehaviour
 {
-    public Action OnAnimationCallback;
+    public Action OnClick;
 
     [SerializeField] private Color32 disabledColor;
+    [SerializeField] private Sprite disabledSprite;
+    [SerializeField] private bool asToggle = false;
 
-    private Image image;
     private Color32 downColor;
     private Color32 defaultColor;
+    private Sprite defaultSprite;
     private bool isDisabled = false;
 
-    protected override void Awake()
-    {
-        base.Awake();
+    private Button button;
+    private Image image;
 
+    void Awake()
+    {
         downColor = new Color32(155, 155, 155, 255);
+        button = GetComponent<Button>();
         image = GetComponent<Image>();
         defaultColor = image.color;
-
-        onClick.AddListener(OnClicked);
+        defaultSprite = image.sprite;
+        button.onClick.AddListener(OnClicked);
     }
 
     private void OnClicked()
     {
-        if (!gameObject.activeSelf || !IsInteractable())
+        if (!gameObject.activeSelf || !button.interactable || isDisabled)
             return;
 
         StopAllCoroutines();
         StartCoroutine(Click());
     }
 
-
-
-    public void SetActiveButton(bool value)
+    public bool SetAsDisabled
     {
-        //StopAllCoroutines();
+        get => isDisabled;
+        set
+        {
+            button.interactable = !value;
+            isDisabled = value;
 
-        //image.color = value ? defaultColor : disabledColor;
-        //isDisabled = !value;
+            if (disabledSprite != null)
+            {
+                image.sprite = value ? disabledSprite : defaultSprite;
+            }
+            else
+            {
+                image.color = value ? defaultColor : downColor;
+            }
+
+        }
     }
 
-    /*public void OnPointerClick(PointerEventData eventData)
+    public bool SetAsToggled
     {
-        
-    }*/
+        get => asToggle;
+        set => asToggle = value;
+    }
 
-    //void OnDisable()
-    //{
-    //   StopAllCoroutines();
-    //}
+
+
+    // public void SetActiveButton(bool value)
+    // {
+    //     //StopAllCoroutines();
+
+    //     //image.color = value ? defaultColor : disabledColor;
+    //     //isDisabled = !value;
+    // }
 
     IEnumerator Click()
     {
-        image.color = downColor;
-        yield return new WaitForSeconds(0.1f);
-        image.color = isDisabled ? disabledColor : Color.white;
-        OnAnimationCallback?.Invoke();
-        //OnClick?.Invoke();
+        if (disabledSprite != null)
+        {
+            image.sprite = disabledSprite;
+        }
+        else
+        {
+            image.color = downColor;
+        }
+
+        yield return new WaitForSeconds(0.2f);
+
+        if (asToggle)
+        {
+            SetAsDisabled = true;
+        }
+
+        OnClick?.Invoke();
     }
 }

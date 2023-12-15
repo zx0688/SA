@@ -9,7 +9,7 @@ public class UI_RecipesTooltip : MonoBehaviour
 {
     [SerializeField] private TooltipBack _background;
     [SerializeField] private Image _icon;
-    [SerializeField] private UI_Target _target;
+    [SerializeField] private UITarget _target;
     [SerializeField] private UIReward _reward;
     [SerializeField] private Text _timer;
     [SerializeField] private GameObject _timerBox;

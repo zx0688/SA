@@ -25,6 +25,7 @@ public class UIDropReward : ServiceBehaviour
     [SerializeField] private GameObject positionAddAnimation;
     [SerializeField] private GameObject positionSpendAnimation;
     [SerializeField] private GameObject positionSpecialAnimation;
+    [SerializeField] private GameObject positionQuestAnimation;
 
     protected override void Awake()
     {
@@ -105,7 +106,7 @@ public class UIDropReward : ServiceBehaviour
         else
         {
             item.SetActive(true);
-            ScenarioITEM(item, position);
+            ScenarioITEM(item, position, positionAddAnimation);
         }
 
     }
@@ -137,9 +138,9 @@ public class UIDropReward : ServiceBehaviour
         });
     }
 
-    private void ScenarioITEM(GameObject item, Vector3 position)
+    private void ScenarioITEM(GameObject item, Vector3 position, GameObject targetPosition)
     {
-        Vector3 p = positionAddAnimation.transform.position;
+        Vector3 p = targetPosition.transform.position;
         item.gameObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
         item.gameObject.transform.DOKill();
         item.gameObject.transform.DOMove(position + item.gameObject.transform.position, 0.6f).OnComplete(() =>
@@ -209,8 +210,21 @@ public class UIDropReward : ServiceBehaviour
     {
         base.OnServicesInited();
         Services.Player.OnGetReward += OnItemReceived;
+        Services.Player.OnQuestStart += OnQuestStart;
     }
 
+    private void OnQuestStart()
+    {
+        GameObject item = items[items.Count - 1];
+        items.RemoveAt(items.Count - 1);
+        items.Insert(0, item);
+
+        item.GetComponent<RectTransform>().anchoredPosition = new Vector3(0, 0, 0);
+        gameObject.SetActive(true);
+        item.GetComponent<Image>().LoadItemIcon("1000");
+        item.SetActive(true);
+        ScenarioITEM(item, new Vector3(0, 0, 0), positionQuestAnimation);
+    }
 
     private void OnItemReceived(List<RewardMeta> rewards)
     {

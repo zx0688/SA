@@ -47,6 +47,7 @@ class CardData {
 		this.CT = 0;
 		this.CR = 0;
 		this.Choice = null;
+		this.Value = 0;
 	}
 
 	public var Id:String;
@@ -54,6 +55,7 @@ class CardData {
 	public var CT:Int;
 	public var Executed:Int;
 	public var Choice:String;
+	public var Value:Int;
 }
 
 @:nativeGen

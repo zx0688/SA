@@ -25,7 +25,7 @@ public class PageSwiper : MonoBehaviour, IDragHandler, IEndDragHandler
 
     private Dictionary<GameObject, ISetData<ItemData>[]> _pages;
     private List<ItemData> _items;
-    private List<GameObject> _panels;
+    [SerializeField] private List<GameObject> _panels;
     private int _countItemsPerPage;
     private Vector3 _panelLocation;
     private Vector3 _pivotStartPoint;
@@ -37,8 +37,8 @@ public class PageSwiper : MonoBehaviour, IDragHandler, IEndDragHandler
     void Awake()
     {
         RectTransform rectTransform = GetComponent<RectTransform>();
+        //transform.Find("0").gameObject, transform.Find("1").gameObject, transform.Find("2").gameObject
 
-        _panels = new List<GameObject>() { transform.Find("0").gameObject, transform.Find("1").gameObject, transform.Find("2").gameObject };
         _width = transform.localToWorldMatrix[0] * rectTransform.rect.width + 40;
 
         RectTransform _rect = _panels[1].GetComponent<RectTransform>();

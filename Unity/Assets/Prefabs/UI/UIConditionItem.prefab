@@ -32,7 +32,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 426264439743592156}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -103,7 +102,7 @@ GameObject:
   - component: {fileID: 6392847308024811957}
   - component: {fileID: 7794237202104960971}
   - component: {fileID: 1909697325010350644}
-  - component: {fileID: 3021774530036037871}
+  - component: {fileID: 8780061652580154931}
   m_Layer: 0
   m_Name: Value
   m_TagString: Untagged
@@ -124,7 +123,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 426264439743592156}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -173,7 +171,7 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: 231
---- !u!114 &3021774530036037871
+--- !u!114 &8780061652580154931
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -182,11 +180,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 2825808466483249072}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_EffectColor: {r: 0.08236047, g: 0.0042274827, b: 0.1792453, a: 0.76862746}
-  m_EffectDistance: {x: 6, y: 4}
+  m_EffectColor: {r: 0.1625049, g: 0.07920967, b: 0.18867922, a: 0.77254903}
+  m_EffectDistance: {x: 5, y: -5}
   m_UseGraphicAlpha: 1
 --- !u!1 &9219589620488613011
 GameObject:
@@ -220,7 +218,6 @@ RectTransform:
   - {fileID: 7054267411440793158}
   - {fileID: 6392847308024811957}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}

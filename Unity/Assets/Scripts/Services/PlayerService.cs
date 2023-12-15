@@ -18,11 +18,12 @@ public partial class PlayerService : IService
 
     public event Action<CardMeta> OnChangedLocation;
     public event Action<List<RewardMeta>> OnGetReward;
+    public event Action OnFollowQuestChanged;
 
     public event Action<CardMeta, CardData> OnCardExecuted;
 
     public event Action OnProfileUpdated;
-    public event Action OnQuestComplete;
+    public event Action OnQuestStart;
     public event Action OnAccelerated;
     public event Action OnInited;
     public event Action OnUpdated;
@@ -31,6 +32,16 @@ public partial class PlayerService : IService
     public ProfileData Profile;
     private GameMeta Meta => Services.Meta.Game;
     private GameRequest request = null;
+
+    public string FollowQuest
+    {
+        get => PlayerPrefs.HasKey("AQ") ? PlayerPrefs.GetString("AQ") : null;
+        set
+        {
+            PlayerPrefs.SetString("AQ", value);
+            OnFollowQuestChanged?.Invoke();
+        }
+    }
 
     //public List<CardMeta> QueueMeta => playerVO.Layers.ConvertAll(i => Services.Data.GetCardMetaByID(i));
     // public bool DoesPlayerKnow(int id, int Tp) => Tp switch
@@ -161,6 +172,17 @@ public partial class PlayerService : IService
         if (Profile.RewardEvent.Count > 0)
             OnGetReward?.Invoke(Profile.RewardEvent);
 
+        if (Profile.QuestEvent != null)
+        {
+            if (Profile.ActiveQuests.Count == 0)
+                FollowQuest = null;
+            else if (FollowQuest == null || !Profile.ActiveQuests.Contains(FollowQuest))
+                FollowQuest = Profile.ActiveQuests[0];
+
+            if (Profile.ActiveQuests.Contains(Profile.QuestEvent))
+                OnQuestStart?.Invoke();
+        }
+
         OnCardExecuted?.Invoke(swipe.Card, swipe.Data);
         OnProfileUpdated?.Invoke();
     }
@@ -200,7 +222,6 @@ public partial class PlayerService : IService
         swipeData.Right = Profile.Right != null ? Meta.Cards[Profile.Right] : swipeData.Left;
         swipeData.LastCard = swipeData.Left == null && swipeData.Right == null && Profile.Deck.Count <= 1;
         swipeData.Hero = swipeData.Card.Hero != null ? Meta.Heroes[swipeData.Card.Hero] : null;
-        swipeData.Quest = swipeData.Card.Type == CardMeta.TYPE_QUEST ? Meta.Quests[nextCardId] : null;
 
         swipeData.Conditions = new List<ConditionMeta>();
         if (swipeData.Card.Next != null && swipeData.Card.Next.Length > 0)

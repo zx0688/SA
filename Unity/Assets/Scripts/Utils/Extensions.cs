@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Cysharp.Text;
 using haxe.lang;
+using haxe.root;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -31,7 +32,8 @@ public static class Extensions
         return conditions;
     }
 
-
+    public static bool Check(this ConditionMeta condition) => SL.CheckCondition(new ConditionMeta[] { condition }, Services.Meta.Game, Services.Player.Profile, null);
+    public static bool Check(this ConditionMeta[] conditions) => SL.CheckCondition(conditions, Services.Meta.Game, Services.Player.Profile, null);
 
     public static T Find<T>(this T[] array, Predicate<T> match) where T : class
     {

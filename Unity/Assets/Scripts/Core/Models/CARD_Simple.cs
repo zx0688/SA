@@ -18,6 +18,7 @@ namespace Core
 
         [SerializeField] private Image art;
         [SerializeField] private Image hero;
+        [SerializeField] private Text name;
         [SerializeField] private GameObject eventIcon;
 
         private CardMeta card => data.Card;
@@ -118,6 +119,14 @@ namespace Core
         {
             this.data = data;
 
+            if (data.Card.Hero == null)
+            {
+                name.Localize(data.Card.Name, LocalizePartEnum.CardName);
+            }
+            else
+            {
+                name.Localize(data.Hero.Name, LocalizePartEnum.CardName);
+            }
 
             if (card.Image != null)
             {

@@ -20,7 +20,7 @@ class SL {
 	private static var random:Random;
 
 	// random based on shared timestamp
-	public static function GetRandomInstance():Random {
+	private static function GetRandomInstance():Random {
 		if (random == null)
 			random = new Random();
 		return random;
@@ -47,8 +47,6 @@ class SL {
 	}
 
 	public static function CreateProfile(meta:GameMeta, timestamp:Int, random:Random):ProfileData {
-		random.setStringSeed(Std.string(timestamp));
-
 		// there should be getting profile from Mongo database on server side
 		var profile:ProfileData = new ProfileData();
 		profile.Cards = new Dictionary_2<String, CardData>();
@@ -75,7 +73,7 @@ class SL {
 		return profile;
 	}
 
-	public static function Change(request:GameRequest, meta:GameMeta, profile:ProfileData, timestamp:Int, response:GameResponse, random:Random):Void {
+	public static function Change(request:GameRequest, meta:GameMeta, profile:ProfileData, timestamp:Int, response:GameResponse):Void {
 		if (request.Timestamp > timestamp) {
 			response.Error = "request can't be created later than the current time";
 			return;
@@ -137,9 +135,11 @@ class SL {
 				var card:CardData = profile.Cards.getOrCreate(request.Hash, f -> new CardData(request.Hash));
 				card.CT++;
 				card.Choice = request.Id;
-				card.Executed = request.Timestamp;
+				card.Executed = profile.SwipeCount;
 
+				random = GetRandomInstance();
 				random.setStringSeed(Std.string(request.Timestamp));
+
 				deck.pop();
 
 				if (request.Id != null) {
@@ -176,23 +176,22 @@ class SL {
 								deck.push(c.Id);
 						}
 					}
-
 					for (qID in profile.ActiveQuests) {
-						var qm:QuestMeta = meta.Quests.tryGet(qID);
+						var qm:CardMeta = meta.Cards.tryGet(qID);
 						if (qm.ST != null
-							&& qm.ST.find(qms -> qms.Id == nextCard.Id) != null
+							&& (qm.ST[0].Type == TriggerMeta.ALWAYS || qm.ST.find(qms -> qms.Id == nextCard.Id) != null)
 							&& CheckCondition(qm.SC, meta, profile, random)) {
 							var qp:CardData = profile.Cards.tryGet(qID);
-							qp.Executed = QuestMeta.SUCCESS;
+							qp.Value = CardMeta.QUEST_SUCCESS;
 							profile.QuestEvent = qp.Id;
 							profile.ActiveQuests.removeItem(qID);
 							ApplyReward(qm.SR, meta, profile, random);
 							deck.push(qID);
 						} else if (qm.FT != null
-							&& qm.FT.find(qms -> qms.Id == nextCard.Id) != null
+							&& (qm.FT[0].Type == TriggerMeta.ALWAYS || qm.FT.find(qms -> qms.Id == nextCard.Id) != null)
 							&& CheckCondition(qm.FC, meta, profile, random)) {
 							var qp:CardData = profile.Cards.tryGet(qID);
-							qp.Executed = QuestMeta.FAIL;
+							qp.Value = CardMeta.QUEST_FAIL;
 							profile.QuestEvent = qp.Id;
 							profile.ActiveQuests.removeItem(qID);
 							ApplyReward(qm.FR, meta, profile, random);
@@ -214,10 +213,13 @@ class SL {
 					if (nextCard.Type == CardMeta.TYPE_QUEST) {
 						profile.ActiveQuests.push(nextCard.Id);
 						profile.QuestEvent = nextCard.Id;
+						var card:CardData = profile.Cards.getOrCreate(nextCard.Id, f -> new CardData(nextCard.Id));
+						card.Value = CardMeta.QUEST_ACTIVE;
 					}
 				} else {
 					profile.Cooldown = timestamp;
 				}
+				profile.SwipeCount++;
 
 			case TriggerMeta.REROLL:
 				if (profile.Deck.getCount() > 0) {
@@ -316,7 +318,7 @@ class SL {
 		return true;
 	}
 
-	private static function CheckCondition(con:Null<NativeArray<ConditionMeta>>, data:GameMeta, profile:ProfileData, random:Random):Bool {
+	public static function CheckCondition(con:Null<NativeArray<ConditionMeta>>, data:GameMeta, profile:ProfileData, random:Random):Bool {
 		if (con == null || con.length == 0)
 			return true;
 
@@ -427,9 +429,8 @@ class CSExtension {
 		return _this.Count;
 	}
 
-	@:generic public static function push<T>(_this:cs.system.collections.generic.List_1<T>, x:T):Int {
+	@:generic public static function push<T>(_this:cs.system.collections.generic.List_1<T>, x:T):Void {
 		_this.Add(x);
-		return _this.Count;
 	}
 
 	@:generic public static function removeItem<T>(_this:cs.system.collections.generic.List_1<T>, x:T):Void {

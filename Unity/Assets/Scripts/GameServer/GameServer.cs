@@ -198,7 +198,7 @@ namespace GameServer
             response.Error = null;
 
             Debug.Log($"REQUEST:{JSON.Serialize(request)}");
-            SL.Change(request, meta, profile, request.Timestamp, response, SL.GetRandomInstance());
+            SL.Change(request, meta, profile, request.Timestamp, response);
             if (response.Error != null)
                 throw new Exception(response.Error);
 

@@ -13,7 +13,6 @@ import cs.system.Attribute;
 class GameMeta {
 	public var Cards:Dictionary_2<String, CardMeta>;
 	// public var All:NativeArray<CardMeta>;
-	public var Quests:Dictionary_2<String, QuestMeta>;
 	public var Items:Dictionary_2<String, ItemMeta>;
 	public var Heroes:Dictionary_2<String, ItemMeta>;
 	public var Skills:Dictionary_2<String, SkillMeta>;
@@ -89,15 +88,19 @@ class ChoiceMeta {
 @:nativeGen
 @:strict(SerializableAttribute)
 class TriggerMeta {
-	public static inline var ALWAYS:Int = 0;
-	public static inline var SWIPE:Int = 1;
-	public static inline var START_GAME:Int = 2;
-	public static inline var EVENT:Int = 3;
-	public static inline var CHANGE_LOCATION:Int = 4;
-	public static inline var REROLL:Int = 5;
+	public static inline var CARD:Int = 1;
+	public static inline var ITEM:Int = 2;
+
+	public static inline var ALWAYS:Int = 10;
+	public static inline var SWIPE:Int = 11;
+	public static inline var START_GAME:Int = 12;
+	public static inline var EVENT:Int = 13;
+	public static inline var CHANGE_LOCATION:Int = 14;
+	public static inline var REROLL:Int = 15;
 
 	public var Id:String;
 	public var Type:Int;
+	public var Count:Int;
 	public var Tags:NativeArray<String>;
 	public var Value:Int;
 	public var Chance:Int;
@@ -124,24 +127,6 @@ class ConditionMeta {
 
 @:nativeGen
 @:strict(SerializableAttribute)
-class QuestMeta {
-	public static inline var ACTIVE:Int = 0;
-	public static inline var SUCCESS:Int = 1;
-	public static inline var FAIL:Int = 2;
-
-	public var Id:String;
-	public var SR:NativeArray<RewardMeta>;
-	public var FR:NativeArray<RewardMeta>;
-	public var Duration:Int;
-
-	public var SC:NativeArray<ConditionMeta>;
-	public var FC:NativeArray<ConditionMeta>;
-	public var ST:NativeArray<TriggerMeta>;
-	public var FT:NativeArray<TriggerMeta>;
-}
-
-@:nativeGen
-@:strict(SerializableAttribute)
 class CardMeta {
 	public static inline var LEFT:Int = 0;
 	public static inline var RIGHT:Int = 1;
@@ -152,6 +137,10 @@ class CardMeta {
 	public static inline var TYPE_CARD:Int = 0;
 	public static inline var TYPE_SKILL:Int = 1;
 	public static inline var TYPE_QUEST:Int = 2;
+
+	public static inline var QUEST_ACTIVE:Int = 0;
+	public static inline var QUEST_SUCCESS:Int = 1;
+	public static inline var QUEST_FAIL:Int = 2;
 
 	public var Id:String;
 	public var Tags:NativeArray<String>;
@@ -173,4 +162,13 @@ class CardMeta {
 	public var Text:String;
 
 	public var Sound:NativeArray<String>;
+
+	// Quest
+	public var SR:NativeArray<RewardMeta>;
+	public var FR:NativeArray<RewardMeta>;
+	public var SC:NativeArray<ConditionMeta>;
+	public var FC:NativeArray<ConditionMeta>;
+	public var ST:NativeArray<TriggerMeta>;
+	public var FT:NativeArray<TriggerMeta>;
+	public var Duration:Int;
 }

@@ -29,7 +29,6 @@ namespace Core
         [SerializeField] private PagePanel pages;
         [SerializeField] private UIActionPanel action;
         [SerializeField] private UIAcceleratePanel accelerate;
-        [SerializeField] private Text name;
 
         // [SerializeField]
         //public List<CardData> queue;
@@ -237,17 +236,10 @@ namespace Core
             currentSwipe.ConstructNewSwipe();
             currentCard.UpdateData(swipeData);
 
-            if (swipeData.Card.Hero == null)
-            {
-                name.text = swipeData.Card.Name.Localize(LocalizePartEnum.CardName);
-            }
-            else
-            {
-                name.text = swipeData.Hero.Name.Localize(LocalizePartEnum.CardName);
-            }
-
 
             action.Show(swipeData);
+
+
             currentCard.FadeIn(() => GC.Collect());
             OnDrop();
 

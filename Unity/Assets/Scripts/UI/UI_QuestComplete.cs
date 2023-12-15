@@ -17,7 +17,7 @@ namespace UI
         protected override void OnServicesInited()
         {
             base.OnServicesInited();
-            Services.Player.OnQuestComplete += OnQuestComplete;
+            Services.Player.OnQuestStart += OnQuestComplete;
         }
 
         private void OnQuestComplete()

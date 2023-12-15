@@ -10,6 +10,8 @@ using UnityEngine.UI;
 public class UIReward : MonoBehaviour
 {
     [SerializeField] private UIRewardItem[] items;
+    [SerializeField] private Color32[] colors;
+
 
     public void Hide() => SetItems(null);
 
@@ -31,11 +33,12 @@ public class UIReward : MonoBehaviour
         for (int i = 0; i < items.Length; i++)
         {
             UIRewardItem item = items[i];
+            //item.SetCountVisible = countVisible;
             if (i < prepared.Count)
             {
                 RewardMeta r = rewards[i];
                 item.gameObject.SetActive(true);
-                item.SetItem(r);
+                item.SetItem(r, colors);
             }
             else
             {

@@ -19,7 +19,7 @@ public class UI_RecipeItem : MonoBehaviour, ITick, ISetData<ItemData>
     public Image Icon;
     public Text Header;
     public Text Timer;
-    public UI_Target _target;
+    public UITarget _target;
 
     private CardMeta _data;
     private CardData _vo;

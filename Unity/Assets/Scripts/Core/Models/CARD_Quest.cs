@@ -10,7 +10,10 @@ namespace Core
     public class CARD_Quest : MonoBehaviour, ICard
     {
         [SerializeField] private UIReward uIReward;
-        [SerializeField] private UIChoice uIChoice;
+        [SerializeField] private UITarget uITarget;
+        [SerializeField] private Text title;
+        [SerializeField] private Text descr;
+        [SerializeField] private Text targetText;
 
         private SwipeData data = null;
 
@@ -24,15 +27,23 @@ namespace Core
         {
             this.data = data;
 
-            uIReward.SetItems(data.Quest.SR);
-            if (data.Quest.ST != null && data.Quest.ST.Length > 0)
+            Services.Player.Profile.Cards.TryGetValue(data.Card.Id, out CardData cardData);
+            if (cardData.Value == CardMeta.QUEST_SUCCESS)
             {
-                uIChoice.Show(Services.Meta.Game.Cards[data.Quest.ST[0].Id]);
+                targetText.gameObject.SetActive(false);
+                descr.gameObject.SetActive(false);
             }
-            else
+            else if (cardData.Value == CardMeta.QUEST_ACTIVE)
             {
-                uIChoice.Hide();
+                uITarget.SetItems(data.Card.SC, data.Card.ST);
+                descr.Localize(data.Card.Desc, LocalizePartEnum.CardDescription);
+                descr.gameObject.SetActive(true);
+                targetText.gameObject.SetActive(true);
             }
+
+            uIReward.SetItems(data.Card.SR);
+
+            title.Localize(data.Card.Name, LocalizePartEnum.CardName);
 
         }
 

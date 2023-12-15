@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class LocalizeText : ServiceBehaviour
 {
     [SerializeField] private string key;
+    [SerializeField] private bool upper;
 
     protected override void OnServicesInited()
     {
@@ -17,5 +18,7 @@ public class LocalizeText : ServiceBehaviour
             throw new Exception("failed localization process: no TextComponent found");
 
         c.Localize(key, LocalizePartEnum.GUI);
+        if (upper)
+            c.text = c.text.ToUpper();
     }
 }

@@ -11,7 +11,7 @@ using haxe.lang;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public partial class PlayerService : IService
+public class PlayerService : IService
 {
     //public event Action<List<RewardMeta>> OnGetReward;
     //public event Action<int, int> OnItemChanged;
@@ -70,14 +70,19 @@ public partial class PlayerService : IService
 
         Profile = await HttpBatchServer.GetProfile(progress: progress);
 
+        PlayerPrefs.DeleteAll();
+
         Profile.Cards.Values.ToList().ForEach(c =>
         {
             CardMeta cardMeta = Meta.Cards[c.Id];
-            if (cardMeta.CT > 0 && c.CT >= cardMeta.CT)
+            if (cardMeta.CT > 0 && c.CT >= cardMeta.CT && cardMeta.Type == CardMeta.TYPE_CARD)
             {
                 Meta.Cards.Remove(c.Id);
             }
         });
+
+        if (Profile.ActiveQuests.Count == 0)
+            FollowQuest = null;
 
         OnProfileUpdated?.Invoke();
     }
@@ -134,11 +139,11 @@ public partial class PlayerService : IService
         //List<RewardMeta> priceData = Services.Data.GameMeta.Config.PriceReroll;
         List<RewardMeta> items = new List<RewardMeta>();
         //ItemVO i = (ItemVO) itemHandler.Add(Services.Data.ItemInfo(ItemData.ACCELERATE_ID), priceData[0].id, timestamp);
-        RewardMeta r = new RewardMeta();
+
         //r.Id = ItemMeta.ACCELERATE_ID;
         //r.Tp = DataService.ITEM_ID;
         //r.Count = priceData[0].Id;
-        items.Add(r);
+
 
         OnProfileUpdated?.Invoke();
 
@@ -164,7 +169,7 @@ public partial class PlayerService : IService
         HttpBatchServer.Change(request);
 
         CardData data = null;
-        if (swipe.Card.CT > 0 && Profile.Cards.TryGetValue(swipe.Card.Id, out data) && data.CT >= swipe.Card.CT)
+        if (swipe.Card.CT > 0 && swipe.Card.Type == CardMeta.TYPE_CARD && Profile.Cards.TryGetValue(swipe.Card.Id, out data) && data.CT >= swipe.Card.CT)
         {
             Meta.Cards.Remove(swipe.Card.Id);
         }
@@ -172,11 +177,12 @@ public partial class PlayerService : IService
         if (Profile.RewardEvent.Count > 0)
             OnGetReward?.Invoke(Profile.RewardEvent);
 
-        if (Profile.QuestEvent != null)
+
+        if (Profile.ActiveQuests.Count == 0)
+            FollowQuest = null;
+        else if (Profile.QuestEvent != null)
         {
-            if (Profile.ActiveQuests.Count == 0)
-                FollowQuest = null;
-            else if (FollowQuest == null || !Profile.ActiveQuests.Contains(FollowQuest))
+            if (FollowQuest == null || !Profile.ActiveQuests.Contains(FollowQuest))
                 FollowQuest = Profile.ActiveQuests[0];
 
             if (Profile.ActiveQuests.Contains(Profile.QuestEvent))
@@ -207,6 +213,9 @@ public partial class PlayerService : IService
 
         OnProfileUpdated?.Invoke();
         OnAccelerated?.Invoke();
+
+        if (Profile.RewardEvent.Count > 0)
+            OnGetReward?.Invoke(Profile.RewardEvent);
     }
 
 
@@ -224,9 +233,66 @@ public partial class PlayerService : IService
         swipeData.Hero = swipeData.Card.Hero != null ? Meta.Heroes[swipeData.Card.Hero] : null;
 
         swipeData.Conditions = new List<ConditionMeta>();
-        if (swipeData.Card.Next != null && swipeData.Card.Next.Length > 0)
-            foreach (TriggerMeta t in swipeData.Card.Next)
-                if (Services.Meta.Game.Cards.TryGetValue(t.Id, out CardMeta c) && c.Con != null && c.Con.Length > 0)
-                    swipeData.Conditions.Merge(c.Con.ToList());
+        foreach (TriggerMeta t in swipeData.Card.Next.OrEmptyIfNull())
+            if (Services.Meta.Game.Cards.TryGetValue(t.Id, out CardMeta c) && c.Con != null && c.Con.Length > 0)
+                swipeData.Conditions.Merge(c.Con.ToList());
+        swipeData.Conditions = swipeData.Conditions.Where(c => Profile.Items.TryGetValue(c.Id, out ItemData value)).ToList();
+
+        //we can't take away an item without choice
+        /*foreach (TriggerMeta t in swipeData.Card.Over.OrEmptyIfNull())
+            if (Services.Meta.Game.Cards.TryGetValue(t.Id, out CardMeta c) && c.Con != null && c.Con.Length > 0)
+                swipeData.Conditions.Merge(c.Con.ToList());
+*/
+
+        swipeData.FollowPrompt = -1;
+        if (FollowQuest != null
+            && swipeData.Left != null
+            && swipeData.Left.Id != swipeData.Right.Id
+            && Services.Meta.Game.Cards.TryGetValue(FollowQuest, out CardMeta quest))
+        {
+            List<CardMeta> cards = findAllNextPossibleCards(swipeData.Left);
+            bool left = quest.Next.ToList().Exists(t => swipeData.Left.Id == t.Id || findCardIdDeepRecursive(cards, t.Id, 4));
+
+            if (left == false) cards = findAllNextPossibleCards(swipeData.Right);
+            bool right = !left && quest.Next.ToList().Exists(t => swipeData.Right.Id == t.Id || findCardIdDeepRecursive(cards, t.Id, 4));
+            swipeData.FollowPrompt = left ? CardMeta.LEFT : (right ? CardMeta.RIGHT : -1);
+        }
+    }
+
+    private List<CardMeta> findAllNextPossibleCards(CardMeta start)
+    {
+        List<TriggerMeta> possibleNextTrigger = new List<TriggerMeta>();
+        if (start.Next != null)
+            possibleNextTrigger = possibleNextTrigger.Concat(start.Next.ToList()).ToList();
+
+        if (start.Over != null)
+            possibleNextTrigger = possibleNextTrigger.Concat(start.Over.ToList()).ToList();
+
+        List<CardMeta> cards = possibleNextTrigger.Select(t =>
+            {
+                if (Services.Meta.Game.Cards.TryGetValue(t.Id, out CardMeta cardMeta))
+                    return cardMeta;
+                else
+                    return null;
+
+            }).Where(c => c != null && (c.Type == CardMeta.TYPE_CARD || c.Type == CardMeta.TYPE_SKILL)).ToList();
+        return cards;
+    }
+
+    private bool findCardIdDeepRecursive(List<CardMeta> cards, string lookingForId, int deep)
+    {
+        foreach (CardMeta c in cards)
+        {
+            if (c.Id == lookingForId)
+                return true;
+            if (deep > 0)
+            {
+                List<CardMeta> nextCards = findAllNextPossibleCards(c);
+                if (nextCards.Count > 0 && findCardIdDeepRecursive(nextCards, lookingForId, deep - 1))
+                    return true;
+            }
+
+        }
+        return false;
     }
 }

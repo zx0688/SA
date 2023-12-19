@@ -8,6 +8,14 @@ onBoardingDoNotAskAgain = true
 showPackageIndexes = false
 showStatusBar = false
 scopes = {
+	"picker_window_position_offset.768FEAAC" = "-548;213;320;550"
+	"picker_search_text.768FEAAC" = "Main"
+	"last_search.768FEAAC" = "Main"
+	"OpenInspectorPreview.768FEAAC" = "0"
+	"currentGroup.768FEAAC" = "all"
+	"last_search.310DEAF1" = "t:AudioS"
+	"OpenInspectorPreview.310DEAF1" = "0"
+	"currentGroup.310DEAF1" = "all"
 }
 providers = {
 	scene = {
@@ -59,11 +67,12 @@ providers = {
 objectSelectors = {
 }
 recentSearches = [
+	"t"
 ]
 searchItemFavorites = [
 ]
 savedSearchesSortOrder = 0
-showSavedSearchPanel = false
+showSavedSearchPanel = true
 hideTabs = false
 expandedQueries = [
 ]

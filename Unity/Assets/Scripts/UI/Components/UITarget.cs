@@ -29,9 +29,10 @@ public class UITarget : MonoBehaviour
                 TriggerMeta r = triggers[i];
                 item.SetItem(null, r, colors);
             }
-            else if (conditions != null && i - triggers.Length < conditions.Length)
+            else if (conditions != null && ((triggers == null && i < conditions.Length) || (triggers != null && i - triggers.Length < conditions.Length)))
             {
-                ConditionMeta r = conditions[i - triggers.Length];
+                int ii = triggers == null ? i : i - triggers.Length;
+                ConditionMeta r = conditions[ii];
                 item.SetItem(r, null, colors);
             }
             else

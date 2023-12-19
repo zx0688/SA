@@ -29,6 +29,7 @@ namespace Core
         [SerializeField] private PagePanel pages;
         [SerializeField] private UIActionPanel action;
         [SerializeField] private UIAcceleratePanel accelerate;
+        [SerializeField] private AudioSource audioSource;
 
         // [SerializeField]
         //public List<CardData> queue;
@@ -65,6 +66,8 @@ namespace Core
             }
 
             State = States.IDLE;
+
+            accelerate.Hide();
 
             Loop().Forget();
 
@@ -197,31 +200,6 @@ namespace Core
               return earlyierDuration;
           }*/
 
-        /*IEnumerator Tick()
-        {
-            //Swipe swipe = currentCard.GetComponent<Swipe> ();
-            startTimeLeft = GameTime.Current;
-            waitingTimeLeft = GetEarlyDuration(startTimeLeft);
-            noCardTimer.text = TimeFormat.ONE_CELL_FULLNAME(GameTime.Left(startTimeLeft, startTimeLeft, waitingTimeLeft));
-            acceleratePanel.SetTimer(startTimeLeft, waitingTimeLeft);
-            while (queue.Count == 0 && State == States.WAITING)
-            {
-
-                int time = GameTime.Current;
-                int timeLeft = GameTime.Left(time, startTimeLeft, waitingTimeLeft);
-                noCardTimer.text = TimeFormat.ONE_CELL_FULLNAME(timeLeft > 0 ? timeLeft : 0);
-
-                if (timeLeft <= 0 && State == States.WAITING)
-                {
-                    startTimeLeft = 0;
-                    background.SetActive(false);
-                    Services.Player.Trigger(queue,
-                        new TriggerVO(TriggerData.START_GAME, 0, 0, null, null, null, null), new List<RewardData>(), time);
-                }
-                yield return new WaitForSeconds(1f);
-            }
-        }*/
-
         private void OpenCard()
         {
             Services.Player.CreateSwipeData(swipeData);
@@ -243,13 +221,8 @@ namespace Core
             currentCard.FadeIn(() => GC.Collect());
             OnDrop();
 
-            //desc.gameObject.SetActive(true);
-            /*if (currentData.CardData.sound != null && currentData.CardData.sound.Length > 0)
-            {
-                int r = UnityEngine.Random.Range(0, currentData.CardData.sound.Length);
-                //string sound = currentData.CardData.ound[r];
+            if (swipeData.Card.Sound.TryGetRandom(out string sound))
                 Services.Assets.PlaySound(sound, audioSource).Forget();
-            }*/
         }
 
         public void Show()

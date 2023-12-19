@@ -18,8 +18,8 @@ namespace UI.Components
 
         void Awake()
         {
-            Swipe.OnDrop += () => Show();
-            Swipe.OnTakeCard += Hide;
+            //Swipe.OnDrop += () => Show();
+            //Swipe.OnTakeCard += Hide;
         }
 
         public void Hide()

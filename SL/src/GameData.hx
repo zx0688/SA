@@ -32,10 +32,12 @@ class ProfileData {
 
 	public var OpenedLocations:List_1<String>;
 	public var CurrentLocation:String;
-	public var LastRequstTimestamp:Int;
+	public var LastChange:Int;
+	public var Created:Int;
+	public var Rerolls:Int;
 
 	// TEMP
-	public var RewardEvent:List_1<RewardMeta>;
+	public var RewardEvent:List_1<RewardData>;
 	public var QuestEvent:String;
 }
 
@@ -56,6 +58,18 @@ class CardData {
 	public var Executed:Int;
 	public var Choice:String;
 	public var Value:Int;
+}
+
+@:nativeGen
+@:strict(SerializableAttribute)
+class RewardData {
+	public function new(Id:String, Count:Int) {
+		this.Id = Id;
+		this.Count = Count;
+	}
+
+	public var Id:String;
+	public var Count:Int;
 }
 
 @:nativeGen

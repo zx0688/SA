@@ -12,6 +12,7 @@ public class ClickButton : MonoBehaviour
     [SerializeField] private Color32 disabledColor;
     [SerializeField] private Sprite disabledSprite;
     [SerializeField] private bool asToggle = false;
+    [SerializeField] private float waitAnimation = 0.2f;
 
     private Color32 downColor;
     private Color32 defaultColor;
@@ -87,11 +88,19 @@ public class ClickButton : MonoBehaviour
             image.color = downColor;
         }
 
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(waitAnimation);
 
         if (asToggle)
         {
             SetAsDisabled = true;
+        }
+        else if (disabledSprite != null)
+        {
+            image.sprite = defaultSprite;
+        }
+        else
+        {
+            image.color = defaultColor;
         }
 
         OnClick?.Invoke();

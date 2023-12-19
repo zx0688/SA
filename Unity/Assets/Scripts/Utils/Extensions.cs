@@ -1,10 +1,12 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Cysharp.Text;
 using haxe.lang;
 using haxe.root;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -32,6 +34,8 @@ public static class Extensions
         return conditions;
     }
 
+    public static bool Exists<T>(this T[] value) => value != null && value.Length > 0;
+
     public static bool Check(this ConditionMeta condition) => SL.CheckCondition(new ConditionMeta[] { condition }, Services.Meta.Game, Services.Player.Profile, null);
     public static bool Check(this ConditionMeta[] conditions) => SL.CheckCondition(conditions, Services.Meta.Game, Services.Player.Profile, null);
 
@@ -45,7 +49,7 @@ public static class Extensions
 
     public static void LoadItemIcon(this Image icon, string id, Action callback = null)
     {
-        Services.Assets.SetSpriteIntoImage(icon, ZString.Format("Items/{0}", id), true).Forget();
+        Services.Assets.SetSpriteIntoImage(icon, ZString.Format("Items/{0}", id), true, null, callback).Forget();
     }
 
     public static void LoadCardImage(this Image icon, string name, Action callback = null)
@@ -65,17 +69,28 @@ public static class Extensions
         return JsonUtility.ToJson(wrapper);
     }
 
-    public static bool HasText(this string text)
+    public static bool HasText(this string text) => text != null && text.Length > 0;
+
+    public static bool TryGetRandom<T>(this IEnumerable<T> source, out T value) where T : class
     {
-        return text != null && text.Length > 0;
+        value = null;
+        if (source == null || source.Count() == 0)
+            return false;
+        value = source.PickRandom(1).Single();
+        return true;
     }
 
-    public static T PickRandomOrNull<T>(this IEnumerable<T> source) where T : class
-    {
-        if (source == null || source.Count() == 0)
-            return null;
-        return source.PickRandom(1).Single();
-    }
+
+    public static IEnumerable<T> OrEmptyIfNull<T>(this IEnumerable<T> source) where T : class
+    => source ?? Enumerable.Empty<T>();
+
+
+    // public static T PickRandomOrNull<T>(this IEnumerable<T> source) where T : class
+    // {
+    //     if (source == null || source.Count() == 0)
+    //         return null;
+    //     return source.PickRandom(1).Single();
+    // }
 
     public static T PickRandom<T>(this IEnumerable<T> source)
     {

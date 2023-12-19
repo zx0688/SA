@@ -6,7 +6,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-public class UI_Achivement : UI_Inventory
+public class UI_Achivement : UIInventory
 {
 
     /*protected override void UpdateList()

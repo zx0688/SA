@@ -38,6 +38,9 @@ public class UIQuestsTooltip : MonoBehaviour
         star.rectTransform.localScale = new Vector3(0f, 0f, 0f);
         star.DOKill();
         star.rectTransform.DOScale(1f, 0.6f).SetEase(Ease.OutElastic);
+
+        activeText.Localize("Quest.IsActived", LocalizePartEnum.GUI);
+
     }
 
     public void HideTooltip()

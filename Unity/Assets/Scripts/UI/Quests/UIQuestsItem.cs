@@ -34,22 +34,19 @@ public class UIQuestsItem : MonoBehaviour, ISetData<ItemData>
             Hide();
             return;
         }
+        if (!Services.Meta.Game.Cards.TryGetValue(data.Id, out meta))
+            throw new Exception("quest should have a card meta data");
 
-        if (data != null)
-            star.SetActive(Services.Player.FollowQuest == data.Id);
+        if (!Services.Player.Profile.Cards.TryGetValue(data.Id, out cardData))
+            throw new Exception("quest should have a card profile data");
 
-        if ((this.data != null && this.data.Id == data.Id) || !Services.Meta.Game.Cards.TryGetValue(data.Id, out meta))
-            return;
-
-        if (meta == null)
-            throw new Exception("Meta card ");
+        star.SetActive(Services.Player.FollowQuest == data.Id);
+        target.SetItems(meta.SC, meta.ST);
 
         this.data = data;
-        cardData = Services.Player.Profile.Cards[data.Id];
 
         header.Localize(meta.Name, LocalizePartEnum.CardName);
         icon.LoadCardImage(meta.Image);
-        target.SetItems(meta.SC, meta.ST);
 
         showTooltipBtn.interactable = true;
         gameObject.SetActive(true);

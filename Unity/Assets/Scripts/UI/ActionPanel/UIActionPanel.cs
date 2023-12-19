@@ -25,8 +25,7 @@ namespace UI.ActionPanel
         [SerializeField] private Text action;
         [SerializeField] private GameObject choicePanel;
 
-        [SerializeField] private GameObject leftArrow;
-        [SerializeField] private GameObject rightArrow;
+        [SerializeField] private GameObject followPrompt;
 
 
 
@@ -43,13 +42,12 @@ namespace UI.ActionPanel
             Swipe.OnTakeCard += OnTakeCard;
             Swipe.OnEndSwipe += Hide;
 
-            leftArrow.gameObject.SetActive(false);
-            rightArrow.gameObject.SetActive(false);
+            followPrompt.gameObject.SetActive(false);
         }
 
         void OnTakeCard()
         {
-            conditions.Hide();
+            //conditions.Hide();
 
 
 
@@ -88,7 +86,7 @@ namespace UI.ActionPanel
         void OnDrop()
         {
             choice = -10;
-            conditions.Hide();
+
             reward.Hide();
 
             HideChoice();
@@ -106,8 +104,7 @@ namespace UI.ActionPanel
                 description.text = data.Card.Desc.Localize(LocalizePartEnum.CardDescription);
             }
 
-            if (data.Conditions.Count > 0)
-                conditions.SetItem(data.Conditions);
+
         }
 
 
@@ -118,20 +115,21 @@ namespace UI.ActionPanel
 
             OnDrop();
 
-            leftArrow.gameObject.SetActive(true);
-            rightArrow.gameObject.SetActive(false);
-
             gameObject.SetActive(true);
+
+            if (data.Conditions.Count > 0)
+                conditions.SetItem(data.Conditions);
+            else
+                conditions.Hide();
+
         }
 
         public void Hide()
         {
-            conditions.Hide();
+            //conditions.Hide();
             reward.Hide();
             description.gameObject.SetActive(false);
-            leftArrow.gameObject.SetActive(false);
-            rightArrow.gameObject.SetActive(false);
-
+            followPrompt.gameObject.SetActive(false);
             HideChoice();
 
             gameObject.SetActive(false);
@@ -172,6 +170,8 @@ namespace UI.ActionPanel
             choicePanel.gameObject.SetActive(false);
             image.gameObject.SetActive(false);
             hero.gameObject.SetActive(false);
+            followPrompt.gameObject.SetActive(false);
+
         }
 
         void OnChangeDeviation(float dev)
@@ -209,6 +209,7 @@ namespace UI.ActionPanel
                 {
                     description.gameObject.SetActive(false);
                     ShowChoice(data.Left);
+                    followPrompt.gameObject.SetActive(data.FollowPrompt == CardMeta.LEFT);
                 }
             }
             else if (data.Right != null && choice == CardMeta.RIGHT)
@@ -223,6 +224,7 @@ namespace UI.ActionPanel
                 {
                     description.gameObject.SetActive(false);
                     ShowChoice(data.Right);
+                    followPrompt.gameObject.SetActive(data.FollowPrompt == CardMeta.RIGHT);
                 }
             }
 

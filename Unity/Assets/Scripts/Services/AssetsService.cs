@@ -185,35 +185,9 @@ public class AssetsService
 
     public async UniTaskVoid PlaySound(string name, AudioSource source)
     {
-        AudioClip clip = await GetSound(name, true);
-        source.PlayOneShot(clip);
-    }
-    public async UniTask<AudioClip> GetSound(string name, bool fromResources, IProgress<float> progress = null)
-    {
-
-        if (fromResources)
-        {
-
-            return Resources.Load<AudioClip>("Sound/" + name);
-            //var (isCanceled, asset) = await Resources.LoadAsync<Sprite> (name).ToUniTask (progress: progress).SuppressCancellationThrow ();
-            // if (asset != null && isCanceled == false) {
-
-            //    return asset as Sprite;
-            //}
-        }
-        UnityWebRequest request = UnityWebRequestMultimedia.GetAudioClip(BASE_URL + name, AudioType.WAV);
-
-        await request.SendWebRequest().ToUniTask(progress: progress);
-
-        if (request.isNetworkError || request.isHttpError)
-        {
-            //Debug.LogWarning (request.error);
-            Debug.LogWarning("Cant find " + name);
-            return null;
-        }
-
-        AudioClip clip = ((DownloadHandlerAudioClip)request.downloadHandler).audioClip;
-        return clip;
+        var (isCanceled, asset) = await Resources.LoadAsync<AudioClip>(ZString.Format("Sound/{0}", name)).ToUniTask().SuppressCancellationThrow();
+        if (asset != null && isCanceled == false)
+            source.PlayOneShot(asset as AudioClip);
     }
 
     public async UniTask<Sprite> GetSprite(string name, bool fromResources, IProgress<float> progress = null)

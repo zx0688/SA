@@ -30,7 +30,6 @@ public class UITargetItem : MonoBehaviour
 
         // if (this.data != null && this.data.Id == condition.Id && this.data.Type == condition.Type)
         //     return;
-
         icon.enabled = true;
         value.enabled = true;
         target.enabled = true;
@@ -45,7 +44,7 @@ public class UITargetItem : MonoBehaviour
         else if (trigger != null && trigger.Type == TriggerMeta.CARD)
         {
             CardMeta cardMeta = Services.Meta.Game.Cards[trigger.Id];
-            target.text = "Trigger.Move".Localize(LocalizePartEnum.GUI);
+            target.text = "Trigger.Locate".Localize(LocalizePartEnum.GUI);
             targetName.text = cardMeta.Name;
             targetName.gameObject.SetActive(true);
             back.gameObject.SetActive(false);
@@ -57,7 +56,7 @@ public class UITargetItem : MonoBehaviour
                 current = new ItemData(condition.Id, 0);
 
             back.gameObject.SetActive(true);
-            target.Localize("Condition.Collect", LocalizePartEnum.GUI);
+            target.Localize("Condition.Have", LocalizePartEnum.GUI);
             value.text = ZString.Format("{0}/{1}", current.Count, condition.Sign == ">=" ? condition.Count : condition.Count + 1);
             icon.LoadItemIcon(condition.Id);
 

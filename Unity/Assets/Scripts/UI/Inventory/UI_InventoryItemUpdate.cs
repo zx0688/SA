@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-public class UI_InventoryItemUpdate : UI_InventoryItem
+public class UI_InventoryItemUpdate : UIInventoryItem
 {
 
     [SerializeField]

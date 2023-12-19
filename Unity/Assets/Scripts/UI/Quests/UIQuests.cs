@@ -36,11 +36,12 @@ public class UIQuests : ServiceBehaviour, IPage
     override protected void OnServicesInited()
     {
         base.OnServicesInited();
-        Services.Player.OnFollowQuestChanged += UpdateList;
+
     }
 
     void UpdateList()
     {
+
         List<string> activeQuest = Services.Player.Profile.ActiveQuests;
         string currentQuest = Services.Player.FollowQuest;
         List<ItemData> data = activeQuest.Select(s => new ItemData(s, 0)).ToList();
@@ -70,6 +71,8 @@ public class UIQuests : ServiceBehaviour, IPage
     {
         tooltip?.HideTooltip();
         UpdateList();
+
+        Services.Player.OnFollowQuestChanged += UpdateList;
     }
 
     public string GetName() => "Menu.Quests".Localize(LocalizePartEnum.GUI);
@@ -78,5 +81,7 @@ public class UIQuests : ServiceBehaviour, IPage
     public void Hide()
     {
         tooltip?.HideTooltip();
+
+        Services.Player.OnFollowQuestChanged -= UpdateList;
     }
 }

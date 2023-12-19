@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
-public class UI_AchivementItem : UI_InventoryItem, ITick
+public class UI_AchivementItem : UIInventoryItem, ITick
 {
 
 

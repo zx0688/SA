@@ -42,6 +42,12 @@ class ConfigMeta {
 @:nativeGen
 @:strict(SerializableAttribute)
 class RewardMeta {
+	public function new(Id:String, Type:Int, Count:Int) {
+		this.Id = Id;
+		this.Type = Type;
+		this.Count = Count;
+	}
+
 	public var Id:String;
 	public var Type:Int;
 	public var Tags:NativeArray<String>;
@@ -149,6 +155,7 @@ class CardMeta {
 	public var CR:Int;
 	public var Hero:String;
 	public var Type:Int;
+	public var Delete:Bool;
 
 	public var Name:String;
 	public var Desc:String;

@@ -89,18 +89,13 @@ public class UIRewardItem : MonoBehaviour
         {
             if (reward.Random != null && reward.Random.Length > 0)
             {
-                Services.Assets.SetSpriteIntoImage(icon, "UI/randomItem", true).Forget();
+                //Services.Assets.SetSpriteIntoImage(icon, "UI/randomItem", true).Forget();
             }
             else
             {
-                Services.Assets.SetSpriteIntoImage(icon, "Items/" + reward.Id, true).Forget();
+                icon.LoadItemIcon(reward.Id);
             }
         }
-        else if (reward.Type == ConditionMeta.CARD)
-        {
-            Services.Assets.SetSpriteIntoImage(icon, "UI/eventPic", true).Forget();
-        }
-
     }
 
     public bool IsEmpty()

@@ -114,6 +114,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   key: Card.Reward
+  upper: 0
+  lower: 0
 --- !u!1 &6370640955152631531
 GameObject:
   m_ObjectHideFlags: 0
@@ -208,6 +210,7 @@ MonoBehaviour:
   - {fileID: 2912610899048626249}
   - {fileID: 3766082391712978055}
   - {fileID: 4123546775116698341}
+  colors: []
 --- !u!1001 &231075265308493383
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -320,6 +323,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1909697325010350644, guid: cec9e2640a2de5043a2f725724e49230,
+        type: 3}
+      propertyPath: m_FontData.m_Alignment
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6392847308024811957, guid: cec9e2640a2de5043a2f725724e49230,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -224.49
+      objectReference: {fileID: 0}
+    - target: {fileID: 6392847308024811957, guid: cec9e2640a2de5043a2f725724e49230,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 71.304
       objectReference: {fileID: 0}
     - target: {fileID: 9219589620488613011, guid: cec9e2640a2de5043a2f725724e49230,
         type: 3}
@@ -467,6 +485,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1909697325010350644, guid: cec9e2640a2de5043a2f725724e49230,
+        type: 3}
+      propertyPath: m_FontData.m_Alignment
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6392847308024811957, guid: cec9e2640a2de5043a2f725724e49230,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -224.49
+      objectReference: {fileID: 0}
+    - target: {fileID: 6392847308024811957, guid: cec9e2640a2de5043a2f725724e49230,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 71.304
+      objectReference: {fileID: 0}
     - target: {fileID: 9219589620488613011, guid: cec9e2640a2de5043a2f725724e49230,
         type: 3}
       propertyPath: m_Name
@@ -613,6 +646,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1909697325010350644, guid: cec9e2640a2de5043a2f725724e49230,
+        type: 3}
+      propertyPath: m_FontData.m_Alignment
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6392847308024811957, guid: cec9e2640a2de5043a2f725724e49230,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -224.49
+      objectReference: {fileID: 0}
+    - target: {fileID: 6392847308024811957, guid: cec9e2640a2de5043a2f725724e49230,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 71.304
+      objectReference: {fileID: 0}
     - target: {fileID: 9219589620488613011, guid: cec9e2640a2de5043a2f725724e49230,
         type: 3}
       propertyPath: m_Name
@@ -758,6 +806,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1909697325010350644, guid: cec9e2640a2de5043a2f725724e49230,
+        type: 3}
+      propertyPath: m_FontData.m_Alignment
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6392847308024811957, guid: cec9e2640a2de5043a2f725724e49230,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -224.49
+      objectReference: {fileID: 0}
+    - target: {fileID: 6392847308024811957, guid: cec9e2640a2de5043a2f725724e49230,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 71.304
       objectReference: {fileID: 0}
     - target: {fileID: 9219589620488613011, guid: cec9e2640a2de5043a2f725724e49230,
         type: 3}

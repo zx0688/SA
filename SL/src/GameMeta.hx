@@ -42,12 +42,6 @@ class ConfigMeta {
 @:nativeGen
 @:strict(SerializableAttribute)
 class RewardMeta {
-	public function new(Id:String, Type:Int, Count:Int) {
-		this.Id = Id;
-		this.Type = Type;
-		this.Count = Count;
-	}
-
 	public var Id:String;
 	public var Type:Int;
 	public var Tags:NativeArray<String>;
@@ -75,6 +69,9 @@ class ItemMeta {
 
 	public var Hide:Bool;
 	public var Type:Int;
+
+	public var HowTo:NativeArray<ConditionMeta>;
+	public var WhereTo:NativeArray<ConditionMeta>;
 }
 
 @:nativeGen
@@ -110,6 +107,7 @@ class TriggerMeta {
 	public var Tags:NativeArray<String>;
 	public var Value:Int;
 	public var Chance:Int;
+	public var Group:Int;
 }
 
 @:nativeGen
@@ -143,6 +141,7 @@ class CardMeta {
 	public static inline var TYPE_CARD:Int = 0;
 	public static inline var TYPE_SKILL:Int = 1;
 	public static inline var TYPE_QUEST:Int = 2;
+	public static inline var TYPE_GROUP:Int = 3;
 
 	public static inline var QUEST_ACTIVE:Int = 0;
 	public static inline var QUEST_SUCCESS:Int = 1;
@@ -169,6 +168,7 @@ class CardMeta {
 	public var Text:String;
 
 	public var Sound:NativeArray<String>;
+	public var CN:String;
 
 	// Quest
 	public var SR:NativeArray<RewardMeta>;

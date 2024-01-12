@@ -12,6 +12,7 @@ namespace UI.Map
     {
         [SerializeField] private UIMapTooltip tooltip;
         [SerializeField] protected UILocationButton[] items;
+        [SerializeField] protected GameObject background;
 
         protected override void Awake()
         {
@@ -40,7 +41,7 @@ namespace UI.Map
 
             for (int i = 0; i < items.Length; i++)
             {
-                CardMeta locationMeta = Services.Meta.Game.Locations[items[i].Id];
+                CardMeta locationMeta = null;//Services.Meta.Game.Locations[items[i].Id];
                 if (locationMeta == null)
                 {
                     items[i].gameObject.SetActive(false);
@@ -66,17 +67,18 @@ namespace UI.Map
 
         public void Show()
         {
+            background.SetActive(true);
             tooltip?.HideTooltip();
             UpdateList();
         }
 
         public void Hide()
         {
-
+            background.SetActive(false);
             Services.Player.OnChangedLocation -= cm => UpdateList();
         }
 
-        public string GetName() => "Карта";
+        public string GetName() => "Menu.Map".Localize();
         public GameObject GetGameObject() => gameObject;
 
     }

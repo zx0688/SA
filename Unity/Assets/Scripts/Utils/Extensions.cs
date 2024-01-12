@@ -54,12 +54,12 @@ public static class Extensions
 
     public static void LoadCardImage(this Image icon, string name, Action callback = null)
     {
-        Services.Assets.SetSpriteIntoImage(icon, ZString.Format("Cards/{0}", name), true).Forget();
+        Services.Assets.SetSpriteIntoImage(icon, ZString.Format("Cards/{0}", name), true, null, callback).Forget();
     }
 
     public static void LoadHeroImage(this Image icon, string name, Action callback = null)
     {
-        Services.Assets.SetSpriteIntoImage(icon, ZString.Format("Heroes/{0}", name), true).Forget();
+        Services.Assets.SetSpriteIntoImage(icon, ZString.Format("Heroes/{0}", name), true, null, callback).Forget();
     }
 
     public static string ToJson<T>(this T[] array)

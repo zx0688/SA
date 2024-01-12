@@ -19,10 +19,10 @@ public static class TimeFormat
 
     public static void Init()
     {
-        string second = ZString.Format(" {0} ", "Time.Second".Localize().Substring(0, 3).ToLower());
-        string day = ZString.Format(" {0} ", "Time.Day".ToLower());
-        string hour = ZString.Format(" {0} ", "Time.Hour".Substring(0, 3).ToLower());
-        string min = ZString.Format(" {0} ", "Time.Minute".Substring(0, 3).ToLower());
+        string second = ZString.Format(" {0}", "Time.Second".Localize().Substring(0, 3).ToLower());
+        string day = ZString.Format(" {0}", "Time.Day".Localize().ToLower());
+        string hour = ZString.Format(" {0}", "Time.Hour".Localize().Substring(0, 3).ToLower());
+        string min = ZString.Format(" {0}", "Time.Minute".Localize().Substring(0, 3).ToLower());
         timeNameLocalization = new string[4] { day, hour, min, second };
     }
     public static string ONE_CELL_FULLNAME(int timeLeft)
@@ -40,8 +40,6 @@ public static class TimeFormat
         remaining -= (sInMinutes * minutes);
         int seconds = Mathf.FloorToInt(remaining);
 
-        //this.timeNameLocalization[0] = localpositions[timeleft].
-
         if (days > 0)
         {
             return days + timeNameLocalization[0];
@@ -56,7 +54,6 @@ public static class TimeFormat
         }
         else
             return seconds + timeNameLocalization[3];
-
     }
     public static string TWO_CELLS_FULLNAME(int timeLeft)
     {

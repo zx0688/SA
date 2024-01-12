@@ -68,15 +68,6 @@ public class ClickButton : MonoBehaviour
     }
 
 
-
-    // public void SetActiveButton(bool value)
-    // {
-    //     //StopAllCoroutines();
-
-    //     //image.color = value ? defaultColor : disabledColor;
-    //     //isDisabled = !value;
-    // }
-
     IEnumerator Click()
     {
         if (disabledSprite != null)

@@ -5,7 +5,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UI_AchivementTooltip : UI_InventoryTooltip, ITick
+public class UI_AchivementTooltip : UIInventoryTooltip, ITick
 {
 
     private Image image;

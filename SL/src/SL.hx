@@ -39,7 +39,7 @@ class SL {
 	static function main() {}
 
 	public static function GetPriceReroll(timeleft:Int, meta:GameMeta):Int {
-		return cast Math.floor(cast(timeleft, Float) / (meta.Config.DurationReroll / meta.Config.PriceReroll[0].Count));
+		return cast Math.floor(cast(timeleft, Float) / (meta.Config.DurationReroll / -meta.Config.PriceReroll[0].Count));
 	}
 
 	public static function Left(time:Int, start:Int, duration:Int):Int {
@@ -59,20 +59,34 @@ class SL {
 		profile.Sid = 0;
 		profile.SwipeCount = 0;
 		profile.Items = new Dictionary_2<String, ItemData>();
+		profile.Items.getOrCreate("6", f -> new ItemData("6", 998));
+		profile.Items.getOrCreate("5", f -> new ItemData("5", 2));
+		profile.Items.getOrCreate("13", f -> new ItemData("13", 10));
+
 		profile.LastChange = timestamp;
 		profile.Created = timestamp;
 		profile.ActiveQuests = new List_1();
 		profile.Rerolls = 0;
 
-		profile.RewardEvent = new List_1();
+		profile.RewardEvents = new List_1();
 		profile.QuestEvent = null;
 
 		// profile.Deck.push("28366105");
 		// profile.Deck.push("28366091");
 
-		// profile.Deck.push("27901213");
+		// profile.Deck.push("28362199");
 
-		profile.Deck.push("28362200");
+		// profile.Deck.push("28362200");
+
+		// торговая улица
+		// profile.Deck.push("27905697");
+		// грибная роща
+		// profile.Deck.push("28390976");
+		// кристалические пещеры
+		profile.Deck.push("27901221");
+
+		// средний город
+		// profile.Deck.push("27905696");
 
 		CreateLeftRight(meta.Cards.tryGet(GetCurrentCard(profile)).Next, meta, profile, random);
 
@@ -94,7 +108,7 @@ class SL {
 		}
 
 		// just temp events for client, we can delete these safty
-		profile.RewardEvent = new List_1();
+		profile.RewardEvents = new List_1();
 		profile.QuestEvent = null;
 
 		switch (request.Type) {
@@ -140,8 +154,8 @@ class SL {
 				// Apply card
 				var card:CardData = profile.Cards.getOrCreate(request.Hash, f -> new CardData(request.Hash));
 				card.CT++;
+				card.CR++;
 				card.Choice = request.Id;
-				card.Executed = profile.SwipeCount;
 
 				random = GetRandomInstance();
 				random.setStringSeed(Std.string(request.Timestamp));
@@ -152,41 +166,54 @@ class SL {
 					var nextCard:CardMeta = meta.Cards.tryGet(request.Id);
 					if (nextCard.Type == CardMeta.TYPE_CARD || nextCard.Type == CardMeta.TYPE_QUEST) {
 						deck.push(nextCard.Id);
-					} else {
+					} else if (nextCard.Type == CardMeta.TYPE_SKILL) {
 						if (nextCard.Next != null) {
-							var next:Array<CardMeta> = new Array<CardMeta>();
+							var candidates:Array<CardMeta> = GetTempArrayUnsafe();
 							for (n in nextCard.Next) {
 								var nc:CardMeta = meta.Cards.tryGet(n.Id);
 								if (CheckCard(nc, n, meta, profile, random))
-									next.push(nc);
+									candidates.push(nc);
 							}
-							if (next.length > 0) {
-								deck.push(next[random.randomInt(0, next.length - 1)].Id);
+							if (candidates.length > 0) {
+								deck.push(candidates[random.randomInt(0, candidates.length - 1)].Id);
 							}
 						}
+
 						ApplyReward(nextCard.Reward, meta, profile, random);
 					}
 
-					if (nextCard.Over != null) {
-						var over:NativeArray<TriggerMeta> = nextCard.Over;
-						var candidates:Array<CardMeta> = GetTempArrayUnsafe();
-						for (o in over) {
-							var oc:CardMeta = meta.Cards.tryGet(o.Id);
-							if (CheckCard(oc, o, meta, profile, random))
-								candidates.push(oc);
-						}
-
-						if (candidates.length > 0) {
-							candidates.sort((a, b) -> a.Pri - b.Pri);
-							for (c in candidates)
-								deck.push(c.Id);
-						}
-					}
+					RecursiveOver(nextCard, deck, meta, profile, random);
+					// if (nextCard.Over != null) {
+					// 	var over:NativeArray<TriggerMeta> = nextCard.Over;
+					// 	var candidates:Array<CardMeta> = GetTempArrayUnsafe();
+					// 	for (o in over) {
+					// 		var oc:CardMeta = meta.Cards.tryGet(o.Id);
+					// 		if (oc.Type == CardMeta.TYPE_GROUP) {
+					// 			var next:NativeArray<TriggerMeta> = oc.Next;
+					// 			var candidates2:Array<CardMeta> = new Array<CardMeta>();
+					// 			for (n in next) {
+					// 				var oc2:CardMeta = meta.Cards.tryGet(n.Id);
+					// 				if (CheckCard(oc2, n, meta, profile, random))
+					// 					candidates2.push(oc2);
+					// 			}
+					// 			if (candidates2.length > 0)
+					// 				deck.push(candidates2[random.randomInt(0, candidates2.length - 1)].Id);
+					// 		} else if (CheckCard(oc, o, meta, profile, random)) {
+					// 			candidates.push(oc);
+					// 		}
+					// 	}
+					// 	if (candidates.length > 0) {
+					// 		candidates.sort((a, b) -> a.Pri - b.Pri);
+					// 		for (c in candidates)
+					// 			deck.push(c.Id);
+					// 	}
+					// }
 				}
 
 				var swipedCard:CardMeta = meta.Cards.tryGet(request.Hash);
-				if (swipedCard.Type == CardMeta.TYPE_CARD) {
+				if (swipedCard.Type == CardMeta.TYPE_CARD && profile.ActiveQuests.getCount() > 0) {
 					// Quests
+					var rem:List_1<String> = new List_1<String>();
 					for (qID in profile.ActiveQuests) {
 						var qm:CardMeta = meta.Cards.tryGet(qID);
 						if ((qm.ST == null
@@ -195,9 +222,7 @@ class SL {
 							&& CheckCondition(qm.SC, meta, profile, random)) {
 							var qp:CardData = profile.Cards.tryGet(qID);
 							qp.Value = CardMeta.QUEST_SUCCESS;
-							profile.QuestEvent = qp.Id;
-							profile.ActiveQuests.removeItem(qID);
-							ApplyReward(qm.SR, meta, profile, random);
+							rem.push(qID);
 							deck.push(qID);
 						}
 						// } else if (qm.FT != null
@@ -211,6 +236,8 @@ class SL {
 						// 	deck.push(qID);
 						// }
 					}
+					for (qID in rem)
+						profile.ActiveQuests.removeItem(qID);
 				}
 
 				profile.Left = null;
@@ -224,10 +251,16 @@ class SL {
 					ApplyReward(nextCard.Reward, meta, profile, random);
 
 					if (nextCard.Type == CardMeta.TYPE_QUEST) {
-						profile.ActiveQuests.push(nextCard.Id);
+						var card:CardData = profile.Cards.tryGet(nextCard.Id);
+						if (card == null) {
+							card = new CardData(nextCard.Id);
+							card.Value = CardMeta.QUEST_ACTIVE;
+							profile.ActiveQuests.push(nextCard.Id);
+							profile.Cards.set(nextCard.Id, card);
+						} else if (card.Value == CardMeta.QUEST_SUCCESS) {
+							ApplyReward(nextCard.SR, meta, profile, random);
+						}
 						profile.QuestEvent = nextCard.Id;
-						var card:CardData = profile.Cards.getOrCreate(nextCard.Id, f -> new CardData(nextCard.Id));
-						card.Value = CardMeta.QUEST_ACTIVE;
 					} else {
 						if (nextCard.Next != null) {
 							var next:NativeArray<TriggerMeta> = nextCard.Next;
@@ -259,11 +292,19 @@ class SL {
 				}
 				i.Count -= price;
 				i.Count = i.Count < 0 ? 0 : i.Count;
-				profile.Items.set(id, i);
 				profile.Deck.push(meta.Locations.tryGet(profile.CurrentLocation).Over[0].Id);
 				profile.Cooldown = 0;
 				profile.Rerolls++;
-				profile.RewardEvent.push(new RewardData(id, ConditionMeta.ITEM, price));
+				var r:RewardMeta = Type.createEmptyInstance(RewardMeta);
+				r.Id = id;
+				r.Type = ConditionMeta.ITEM;
+				r.Count = -price;
+				profile.RewardEvents.push(r);
+
+				for (key in profile.Cards.GetKeys()) {
+					var qd:CardData = profile.Cards.tryGet(cast key);
+					qd.CR = 0;
+				}
 
 				CreateLeftRight(meta.Cards.tryGet(profile.Deck[0]).Next, meta, profile, random);
 
@@ -300,16 +341,16 @@ class SL {
 		if (cardMeta == null)
 			return false;
 
-		if (!CheckCondition(cardMeta.Con, data, profile, random))
-			return false;
-
 		if (cardMeta.CT > 0 || cardMeta.CR > 0) {
 			var cardData:CardData = profile.Cards.tryGet(cardMeta.Id);
-			if (cardData != null && cardData.Executed > 0)
+			if (cardData != null && ((cardMeta.CT != 0 && cardData.CT >= cardMeta.CT) || (cardMeta.CR != 0 && cardData.CR >= cardMeta.CR)))
 				return false;
 		}
 
-		if (triggerMeta.Chance > 0 && random.randomInt(0, 100) > triggerMeta.Chance)
+		if (!CheckCondition(cardMeta.Con, data, profile, random))
+			return false;
+
+		if (triggerMeta != null && triggerMeta.Chance > 0 && random.randomInt(0, 100) > triggerMeta.Chance)
 			return false;
 
 		// check related card
@@ -329,8 +370,42 @@ class SL {
 		return true;
 	}
 
+	public static function RecursiveOver(nextCard:CardMeta, deck:List_1<String>, meta:GameMeta, profile:ProfileData, random:Random):Void {
+		if (nextCard.Over == null)
+			return;
+
+		var over:NativeArray<TriggerMeta> = nextCard.Over;
+		var candidates:Array<CardMeta> = GetTempArrayUnsafe();
+		for (o in over) {
+			var oc:CardMeta = meta.Cards.tryGet(o.Id);
+			if (oc.Type == CardMeta.TYPE_GROUP) {
+				var next:NativeArray<TriggerMeta> = oc.Next;
+				var candidates2:Array<CardMeta> = new Array<CardMeta>();
+				for (n in next) {
+					var oc2:CardMeta = meta.Cards.tryGet(n.Id);
+					if (CheckCard(oc2, n, meta, profile, random))
+						candidates2.push(oc2);
+				}
+				if (candidates2.length > 0)
+					deck.push(candidates2[random.randomInt(0, candidates2.length - 1)].Id);
+			} else if (CheckCard(oc, o, meta, profile, random)) {
+				candidates.push(oc);
+			}
+		}
+		if (candidates.length > 0) {
+			tempArray = new Array<CardMeta>();
+			candidates.sort((a, b) -> a.Pri - b.Pri);
+			for (c in candidates) {
+				deck.push(c.Id);
+				tempArray.push(c);
+			}
+			for (c in tempArray)
+				RecursiveOver(c, deck, meta, profile, random);
+		}
+	}
+
 	public static function CheckReward(rewardMeta:RewardMeta, data:GameMeta, profile:ProfileData, random:Random):Bool {
-		if (rewardMeta.Chance > 0 && random != null && random.randomInt(0, 100) > rewardMeta.Chance)
+		if (rewardMeta.Chance > 0 && random.randomInt(0, 100) > rewardMeta.Chance)
 			return false;
 
 		if (!CheckCondition(rewardMeta.Con, data, profile, random))
@@ -382,7 +457,7 @@ class SL {
 					i.Count = i.Count < 0 ? 0 : i.Count;
 			}
 
-			profile.RewardEvent.push(new RewardData(r.Id, r.Count,));
+			profile.RewardEvents.push(r);
 		}
 	}
 
@@ -448,6 +523,10 @@ class CSExtension {
 
 	@:generic public static function getCount<T>(_this:cs.system.collections.generic.List_1<T>):Int {
 		return _this.Count;
+	}
+
+	@:generic public static function GetKeys<K, T>(_this:cs.system.collections.generic.Dictionary_2<K, T>):Iterator<K> {
+		return _this.Keys.iterator();
 	}
 
 	@:generic public static function push<T>(_this:cs.system.collections.generic.List_1<T>, x:T):Void {
@@ -525,6 +604,10 @@ class IEnumerableIterator<T> {
 class CSExtension {
 	@:generic public static function removeItem<T>(_this:Array<T>, x:T):Void {
 		_this.remove(x);
+	}
+
+	@:generic public static function GetKeys<K, T>(_this:Map<K, T>):Iterator<K> {
+		return _this.keys();
 	}
 
 	@:generic public static function find<T>(_this:NativeArray<T>, f:T->Bool):Null<T> {

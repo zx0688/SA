@@ -8,6 +8,7 @@ public class LocalizeText : ServiceBehaviour
 {
     [SerializeField] private string key;
     [SerializeField] private bool upper;
+    [SerializeField] private bool lower;
 
     protected override void OnServicesInited()
     {
@@ -20,5 +21,7 @@ public class LocalizeText : ServiceBehaviour
         c.Localize(key, LocalizePartEnum.GUI);
         if (upper)
             c.text = c.text.ToUpper();
+        else if (lower)
+            c.text = c.text.ToLower();
     }
 }

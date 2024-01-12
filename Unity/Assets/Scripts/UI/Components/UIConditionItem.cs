@@ -17,22 +17,26 @@ namespace UI.Components
 
         public void SetItem(ConditionMeta cond)
         {
+            if (cond == null)
+            {
+                Hide();
+                return;
+            }
+
+            this.gameObject.SetActive(true);
 
             if (cond.Type == ConditionMeta.ITEM)
             {
                 count.text = cond.Sign == ">" ? Math.Abs(cond.Count + 1).ToString() : Math.Abs(cond.Count).ToString();
-                count.gameObject.SetActive(true);
+                count.gameObject.SetActive(cond.Count != 0);
             }
-            else if (cond.Type == ConditionMeta.ITEM)
+            else if (cond.Type == ConditionMeta.CARD)
             {
                 count.gameObject.SetActive(false);
             }
 
-            if (Data != null && Data.Id == cond.Id && Data.Type == cond.Type)
-                return;
-
+            count.gameObject.SetActive(false);
             Data = cond;
-            this.gameObject.SetActive(true);
 
             if (cond.Type == ConditionMeta.ITEM)
             {

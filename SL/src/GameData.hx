@@ -36,8 +36,8 @@ class ProfileData {
 	public var Created:Int;
 	public var Rerolls:Int;
 
-	// TEMP
-	public var RewardEvent:List_1<RewardData>;
+	// EVENTS
+	public var RewardEvents:List_1<RewardMeta>;
 	public var QuestEvent:String;
 }
 
@@ -55,21 +55,8 @@ class CardData {
 	public var Id:String;
 	public var CR:Int;
 	public var CT:Int;
-	public var Executed:Int;
 	public var Choice:String;
 	public var Value:Int;
-}
-
-@:nativeGen
-@:strict(SerializableAttribute)
-class RewardData {
-	public function new(Id:String, Count:Int) {
-		this.Id = Id;
-		this.Count = Count;
-	}
-
-	public var Id:String;
-	public var Count:Int;
 }
 
 @:nativeGen

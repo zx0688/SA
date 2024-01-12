@@ -23,10 +23,7 @@ public class UIReward : MonoBehaviour
             return;
         }
 
-        List<RewardMeta> prepared = rewards.Where(r => r.Type == ConditionMeta.ITEM).ToList();
-        RewardMeta cardItem = rewards.Find(r => r.Type == ConditionMeta.CARD);
-        if (cardItem != null)
-            prepared.Add(cardItem);
+        List<RewardMeta> prepared = rewards.Where(r => r.Type == ConditionMeta.ITEM && r.Chance == 0).ToList();
 
         gameObject.SetActive(true);
 

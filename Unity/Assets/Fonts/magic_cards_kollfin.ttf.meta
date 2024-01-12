@@ -8,9 +8,8 @@ TrueTypeFontImporter:
   characterSpacing: 0
   characterPadding: 1
   includeFontData: 1
-  fontName: Magic Cards Kollfin
   fontNames:
-  - Magic Cards Kollfin
+  - Comic Relief
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0

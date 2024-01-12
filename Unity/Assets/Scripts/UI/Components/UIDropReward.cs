@@ -101,17 +101,16 @@ public class UIDropReward : ServiceBehaviour
 
         if (itemMeta.Particle > 0)
         {
-            ScenarioSPECIAL(item, position, itemMeta.Particle).Forget();
+            ScriptSPECIAL(item, position, itemMeta.Particle).Forget();
         }
         else
         {
-            item.SetActive(true);
-            ScenarioITEM(item, position, positionAddAnimation);
+            ScriptITEM(item, position, positionAddAnimation).Forget();
         }
 
     }
 
-    private async UniTaskVoid ScenarioSPECIAL(GameObject item, Vector3 position, int particleNumber)
+    private async UniTaskVoid ScriptSPECIAL(GameObject item, Vector3 position, int particleNumber)
     {
         layer.Show(0.1f);
         item.SetActive(false);
@@ -138,10 +137,15 @@ public class UIDropReward : ServiceBehaviour
         });
     }
 
-    private void ScenarioITEM(GameObject item, Vector3 position, GameObject targetPosition)
+    private async UniTaskVoid ScriptITEM(GameObject item, Vector3 position, GameObject targetPosition)
     {
         Vector3 p = targetPosition.transform.position;
-        item.gameObject.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+
+        item.SetActive(false);
+        await UniTask.DelayFrame(10);
+        item.SetActive(true);
+
+        item.gameObject.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
         item.gameObject.transform.DOKill();
         item.gameObject.transform.DOMove(position + item.gameObject.transform.position, 0.6f).OnComplete(() =>
         {
@@ -154,7 +158,7 @@ public class UIDropReward : ServiceBehaviour
             });
             item.gameObject.transform.DOScale(new Vector3(0.2f, 0.2f, 0.2f), 0.4f).SetDelay(0.4f);
         });
-        item.gameObject.transform.DOScale(new Vector3(1.21f, 1.21f, 1.21f), 0.6f);
+        item.gameObject.transform.DOScale(new Vector3(1.15f, 1.15f, 1.15f), 0.6f);
     }
 
     private void Spend(ItemData cost, float delay)
@@ -209,7 +213,7 @@ public class UIDropReward : ServiceBehaviour
     protected override void OnServicesInited()
     {
         base.OnServicesInited();
-        Services.Player.OnGetReward += OnItemReceived;
+        HttpBatchServer.OnGetReward += OnItemReceived;
         Services.Player.OnQuestStart += OnQuestStart;
     }
 
@@ -223,21 +227,19 @@ public class UIDropReward : ServiceBehaviour
         gameObject.SetActive(true);
         item.GetComponent<Image>().LoadItemIcon("1000");
         item.SetActive(true);
-        ScenarioITEM(item, new Vector3(0, 0, 0), positionQuestAnimation);
+        ScriptITEM(item, new Vector3(0, 0, 0), positionQuestAnimation);
     }
 
     private void OnItemReceived(List<RewardMeta> rewards)
     {
         List<ItemData> itemsData = rewards.Where(r => r.Type == ConditionMeta.ITEM).Select(r => new ItemData(Id: r.Id, Count: r.Count)).ToList();
 
-        if (itemsData.Count == 1)
+        if (itemsData.Count == 1 && itemsData[0].Count == 1)
         {
             if (itemsData[0].Count > 0)
                 Add(itemsData[0], new Vector3(0, 0, 0));
             else
-            {
                 Spend(itemsData[0], 0);
-            }
             return;
         }
 
@@ -245,15 +247,19 @@ public class UIDropReward : ServiceBehaviour
         float step = 6.28f / itemsData.Count;
         for (int i = 0; i < itemsData.Count; i++)
         {
-            if (itemsData[i].Count < 0)
+            ItemData item = itemsData[i];
+            if (item.Count < 0)
             {
-                ////if (Services.Player.Profile.Items[items[i].Id) + Math.Abs(items[i].Count) + items[i].Count > 0];
                 Spend(itemsData[i], i * 0.1f);
                 continue;
             }
             angle += step * i;
-            Vector3 pos = new Vector3(Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius, 0f);
-            Add(itemsData[i], pos);
+            for (int j = 0; j < item.Count; j++)
+            {
+                float da = UnityEngine.Random.Range(-1.5f, 1.5f);
+                Vector3 pos = new Vector3(Mathf.Cos(angle + da) * radius, Mathf.Sin(angle + da) * radius, 0f);
+                Add(itemsData[i], pos);
+            }
         }
     }
 }

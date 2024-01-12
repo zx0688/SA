@@ -146,7 +146,7 @@ namespace Core
         {
             hud?.SetActive(false);
 
-            if (data.Card.Type == CardMeta.TYPE_QUEST)
+            if (data.Card.Type == CardMeta.TYPE_QUEST && data.Data.Value == CardMeta.QUEST_ACTIVE)
                 hud = CARD_Quest;
             else
                 hud = CARD_Simple;

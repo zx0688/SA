@@ -20,7 +20,7 @@ public class UIInventoryItem : MonoBehaviour, ITick, ISetData<ItemData>
     protected ItemMeta data;
     protected string id;
     protected bool isEmpty;
-    protected UI_InventoryTooltip tooltip;
+    protected UIInventoryTooltip tooltip;
 
     public ItemData Data => throw new NotImplementedException();
 
@@ -48,7 +48,7 @@ public class UIInventoryItem : MonoBehaviour, ITick, ISetData<ItemData>
         count.gameObject.SetActive(true);
 
         newText.gameObject.SetActive(false);
-        //showTooltipBtn.interactable = true;
+        showTooltipBtn.interactable = true;
 
         icon.LoadItemIcon(item.Id, OnIconLoaded);
     }
@@ -115,7 +115,7 @@ public class UIInventoryItem : MonoBehaviour, ITick, ISetData<ItemData>
     protected void OnClick()
     {
         if (data != null)
-            tooltip.ShowTooltip(data.Id, data);
+            tooltip.ShowTooltip(data);
     }
 
     public void Tick(int timestamp)
@@ -128,10 +128,10 @@ public class UIInventoryItem : MonoBehaviour, ITick, ISetData<ItemData>
         return false;
     }
 
-    public void SetTooltip(UI_InventoryTooltip tooltip)
+    public void SetTooltip(UIInventoryTooltip tooltip)
     {
         this.tooltip = tooltip;
-        //showTooltipBtn.onClick.AddListener(OnClick);
+        showTooltipBtn.onClick.AddListener(OnClick);
     }
 
     public void Hide()

@@ -8,6 +8,7 @@ using Core;
 using Cysharp.Threading.Tasks;
 using GameServer;
 using haxe.lang;
+using haxe.root;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -17,7 +18,7 @@ public class PlayerService : IService
     //public event Action<int, int> OnItemChanged;
 
     public event Action<CardMeta> OnChangedLocation;
-    public event Action<List<RewardMeta>> OnGetReward;
+
     public event Action OnFollowQuestChanged;
 
     public event Action<CardMeta, CardData> OnCardExecuted;
@@ -43,26 +44,6 @@ public class PlayerService : IService
         }
     }
 
-    //public List<CardMeta> QueueMeta => playerVO.Layers.ConvertAll(i => Services.Data.GetCardMetaByID(i));
-    // public bool DoesPlayerKnow(int id, int Tp) => Tp switch
-    // {
-    //     GameMeta.SKILL => playerVO.Skills.Find(i => i.Id == id) != null,
-    //     ConditionMeta.ITEM => playerVO.Items.Find(i => i.Id == id) != null,
-    //     _ => throw new NotImplementedException("Undefined type")
-    // };
-
-    //public SkillVO GetSkillVOByID(int id) => playerVO.Skills.Find(i => i.Id == id);
-    //public ItemVO GetItemVOByID(int id) => playerVO.Items.Find(i => i.Id == id);
-
-    //public List<RewardMeta> GetItemAsRewardList(int id) => new List<RewardMeta>() { GetItemVOByID(id).CreateReward() };
-
-    // public int GetCountItemByID(int id)
-    // {
-    //     ItemVO i = GetItemVOByID(id);
-    //     return i != null ? i.Count : 0;
-    // }
-
-    //public int SwipeCountLeft(int activate, int time) => (time + activate) - _playerVO.SwipeCount;
 
     public async UniTask Init(IProgress<float> progress = null)
     {
@@ -71,15 +52,6 @@ public class PlayerService : IService
         Profile = await HttpBatchServer.GetProfile(progress: progress);
 
         PlayerPrefs.DeleteAll();
-
-        Profile.Cards.Values.ToList().ForEach(c =>
-        {
-            CardMeta cardMeta = Meta.Cards[c.Id];
-            if (cardMeta.CT > 0 && c.CT >= cardMeta.CT && cardMeta.Type == CardMeta.TYPE_CARD)
-            {
-                Meta.Cards.Remove(c.Id);
-            }
-        });
 
         if (Profile.ActiveQuests.Count == 0)
             FollowQuest = null;
@@ -152,9 +124,6 @@ public class PlayerService : IService
 
     public void StartGame()
     {
-        if (Profile.RewardEvent.Count > 0)
-            OnGetReward?.Invoke(Profile.RewardEvent);
-
         HttpBatchServer.Change(new GameRequest(TriggerMeta.START_GAME));
         OnProfileUpdated?.Invoke();
     }
@@ -167,16 +136,6 @@ public class PlayerService : IService
         request.Id = swipe.Left != null ? (swipe.Choice == CardMeta.LEFT ? swipe.Left.Id : swipe.Right.Id) : null;
 
         HttpBatchServer.Change(request);
-
-        CardData data = null;
-        if (swipe.Card.CT > 0 && swipe.Card.Type == CardMeta.TYPE_CARD && Profile.Cards.TryGetValue(swipe.Card.Id, out data) && data.CT >= swipe.Card.CT)
-        {
-            Meta.Cards.Remove(swipe.Card.Id);
-        }
-
-        if (Profile.RewardEvent.Count > 0)
-            OnGetReward?.Invoke(Profile.RewardEvent);
-
 
         if (Profile.ActiveQuests.Count == 0)
             FollowQuest = null;
@@ -208,14 +167,28 @@ public class PlayerService : IService
 
     public void Accelerate()
     {
+        if (Profile.Deck.Count > 0)
+        {
+            Debug.LogError("can't accelerate if cards are available");
+            return;
+        }
+        int duration = Meta.Config.DurationReroll;
+        int timeLeft = GameTime.Left(GameTime.Get(), Profile.Cooldown, duration);
+        if (timeLeft > 0)
+        {
+            int price = SL.GetPriceReroll(GameTime.Left(GameTime.Get(), Profile.Cooldown, duration), Meta);
+            if (!Profile.Items.TryGetValue(Meta.Config.PriceReroll[0].Id, out ItemData i) || i.Count < price)
+            {
+                Debug.LogError("can't accelerate if not enough price");
+                return;
+            }
+        }
+
         request.Type = TriggerMeta.REROLL;
         HttpBatchServer.Change(request);
 
         OnProfileUpdated?.Invoke();
         OnAccelerated?.Invoke();
-
-        if (Profile.RewardEvent.Count > 0)
-            OnGetReward?.Invoke(Profile.RewardEvent);
     }
 
 
@@ -236,7 +209,7 @@ public class PlayerService : IService
         foreach (TriggerMeta t in swipeData.Card.Next.OrEmptyIfNull())
             if (Services.Meta.Game.Cards.TryGetValue(t.Id, out CardMeta c) && c.Con != null && c.Con.Length > 0)
                 swipeData.Conditions.Merge(c.Con.ToList());
-        swipeData.Conditions = swipeData.Conditions.Where(c => Profile.Items.TryGetValue(c.Id, out ItemData value)).ToList();
+        swipeData.Conditions = swipeData.Conditions.Where(c => !Profile.Items.TryGetValue(c.Id, out ItemData value) || value.Count < c.Count).ToList();
 
         //we can't take away an item without choice
         /*foreach (TriggerMeta t in swipeData.Card.Over.OrEmptyIfNull())

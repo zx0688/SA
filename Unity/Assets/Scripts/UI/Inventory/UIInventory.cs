@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class UIInventory : MonoBehaviour, IPage
 {
-    [SerializeField] private UI_InventoryTooltip tooltip;
+    [SerializeField] private UIInventoryTooltip tooltip;
     [SerializeField] private PageSwiper swiper;
 
     protected UIInventoryItem[] items;

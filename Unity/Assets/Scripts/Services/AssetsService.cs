@@ -33,6 +33,7 @@ public class AssetsService
         LocalizePartEnum.GUI => LocalDic.GUI.TryGetValue(key, out string res) ? res : $"[{key}]",
         LocalizePartEnum.CardDescription => LocalDic.CardDescription.TryGetValue(key, out string res) ? res : key,////$"[{key}]",
         LocalizePartEnum.CardName => LocalDic.CardName.TryGetValue(key, out string res) ? res : key,//$"[{key}]",
+        //LocalizePartEnum.ChoiceText => LocalDic.ChoiceText.TryGetValue(key, out string res) ? res : key,//$"[{key}]",
         _ => $"[{key}]"
     };
 
@@ -66,6 +67,7 @@ public class AssetsService
         */
 
         string json = await GetJson($"localization_{lang}", GOOGLE_DRIVE_LOCALIZATION, progress, LoadContentOption.UseFileVersion);
+        Debug.Log(json);
         LocalDic = JSON.Deserialize<LocalizationData>(json);
 
         await UniTask.Yield();
@@ -353,5 +355,6 @@ public class LocalizationData
     public Dictionary<String, String> GUI;
     public Dictionary<String, String> CardName;
     public Dictionary<String, String> CardDescription;
+    //public Dictionary<String, String> ChoiceText;
     public int Version;
 }

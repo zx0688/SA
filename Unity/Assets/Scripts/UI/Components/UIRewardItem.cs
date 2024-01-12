@@ -12,11 +12,6 @@ public class UIRewardItem : MonoBehaviour
     [SerializeField] private Text count;
     [SerializeField] private Image icon;
 
-    [SerializeField] private Image up;
-    [SerializeField] private Image down;
-
-
-
 
     private RewardMeta data;
     private bool isEmpty;
@@ -131,7 +126,7 @@ public class UIRewardItem : MonoBehaviour
         //tooltip.ShowTooltip (data);
     }
 
-    public void SetTooltip(UI_InventoryTooltip tooltip)
+    public void SetTooltip(UIInventoryTooltip tooltip)
     {
         //this.tooltip = tooltip;
     }

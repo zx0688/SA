@@ -17,21 +17,22 @@ namespace UI.ActionPanel
     public class UIActionPanel : MonoBehaviour
     {
 
-        [SerializeField] private UIReward reward;
-        [SerializeField] private Image image;
-        [SerializeField] private Image hero;
+        [SerializeField] private UIChoicePanel left;
+        [SerializeField] private UIChoicePanel right;
+
         [SerializeField] private UIConditions conditions;
         [SerializeField] private Text description;
-        [SerializeField] private Text action;
-        [SerializeField] private GameObject choicePanel;
+        [SerializeField] private GameObject delem;
 
-        [SerializeField] private GameObject followPrompt;
-
+        // [SerializeField] private GameObject choicePanel;
 
 
         [SerializeField] private List<Color32> colors;
 
+        private bool choiceble = false;
         private int choice = -10;
+        private float threshold = 0.1f;
+
 
         private SwipeData data;
 
@@ -42,69 +43,97 @@ namespace UI.ActionPanel
             Swipe.OnTakeCard += OnTakeCard;
             Swipe.OnEndSwipe += Hide;
 
-            followPrompt.gameObject.SetActive(false);
+            //followPrompt.gameObject.SetActive(false);
+        }
+
+        void OnSet()
+        {
+            choiceble = false;
+            choice = -10;
+
+            HideAll();
+
+            if (data.Card.Type == CardMeta.TYPE_QUEST && Services.Player.Profile.Cards.TryGetValue(data.Card.Id, out CardData cardData))
+            {
+
+
+                //                 action.gameObject.SetActive(true);
+                //                 action.text = (cardData.Value == CardMeta.QUEST_SUCCESS ? "Quest.CompletedQuest" : "Quest.NewQuest").Localize().ToUpper();
+                // 
+                //                 action.color = colors[1];
+                //                 choicePanel.gameObject.SetActive(true);
+
+                description.gameObject.SetActive(true);
+                description.text = data.Card.Name.Localize(LocalizePartEnum.CardName);
+            }
+            else if (data.Left == null && data.Right == null || (data.Left.Id == Services.Player.Profile.Deck.Last()))
+            {
+                if (data.Card.Desc.HasText())
+                {
+                    description.gameObject.SetActive(true);
+                    description.text = data.Card.Desc.Localize(LocalizePartEnum.CardDescription);
+                }
+            }
+            else
+            {
+                if (data.Left.Id == data.Right.Id)
+                {
+
+                    left.ShowChoice(data.Left, data.FollowPrompt == CardMeta.LEFT);
+
+                }
+                else
+                {
+                    choiceble = true;
+                    left.ShowChoice(data.Left, data.FollowPrompt == CardMeta.LEFT);
+                    right.ShowChoice(data.Right, data.FollowPrompt == CardMeta.RIGHT);
+                    delem.SetActive(true);
+                }
+
+
+            }
         }
 
         void OnTakeCard()
         {
-            //conditions.Hide();
+            if (data.Card == null || data.Card.Type != CardMeta.TYPE_CARD)
+                return;
 
+            if (data.Left != null && data.Left.Id == data.Right.Id)
+            {
+                // if (firstTake == true)
+                // {
+                //     left.ShowChoice(data.Left, data.FollowPrompt == CardMeta.LEFT);
+                // }
 
+                left.FadeIn();
 
-            if (data.Card.Type == CardMeta.TYPE_QUEST)
-            {
-                choice = -1;
-                description.gameObject.SetActive(false);
             }
-            else if (data.Left == null && data.Right == null || (data.Left.Id == Services.Player.Profile.Deck.Last()))
+            else if (data.Left != null)
             {
-                choice = -1;
-                HideChoice();
+                // choiceble = true;
+                // left.ShowChoice(data.Left, data.FollowPrompt == CardMeta.LEFT);
+                // right.ShowChoice(data.Right, data.FollowPrompt == CardMeta.RIGHT);
+                //delem.SetActive(true);
             }
-            else if (data.Left.Id == data.Right.Id)
+            else if (data.Left == null)
             {
-                choice = -1;
-                if (data.Card.Hero != null && data.Card.Hero == data.Left.Hero)
-                {
-                    description.gameObject.SetActive(true);
-                    description.text = data.Left.Name.Localize(LocalizePartEnum.CardName);
-                }
-                else
-                {
-                    ShowChoice(data.Left);
-                    description.gameObject.SetActive(false);
-                }
-            }
-            else
-            {
-                HideChoice();
-                description.gameObject.SetActive(false);
+
             }
 
+            choice = -10;
         }
+
 
         void OnDrop()
         {
+            if (data.Card == null || data.Card.Type != CardMeta.TYPE_CARD)
+                return;
+
+            left.FadeOut();
+            right.FadeOut();
+
             choice = -10;
-
-            reward.Hide();
-
-            HideChoice();
-
-            if (data.Card.Type == CardMeta.TYPE_QUEST)
-            {
-                action.gameObject.SetActive(true);
-                action.Localize("Quest.NewQuest", LocalizePartEnum.GUI);
-                action.color = colors[1];
-                choicePanel.gameObject.SetActive(true);
-            }
-            else
-            {
-                description.gameObject.SetActive(true);
-                description.text = data.Card.Desc.Localize(LocalizePartEnum.CardDescription);
-            }
-
-
         }
 
 
@@ -113,7 +142,7 @@ namespace UI.ActionPanel
         {
             this.data = data;
 
-            OnDrop();
+            OnSet();
 
             gameObject.SetActive(true);
 
@@ -127,106 +156,61 @@ namespace UI.ActionPanel
         public void Hide()
         {
             //conditions.Hide();
-            reward.Hide();
+            //rewardLeft.Hide();
             description.gameObject.SetActive(false);
-            followPrompt.gameObject.SetActive(false);
-            HideChoice();
+            //followPrompt.gameObject.SetActive(false);
+            HideAll();
 
             gameObject.SetActive(false);
         }
 
-        private void ShowChoice(CardMeta ch)
+        private void HideAll()
         {
-            choicePanel.gameObject.SetActive(true);
-            if (ch.Reward != null && ch.Reward.Length > 0)
-                reward.SetItems(ch.Reward);
-            else
-                reward.Hide();
-
-
-            image.LoadCardImage(ch.Image);
-            image.gameObject.SetActive(true);
-
-            if (ch.Hero != null)
-            {
-                hero.LoadHeroImage(ch.Hero);
-                hero.gameObject.SetActive(true);
-            }
-            else
-            {
-                hero.gameObject.SetActive(false);
-            }
-
-
-            action.Localize(ch.Name, LocalizePartEnum.CardName);
-            action.gameObject.SetActive(true);
-            action.color = colors[0];
-        }
-
-        private void HideChoice()
-        {
-            action.gameObject.SetActive(false);
-            reward.Hide();
-            choicePanel.gameObject.SetActive(false);
-            image.gameObject.SetActive(false);
-            hero.gameObject.SetActive(false);
-            followPrompt.gameObject.SetActive(false);
-
+            left.HideAll();
+            right.HideAll();
+            delem.SetActive(false);
+            description.gameObject.SetActive(false);
         }
 
         void OnChangeDeviation(float dev)
         {
-            if (data == null || Swipe.State != Swipe.States.DRAG || choice == -1) return;
+            if (data == null || Swipe.State != Swipe.States.DRAG || choiceble == false) return;
 
-            else if (Math.Abs(dev) < 0.9)
+            else if (Math.Abs(dev) < threshold)
             {
-                HideChoice();
+                if (choice == -10)
+                    return;
                 choice = -10;
-                return;
             }
-            else if (dev < -0.9f)
+            else if (dev < -threshold)
             {
                 if (choice == CardMeta.LEFT)
                     return;
                 choice = CardMeta.LEFT;
             }
-            else if (dev > 0.9f)
+            else if (dev > threshold)
             {
                 if (choice == CardMeta.RIGHT)
                     return;
                 choice = CardMeta.RIGHT;
             }
 
-            if (data.Left != null && choice == CardMeta.LEFT)
+            if (choice == -10)
             {
-                if (data.Left.Image == null)
-                {
-                    description.gameObject.SetActive(true);
-                    description.text = data.Left.Desc.Localize(LocalizePartEnum.CardDescription);
-                    HideChoice();
-                }
-                else
-                {
-                    description.gameObject.SetActive(false);
-                    ShowChoice(data.Left);
-                    followPrompt.gameObject.SetActive(data.FollowPrompt == CardMeta.LEFT);
-                }
+                left.FadeOut();
+                right.FadeOut();
             }
-            else if (data.Right != null && choice == CardMeta.RIGHT)
+            else if (choice == CardMeta.LEFT)
             {
-                if (data.Right.Image == null)
-                {
-                    description.gameObject.SetActive(true);
-                    description.text = data.Right.Desc.Localize(LocalizePartEnum.CardDescription);
-                    HideChoice();
-                }
-                else
-                {
-                    description.gameObject.SetActive(false);
-                    ShowChoice(data.Right);
-                    followPrompt.gameObject.SetActive(data.FollowPrompt == CardMeta.RIGHT);
-                }
+                left.FadeIn();
+                right.FadeOut();
             }
+            else if (choice == CardMeta.RIGHT)
+            {
+                left.FadeOut();
+                right.FadeIn();
+            }
+
 
         }
 

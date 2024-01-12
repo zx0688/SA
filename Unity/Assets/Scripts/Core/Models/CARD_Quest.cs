@@ -43,7 +43,7 @@ namespace Core
 
             uIReward.SetItems(data.Card.SR);
 
-            title.Localize(data.Card.Name, LocalizePartEnum.CardName);
+            //title.Localize(data.Card.Name, LocalizePartEnum.CardName);
 
         }
 

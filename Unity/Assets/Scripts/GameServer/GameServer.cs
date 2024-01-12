@@ -16,7 +16,8 @@ namespace GameServer
 {
     public class HttpBatchServer
     {
-        public static Action<GameResponse> OnResponse;
+        public static event Action<GameResponse> OnResponse;
+        public static event Action<List<RewardMeta>> OnGetReward;
 
         public delegate int ExternalTimeManager();
         public static bool HasFatal { get; private set; }
@@ -197,13 +198,21 @@ namespace GameServer
             //local profile changing
             response.Error = null;
 
-            Debug.Log($"REQUEST:{JSON.Serialize(request)}");
+            //Debug.Log($"REQUEST:{JSON.Serialize(request)}");
+            if (request.Id != null)
+                Debug.Log($"HASH:{request.Hash} TO {request.Id}");
+            else
+                Debug.Log($"HASH:{request.Hash}");
+
             SL.Change(request, meta, profile, request.Timestamp, response);
             if (response.Error != null)
                 throw new Exception(response.Error);
 
             Debug.Log($"DECK:{JSON.Serialize(profile.Deck)} LEFT:{profile.Left} RIGHT:{profile.Right}");
 
+
+            if (profile.RewardEvents.Count > 0)
+                OnGetReward?.Invoke(profile.RewardEvents);
 
             if (noServer)
             {

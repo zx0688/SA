@@ -78,7 +78,7 @@ public class Services : MonoBehaviour
                 "3243", // PlatformAdapter.GetToken()
                 "3434", // PlatformAdapter.GetUID()
                 "gp", // PlatformAdapter.GetShortPlatformName()
-                true, // false on realease build
+                true, // false on realease build                
                 Meta.Game,
                 // correct global time
                 serverTimestamp => GameTime.Fix(serverTimestamp),

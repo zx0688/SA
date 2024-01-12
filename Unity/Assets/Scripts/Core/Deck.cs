@@ -210,6 +210,7 @@ namespace Core
             currentCardObject = cards[i];
             currentCardObject.SetActive(true);
             currentCardObject.GetComponent<RectTransform>().SetAsFirstSibling();
+            action.GetComponent<RectTransform>().SetAsFirstSibling();
 
             currentSwipe.ConstructNewSwipe();
             currentCard.UpdateData(swipeData);
@@ -229,6 +230,12 @@ namespace Core
         {
             pages.SetActivePageCounter(false);
             pages.HideArrow();
+
+            if (Services.Player.Profile.Deck.Count == 0)
+            {
+                action.Hide();
+                accelerate.Show();
+            }
         }
 
         public string GetName() => "Swipe Adv".Localize(LocalizePartEnum.GUI);
@@ -237,7 +244,7 @@ namespace Core
 
         public void Hide()
         {
-
+            accelerate.Hide();
         }
     }
 }

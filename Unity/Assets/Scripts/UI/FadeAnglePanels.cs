@@ -17,7 +17,10 @@ namespace UI
         {
             base.OnServicesInited();
             FadeIn();
+
+
         }
+
 
         private void FadeIn()
         {

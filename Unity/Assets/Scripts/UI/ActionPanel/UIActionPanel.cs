@@ -7,7 +7,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using Core;
 using System.Data;
-using Cysharp.Text;
 using UI.Components;
 using System.Linq;
 using System.Drawing;
@@ -43,6 +42,11 @@ namespace UI.ActionPanel
             Swipe.OnTakeCard += OnTakeCard;
             Swipe.OnEndSwipe += Hide;
 
+
+            Swipe.OnEndSwipe -= Hide;
+            Swipe.OnEndSwipe -= Hide;
+            Swipe.OnEndSwipe -= Hide;
+
             //followPrompt.gameObject.SetActive(false);
         }
 
@@ -55,16 +59,9 @@ namespace UI.ActionPanel
 
             if (data.Card.Type == CardMeta.TYPE_QUEST && Services.Player.Profile.Cards.TryGetValue(data.Card.Id, out CardData cardData))
             {
-
-
-                //                 action.gameObject.SetActive(true);
-                //                 action.text = (cardData.Value == CardMeta.QUEST_SUCCESS ? "Quest.CompletedQuest" : "Quest.NewQuest").Localize().ToUpper();
-                // 
-                //                 action.color = colors[1];
-                //                 choicePanel.gameObject.SetActive(true);
-
                 description.gameObject.SetActive(true);
                 description.text = data.Card.Name.Localize(LocalizePartEnum.CardName);
+                description.color = colors[0];
             }
             else if (data.Left == null && data.Right == null || (data.Left.Id == Services.Player.Profile.Deck.Last()))
             {
@@ -72,6 +69,14 @@ namespace UI.ActionPanel
                 {
                     description.gameObject.SetActive(true);
                     description.text = data.Card.Desc.Localize(LocalizePartEnum.CardDescription);
+
+                    if (data.Card.Desc.Contains("ask"))
+                        description.color = colors[1];
+                    else if (data.Card.Desc.Contains("tell"))
+                        description.color = colors[2];
+                    else
+                        description.color = colors[0];
+
                 }
             }
             else

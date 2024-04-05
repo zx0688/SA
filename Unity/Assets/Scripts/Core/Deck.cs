@@ -93,53 +93,6 @@ namespace Core
             }
         }*/
 
-        void Start()
-        {
-            //_rerollBtn.OnClick += OnReroll;
-            //_rerollBtn.OnAnimationCallback += () =>
-            //{
-            //    _rerollBtn.gameObject.SetActive(false);
-            //};
-
-            //_rerollBtn.gameObject.SetActive(false);
-            Swipe.OnDrop += OnDrop;
-            Swipe.OnTakeCard += OnTake;
-        }
-
-        private void OnTake()
-        {
-        }
-
-        private void OnDrop()
-        {
-        }
-
-        /*async UniTask FadeIn()
-        {
-
-            Vector2 pivotPoint = new Vector2(0, 0);
-            CanvasGroup cg = backCard.GetComponent<CanvasGroup>();
-            RectTransform rect = backCard.GetComponent<RectTransform>();
-            cg.alpha = 1f;
-            for (int i = 0; i < 5; i++)
-            {
-
-                GameObject clone = Instantiate(backCard, backCard.transform.position, backCard.transform.rotation, transform) as GameObject;
-                RectTransform r = clone.GetComponent<RectTransform>();
-                r.DOAnchorPos(pivotPoint, 0.4f, true).SetEase(Ease.OutCirc).SetAutoKill(true).SetDelay(0.1f * i).OnComplete(() =>
-                {
-                    r.DOKill();
-                    Destroy(clone);
-                });
-            }
-
-            await rect.DOAnchorPos(pivotPoint, 0.4f, true).SetEase(Ease.OutCirc).SetAutoKill(true).AsyncWaitForCompletion();
-            await cg.DOFade(0f, 0.3f).SetDelay(1f).SetAutoKill(true).AsyncWaitForCompletion();
-            backCard.SetActive(false);
-            GC.Collect();
-
-            return;
-        }*/
 
         //GAME LOOP
         async UniTaskVoid Loop()
@@ -180,26 +133,6 @@ namespace Core
             }
         }
 
-        /*  private int GetEarlyDuration(int timestamp)
-          {
-              int earlyierTimeLeft = int.MaxValue;
-              int earlyierDuration = int.MaxValue;
-              foreach (CardVO cardVO in Services.Player.playerVO.cards)
-              {
-                  CardData cardData = Services.Data.CardInfo(cardVO.id);
-                  if (cardData == null || cardData.Act.Time == 0 || cardVO.executed == 0)
-                      continue;
-                  int timeLeft = GameTime.Left(timestamp, cardVO.executed, cardData.Act.Time);
-                  if (timeLeft > 0 && timeLeft < earlyierTimeLeft && Services.Data.CheckConditions(cardData.Act.Con, int.MaxValue))
-                  {
-                      earlyierTimeLeft = timeLeft;
-                      earlyierDuration = timeLeft; //cardData.act.time - timeLeft;
-                  }
-              }
-
-              return earlyierDuration;
-          }*/
-
         private void OpenCard()
         {
             Services.Player.CreateSwipeData(swipeData);
@@ -215,12 +148,9 @@ namespace Core
             currentSwipe.ConstructNewSwipe();
             currentCard.UpdateData(swipeData);
 
-
             action.Show(swipeData);
 
-
             currentCard.FadeIn(() => GC.Collect());
-            OnDrop();
 
             if (swipeData.Card.Sound.TryGetRandom(out string sound))
                 Services.Assets.PlaySound(sound, audioSource).Forget();

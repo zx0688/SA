@@ -17,6 +17,7 @@ class GameMeta {
 	public var Heroes:Dictionary_2<String, ItemMeta>;
 	public var Skills:Dictionary_2<String, SkillMeta>;
 	public var Locations:Dictionary_2<String, CardMeta>;
+	public var Groups:Dictionary_2<String, GroupMeta>;
 
 	public var Profile:PlayerMeta;
 	public var Config:ConfigMeta;
@@ -55,6 +56,13 @@ class RewardMeta {
 @:strict(SerializableAttribute)
 class SkillMeta extends ItemMeta {
 	public var Slot:Int;
+}
+
+@:nativeGen
+@:strict(SerializableAttribute)
+class GroupMeta {
+	public var Id:String;
+	public var Cards:NativeArray<TriggerMeta>;
 }
 
 @:nativeGen
@@ -107,7 +115,7 @@ class TriggerMeta {
 	public var Tags:NativeArray<String>;
 	public var Value:Int;
 	public var Chance:Int;
-	public var Group:Int;
+	public var Next:String;
 }
 
 @:nativeGen
@@ -118,6 +126,8 @@ class ConditionMeta {
 	public static inline var ITEM:Int = 2;
 	public static inline var LOCATION:Int = 3;
 	public static inline var QUEST:Int = 4;
+	public static inline var SKILL:Int = 5;
+	public static inline var CARD_COND:Int = 6;
 
 	public var Id:String;
 	public var Type:Int;
@@ -156,19 +166,23 @@ class CardMeta {
 	public var Type:Int;
 	public var Delete:Bool;
 
+	public var CN:String;
+
 	public var Name:String;
 	public var Desc:String;
 	public var Image:String;
 
+	public var ActionT:String;
+
 	public var Reward:NativeArray<RewardMeta>;
 	public var Next:NativeArray<TriggerMeta>;
 	public var Over:NativeArray<TriggerMeta>;
+	public var Under:NativeArray<TriggerMeta>;
 
 	public var Con:NativeArray<ConditionMeta>;
 	public var Text:String;
 
 	public var Sound:NativeArray<String>;
-	public var CN:String;
 
 	// Quest
 	public var SR:NativeArray<RewardMeta>;

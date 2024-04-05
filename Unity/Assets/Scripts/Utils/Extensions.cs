@@ -57,6 +57,11 @@ public static class Extensions
         Services.Assets.SetSpriteIntoImage(icon, ZString.Format("Cards/{0}", name), true, null, callback).Forget();
     }
 
+    public static void LoadSkillImage(this Image icon, string name, Action callback = null)
+    {
+        Services.Assets.SetSpriteIntoImage(icon, ZString.Format("Skills/{0}", name), true, null, callback).Forget();
+    }
+
     public static void LoadHeroImage(this Image icon, string name, Action callback = null)
     {
         Services.Assets.SetSpriteIntoImage(icon, ZString.Format("Heroes/{0}", name), true, null, callback).Forget();

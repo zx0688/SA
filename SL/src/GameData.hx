@@ -15,11 +15,12 @@ class ProfileData {
 
 	public var SwipeCount:Int;
 	public var Deck:List_1<String>;
-	public var Left:String;
-	public var Right:String;
+	public var Left:CardNextInfo;
+	public var Right:CardNextInfo;
 
 	public var Cards:Dictionary_2<String, CardData>;
 	public var Items:Dictionary_2<String, ItemData>;
+	public var Skills:List_1<String>;
 	public var Accept:Dictionary_2<String, GameRequest>;
 
 	public var ActiveQuests:List_1<String>;
@@ -99,3 +100,20 @@ class GameResponse {
 
 	public var Timestamp:Int;
 }
+
+@:nativeGen
+@:strict(SerializableAttribute)
+class CardNextInfo {
+	public function new(Id:String, Next:String) {
+		this.Id = Id;
+		this.Next = Next;
+	}
+
+	public var Id:String;
+	public var Next:String;
+}
+
+// class CardMetaNextInfo {
+// 	public var Card:CardMeta;
+// 	public var Next:String;
+// }

@@ -62,31 +62,23 @@ namespace UI.ActionPanel
             followPrompt.gameObject.SetActive(showFollowPrompt);
             gameObject.SetActive(true);
 
-            if (ch.CN.HasText())
-            {
-                //action.alignment = TextAnchor.MiddleCenter;
-                action.Localize(ch.CN, LocalizePartEnum.CardName);
 
-                image.gameObject.SetActive(false);
-                hero.gameObject.SetActive(false);
+            image.LoadCardImage(ch.Image);
+            image.gameObject.SetActive(true);
+
+            if (ch.Hero != null)
+            {
+                hero.LoadHeroImage(ch.Hero);
+                hero.gameObject.SetActive(true);
             }
             else
-            {
-                image.LoadCardImage(ch.Image);
-                image.gameObject.SetActive(true);
+                hero.gameObject.SetActive(false);
 
-                if (ch.Hero != null)
-                {
-                    hero.LoadHeroImage(ch.Hero);
-                    hero.gameObject.SetActive(true);
-                }
-                else
-                    hero.gameObject.SetActive(false);
-
-
-                //action.alignment = TextAnchor.MiddleLeft;
+            if (ch.ActionT.HasText())
+                action.Localize(ch.ActionT, LocalizePartEnum.CardName);
+            else
                 action.Localize(ch.Name, LocalizePartEnum.CardName);
-            }
+
 
             action.gameObject.SetActive(true);
             //action.color = colors[0];

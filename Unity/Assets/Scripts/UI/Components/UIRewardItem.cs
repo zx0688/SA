@@ -8,9 +8,9 @@ using UnityEngine.UI;
 
 public class UIRewardItem : MonoBehaviour
 {
-
-    [SerializeField] private Text count;
+    [SerializeField] private Text value;
     [SerializeField] private Image icon;
+    [SerializeField] private Image randomIcon;
 
 
     private RewardMeta data;
@@ -48,32 +48,17 @@ public class UIRewardItem : MonoBehaviour
             return;
         }
 
-        //_up.gameObject.SetActive(reward.Count > 0);
-        //_down.gameObject.SetActive(reward.Count < 0);
 
-        if (reward.Type == ConditionMeta.ITEM && count != null)
+        if (reward.Type == ConditionMeta.ITEM && value != null)
         {
-            if (reward.Random != null && reward.Random.Length > 0)
-            {
-                count.text = "  ?";
-                count.color = Color.yellow;
-            }
-            else
-            {
-                count.text = reward.Count > 0 ? $"+{Math.Abs(reward.Count)}" : $"-{Math.Abs(reward.Count)}";
-                count.color = reward.Count > 0 ? (colors == null || colors.Length == 0 ? Color.green : colors[0]) : (colors == null || colors.Length == 0 ? Color.red : colors[1]);
-            }
-        }
-        else if (reward.Type == ConditionMeta.CARD && count != null)
-        {
-            count.text = reward.Chance > 0 ? $"{reward.Chance}%" : "100%";
-            count.color = Color.white;
+            value.text = reward.Count > 0 ? $"+{Math.Abs(reward.Count)}" : $"-{Math.Abs(reward.Count)}";
+            value.color = reward.Count > 0 ? (colors == null || colors.Length == 0 ? Color.green : colors[0]) : (colors == null || colors.Length == 0 ? Color.red : colors[1]);
         }
 
         isEmpty = false;
 
-        if (this.data != null && this.data.Id == reward.Id && this.data.Type == reward.Type)
-            return;
+        //if (this.data != null && this.data.Id == reward.Id && this.data.Type == reward.Type)
+        //    return;
 
         this.data = reward;
         this.gameObject.SetActive(true);
@@ -82,14 +67,21 @@ public class UIRewardItem : MonoBehaviour
         //    showTooltipBtn.interactable = true;
         if (reward.Type == ConditionMeta.ITEM)
         {
-            if (reward.Random != null && reward.Random.Length > 0)
-            {
-                //Services.Assets.SetSpriteIntoImage(icon, "UI/randomItem", true).Forget();
-            }
-            else
-            {
-                icon.LoadItemIcon(reward.Id);
-            }
+            icon.LoadItemIcon(reward.Id);
+
+            randomIcon.gameObject.SetActive(reward.Chance > 0);
+            //            count.gameObject.SetActive(false);
+
+            // if (Services.Player.Profile.Items.TryGetValue(reward.Id, out ItemData i))
+            // {
+            //     count.gameObject.SetActive(true);
+            //     count.text = i.Count.ToString();
+            // }
+            // else
+            // {
+            //     count.gameObject.SetActive(false);
+            // }
+
         }
     }
 

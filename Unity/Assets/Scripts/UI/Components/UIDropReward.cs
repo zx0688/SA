@@ -139,6 +139,7 @@ public class UIDropReward : ServiceBehaviour
 
     private async UniTaskVoid ScriptITEM(GameObject item, Vector3 position, GameObject targetPosition)
     {
+
         Vector3 p = targetPosition.transform.position;
 
         item.SetActive(false);
@@ -149,16 +150,17 @@ public class UIDropReward : ServiceBehaviour
         item.gameObject.transform.DOKill();
         item.gameObject.transform.DOMove(position + item.gameObject.transform.position, 0.6f).OnComplete(() =>
         {
-            item.gameObject.transform.DOMove(p, 0.4f, true).SetDelay(0.4f).OnComplete(() =>
+            item.gameObject.transform.DOMove(p, 0.4f, true).SetDelay(0.5f).OnComplete(() =>
             {
                 item.gameObject.SetActive(false);
                 item.gameObject.transform.DOKill();
 
                 CheckWaiting();
             });
-            item.gameObject.transform.DOScale(new Vector3(0.2f, 0.2f, 0.2f), 0.4f).SetDelay(0.4f);
+            item.gameObject.transform.DOScale(new Vector3(0.2f, 0.2f, 0.2f), 0.4f).SetDelay(0.5f);
         });
         item.gameObject.transform.DOScale(new Vector3(1.15f, 1.15f, 1.15f), 0.6f);
+
     }
 
     private void Spend(ItemData cost, float delay)
@@ -172,7 +174,7 @@ public class UIDropReward : ServiceBehaviour
         }
 
         gameObject.SetActive(true);
-        ItemMeta data = null;//Services.Meta.Game.Items[cost.Id.ToString()];
+        ItemMeta data = null;
 
         items.RemoveAt(items.Count - 1);
         items.Insert(0, item);
@@ -185,28 +187,28 @@ public class UIDropReward : ServiceBehaviour
 
         Vector3 position = positionSpendAnimation.transform.position;
 
-        item.gameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+        item.gameObject.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
 
         item.gameObject.transform.DOMove(position, 0.5f, true).SetDelay(delay).OnComplete(() =>
         {
             item.gameObject.SetActive(false);
             item.gameObject.transform.DOKill();
 
-            Image i = item.GetComponent<Image>();
-            Color32 color = i.color;
-            color.a = 255;
-            i.color = color;
-            i.DOKill();
+            // Image i = item.GetComponent<Image>();
+            // Color32 color = i.color;
+            // color.a = 255;
+            // i.color = color;
+            // i.DOKill();
             CheckWaiting();
         });
 
-        Image i = item.GetComponent<Image>();
-        Color32 color = i.color;
-        color.a = 255;
-        i.color = color;
+        // Image i = item.GetComponent<Image>();
+        // Color32 color = i.color;
+        // color.a = 255;
+        // i.color = color;
 
-        i.DOFade(0.1f, 0.05f).SetDelay(0.35f + delay);
-        item.gameObject.transform.DOScale(new Vector3(0.7f, 0.7f, 0.7f), 0.4f).SetDelay(delay);
+        //i.DOFade(0.1f, 0.1f).SetDelay(0.4f + delay);
+        item.gameObject.transform.DOScale(new Vector3(0.5f, 0.5f, 0.5f), 0.6f).SetDelay(delay);
 
     }
 
@@ -250,7 +252,7 @@ public class UIDropReward : ServiceBehaviour
             ItemData item = itemsData[i];
             if (item.Count < 0)
             {
-                Spend(itemsData[i], i * 0.1f);
+                Spend(itemsData[i], i * 0.15f + 0.1f);
                 continue;
             }
             angle += step * i;

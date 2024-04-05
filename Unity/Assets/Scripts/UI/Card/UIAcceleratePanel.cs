@@ -15,8 +15,6 @@ namespace Core
         [SerializeField] private ClickButton accelerateBtn;
         [SerializeField] private Text timerText;
         [SerializeField] private Image item;
-        [SerializeField] private Text rerollGone;
-        [SerializeField] private Text competitionRecord;
         [SerializeField] private GameObject background;
         [SerializeField] private Text buttonText;
 
@@ -58,8 +56,8 @@ namespace Core
             currentCount = i != null ? i.Count : 0;
 
             TickUpdate(GameTime.Get());
-            rerollGone.text = ZString.Format("{0} {1}", Services.Player.Profile.Rerolls + 1, "Reroll.RerollGone".Localize().ToLower());
-            competitionRecord.text = "рекорд: 999";
+            //rerollGone.text = ZString.Format("{0} {1}", Services.Player.Profile.Rerolls + 1, "Reroll.RerollGone".Localize().ToLower());
+            //competitionRecord.text = "рекорд: 999";
 
             timer = StartCoroutine(Tick());
             timer = null;

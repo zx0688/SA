@@ -52,5 +52,6 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "Unity.sln"
+    "dotnet.defaultSolution": "Unity.sln",
+    "workbench.colorTheme": "Laetus Black"
 }

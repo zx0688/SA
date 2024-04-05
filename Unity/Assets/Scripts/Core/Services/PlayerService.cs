@@ -59,6 +59,8 @@ public class PlayerService : IService
     }
 
 
+
+
     public bool IsRewardApplicable(List<RewardMeta> reward)
     {
         foreach (RewardMeta r in reward)
@@ -207,7 +209,7 @@ public class PlayerService : IService
         swipeData.Conditions = new List<ConditionMeta>();
         foreach (TriggerMeta t in swipeData.Card.Next.OrEmptyIfNull())
             if (Services.Meta.Game.Cards.TryGetValue(t.Id, out CardMeta c) && c.Con != null && c.Con.Length > 0)
-                swipeData.Conditions.Merge(c.Con.ToList());
+                swipeData.Conditions.Merge(c.Con[0].ToList());
         //swipeData.Conditions = swipeData.Conditions.Where(c => !Profile.Items.TryGetValue(c.Id, out ItemData value) || value.Count < c.Count).ToList();
 
         //we can't take away an item without choice

@@ -47,6 +47,8 @@ public static class Extensions
         return null;
     }
 
+    public static string GetCurrentDescription(this string[] descr) => descr != null ? descr[Services.Player.Profile.DialogIndex] : null;
+
     public static void LoadItemIcon(this Image icon, string id, Action callback = null)
     {
         Services.Assets.SetSpriteIntoImage(icon, ZString.Format("Items/{0}", id), true, null, callback).Forget();

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using haxe.root;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -61,7 +62,7 @@ public class UIQuestsTooltip : MonoBehaviour
         this.data = data;
 
         target.SetItems(meta.SC, meta.ST);
-        reward.SetItems(meta.SR);
+        reward.SetItems(SL.GetRewardByCondition(meta.SR, meta.SC, Services.Meta.Game, Services.Player.Profile, null, null));
 
         star.rectTransform.localScale = new Vector3(1f, 1f, 1f);
         star.gameObject.SetActive(Services.Player.FollowQuest == meta.Id);
@@ -69,7 +70,7 @@ public class UIQuestsTooltip : MonoBehaviour
         Activebutton.SetAsDisabled = Services.Player.FollowQuest == meta.Id;
         activeText.Localize(Services.Player.FollowQuest != meta.Id ? "Quest.MakeActive" : "Quest.IsActived", LocalizePartEnum.GUI);
 
-        description.text = meta.Desc.Localize(LocalizePartEnum.CardDescription);
+        description.text = meta.Descs.GetCurrentDescription().Localize(LocalizePartEnum.CardDescription);
         icon.LoadCardImage(meta.Image);
     }
 

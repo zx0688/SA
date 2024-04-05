@@ -11,7 +11,7 @@ public class UITarget : MonoBehaviour
     [SerializeField] public UITargetItem[] items;
     [SerializeField] public Color32[] colors;
 
-    public void SetItems(ConditionMeta[] conditions, TriggerMeta[] triggers)
+    public void SetItems(ConditionMeta[][] conditions, TriggerMeta[] triggers)
     {
         if ((conditions == null || conditions.Length == 0) && (triggers == null || triggers.Length == 0))
         {
@@ -32,7 +32,7 @@ public class UITarget : MonoBehaviour
             else if (conditions != null && ((triggers == null && i < conditions.Length) || (triggers != null && i - triggers.Length < conditions.Length)))
             {
                 int ii = triggers == null ? i : i - triggers.Length;
-                ConditionMeta r = conditions[ii];
+                ConditionMeta r = conditions[ii][0];
                 item.SetItem(r, null, colors);
             }
             else

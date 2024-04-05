@@ -12,10 +12,9 @@ namespace Core
         public bool LastCard;
         public int FollowPrompt;
 
+
         public CardData Data;
         public List<ConditionMeta> Conditions;
-
-        // public ConditionMeta[] Conditions;
 
         public int Choice;
     }

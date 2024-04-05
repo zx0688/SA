@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using haxe.root;
 using UI.ActionPanel;
 using UnityEngine;
 using UnityEngine.UI;
@@ -36,12 +37,12 @@ namespace Core
             else if (cardData.Value == CardMeta.QUEST_ACTIVE)
             {
                 uITarget.SetItems(data.Card.SC, data.Card.ST);
-                descr.Localize(data.Card.Desc, LocalizePartEnum.CardDescription);
+                descr.Localize(data.Card.Descs[0], LocalizePartEnum.CardDescription);
                 descr.gameObject.SetActive(true);
                 targetText.gameObject.SetActive(true);
             }
 
-            uIReward.SetItems(data.Card.SR);
+            uIReward.SetItems(SL.GetRewardByCondition(data.Card.SR, data.Card.SC, Services.Meta.Game, Services.Player.Profile, null, null));
 
             //title.Localize(data.Card.Name, LocalizePartEnum.CardName);
 

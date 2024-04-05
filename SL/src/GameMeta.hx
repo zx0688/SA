@@ -28,7 +28,7 @@ class GameMeta {
 @:strict(SerializableAttribute)
 class PlayerMeta {
 	public var Cards:NativeArray<Int>;
-	public var Reward:NativeArray<RewardMeta>;
+	public var Reward:NativeArray<NativeArray<RewardMeta>>;
 	public var Tags:NativeArray<String>;
 	public var Locations:String;
 }
@@ -169,26 +169,26 @@ class CardMeta {
 	public var CN:String;
 
 	public var Name:String;
-	public var Desc:String;
+	public var Descs:NativeArray<String>;
 	public var Image:String;
 
 	public var ActionT:String;
 
-	public var Reward:NativeArray<RewardMeta>;
+	public var Reward:NativeArray<NativeArray<RewardMeta>>;
 	public var Next:NativeArray<TriggerMeta>;
 	public var Over:NativeArray<TriggerMeta>;
 	public var Under:NativeArray<TriggerMeta>;
 
-	public var Con:NativeArray<ConditionMeta>;
+	public var Con:NativeArray<NativeArray<ConditionMeta>>;
 	public var Text:String;
 
 	public var Sound:NativeArray<String>;
 
 	// Quest
-	public var SR:NativeArray<RewardMeta>;
+	public var SR:NativeArray<NativeArray<RewardMeta>>;
 	public var FR:NativeArray<RewardMeta>;
-	public var SC:NativeArray<ConditionMeta>;
-	public var FC:NativeArray<ConditionMeta>;
+	public var SC:NativeArray<NativeArray<ConditionMeta>>;
+	public var FC:NativeArray<NativeArray<ConditionMeta>>;
 	public var ST:NativeArray<TriggerMeta>;
 	public var FT:NativeArray<TriggerMeta>;
 	public var Duration:Int;

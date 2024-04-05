@@ -65,14 +65,15 @@ namespace UI.ActionPanel
             }
             else if (data.Left == null && data.Right == null || (data.Left.Id == Services.Player.Profile.Deck.Last()))
             {
-                if (data.Card.Desc.HasText())
+                string desc = data.Card.Descs.GetCurrentDescription();
+                if (desc.HasText())
                 {
                     description.gameObject.SetActive(true);
-                    description.text = data.Card.Desc.Localize(LocalizePartEnum.CardDescription);
+                    description.text = desc.Localize(LocalizePartEnum.CardDescription);
 
-                    if (data.Card.Desc.Contains("ask"))
+                    if (desc.Contains("ask"))
                         description.color = colors[1];
-                    else if (data.Card.Desc.Contains("tell"))
+                    else if (desc.Contains("tell"))
                         description.color = colors[2];
                     else
                         description.color = colors[0];

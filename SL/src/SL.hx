@@ -59,11 +59,15 @@ class SL {
 		profile.SwipeCount = 0;
 		profile.Items = new Dictionary_2<String, ItemData>();
 		profile.Items.getOrCreate("6", f -> new ItemData("6", 998));
-		profile.Items.getOrCreate("3", f -> new ItemData("3", 998));
-		profile.Items.getOrCreate("13", f -> new ItemData("13", 10));
-		profile.Items.getOrCreate("5", f -> new ItemData("5", 2));
-		profile.Items.getOrCreate("11", f -> new ItemData("13", 10));
-		profile.Items.getOrCreate("62", f -> new ItemData("62", 10));
+		// profile.Items.getOrCreate("3", f -> new ItemData("3", 998));
+		// profile.Items.getOrCreate("13", f -> new ItemData("13", 10));
+		// profile.Items.getOrCreate("5", f -> new ItemData("5", 2));
+		// profile.Items.getOrCreate("11", f -> new ItemData("13", 10));
+		// profile.Items.getOrCreate("62", f -> new ItemData("62", 10));
+
+		profile.Items.getOrCreate("11", f -> new ItemData("11", 10));
+		profile.Items.getOrCreate("42", f -> new ItemData("42", 1));
+		profile.Items.getOrCreate("38", f -> new ItemData("38", 6));
 
 		profile.Skills = new List_1();
 
@@ -161,18 +165,31 @@ class SL {
 					return;
 				}
 
+				var swipedCard:CardMeta = meta.Cards.tryGet(request.Hash);
+
+				if ((swipedCard.Descs != null && profile.DialogIndex >= swipedCard.Descs.length)
+					|| (swipedCard.Descs == null && profile.DialogIndex > 0)) {
+					response.Error = "dialog index is out" + request.Id;
+					return;
+				}
+
 				// Apply card
 				var card:CardData = profile.Cards.getOrCreate(request.Hash, f -> new CardData(request.Hash));
 				card.CT++;
 				card.CR++;
 				card.Choice = request.Id;
+				profile.SwipeCount++;
+
+				// only description card
+				if (swipedCard.Descs != null && profile.DialogIndex > 0) {
+					profile.DialogIndex--;
+					return;
+				}
 
 				random = GetRandomInstance();
 				random.setStringSeed(Std.string(request.Timestamp));
 
 				deck.pop();
-
-				var swipedCard:CardMeta = meta.Cards.tryGet(request.Hash);
 
 				var next:CardNextInfo = null;
 				if (profile.Left != null && request.Id == profile.Left.Id)
@@ -205,7 +222,7 @@ class SL {
 						if ((qm.ST == null
 							|| (qm.ST != null
 								&& (qm.ST[0].Type == TriggerMeta.ALWAYS || qm.ST.find(qms -> qms.Id == swipedCard.Id) != null)))
-							&& CheckCondition(qm.SC, meta, profile, random)) {
+							&& CheckAnyCondition(qm.SC, meta, profile, random)) {
 							var qp:CardData = profile.Cards.tryGet(qID);
 							qp.Value = CardMeta.QUEST_SUCCESS;
 							rem.push(qID);
@@ -240,7 +257,9 @@ class SL {
 						profile.Deck.push(nextCard.Id);
 					}
 
-					ApplyReward(nextCard.Reward, meta, profile, random);
+					profile.DialogIndex = nextCard.Descs != null && nextCard.Descs.length > 0 ? nextCard.Descs.length - 1 : 0;
+
+					ApplyReward(GetRewardByCondition(nextCard.Reward, nextCard.Con, meta, profile, random, response), meta, profile, random);
 
 					if (nextCard.Type == CardMeta.TYPE_QUEST) {
 						var card:CardData = profile.Cards.tryGet(nextCard.Id);
@@ -250,7 +269,7 @@ class SL {
 							profile.ActiveQuests.push(nextCard.Id);
 							profile.Cards.set(nextCard.Id, card);
 						} else if (card.Value == CardMeta.QUEST_SUCCESS) {
-							ApplyReward(nextCard.SR, meta, profile, random);
+							ApplyReward(GetRewardByCondition(nextCard.SR, nextCard.SC, meta, profile, random, response), meta, profile, random);
 						}
 						profile.QuestEvent = nextCard.Id;
 					} else {
@@ -265,7 +284,6 @@ class SL {
 				if (profile.Deck.getCount() == 0) {
 					profile.Cooldown = timestamp;
 				}
-				profile.SwipeCount++;
 
 			case TriggerMeta.REROLL:
 				if (profile.Deck.getCount() > 0) {
@@ -342,7 +360,7 @@ class SL {
 				return false;
 		}
 
-		if (!CheckCondition(cardMeta.Con, data, profile, random))
+		if (!CheckAnyCondition(cardMeta.Con, data, profile, random))
 			return false;
 
 		if (triggerMeta != null) {
@@ -432,6 +450,15 @@ class SL {
 		return true;
 	}
 
+	public static function CheckAnyCondition(con:Null<NativeArray<NativeArray<ConditionMeta>>>, data:GameMeta, profile:ProfileData, random:Random):Bool {
+		if (con == null || con.length == 0)
+			return true;
+		for (c in con)
+			if (CheckCondition(c, data, profile, random))
+				return true;
+		return false;
+	}
+
 	public static function CheckCondition(con:Null<NativeArray<ConditionMeta>>, data:GameMeta, profile:ProfileData, random:Random):Bool {
 		if (con == null || con.length == 0)
 			return true;
@@ -466,6 +493,30 @@ class SL {
 			}
 		}
 		return true;
+	}
+
+	public static function GetRewardByCondition(reward:NativeArray<NativeArray<RewardMeta>>, cond:NativeArray<NativeArray<ConditionMeta>>, meta:GameMeta,
+			profile:ProfileData, random:Random, response:GameResponse):NativeArray<RewardMeta> {
+		var rew:NativeArray<RewardMeta> = null;
+		if (reward == null)
+			return null;
+		else if (cond == null || cond.length <= 1) {
+			rew = reward[0];
+		} else {
+			var checkf = false;
+			for (cc in 0...cond.length)
+				if (CheckCondition(cond[cc], meta, profile, random)) {
+					rew = reward[cc];
+					checkf = true;
+					break;
+				}
+
+			if (checkf == false) {
+				response.Error = "reward shoud match with condition";
+				return null;
+			}
+		}
+		return rew;
 	}
 
 	private static function ApplyReward(reward:NativeArray<RewardMeta>, meta:GameMeta, profile:ProfileData, random:Random):Void {

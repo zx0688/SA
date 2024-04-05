@@ -11,6 +11,7 @@ using Cysharp.Text;
 using UI.Components;
 using System.Linq;
 using System.Drawing;
+using haxe.root;
 
 namespace UI.ActionPanel
 {
@@ -55,7 +56,7 @@ namespace UI.ActionPanel
             bordrer.color = new Color32(142, 129, 129, 255);
 
             if (ch.Reward != null && ch.Reward.Length > 0)
-                reward.SetItems(ch.Reward);
+                reward.SetItems(SL.GetRewardByCondition(ch.Reward, ch.Con, Services.Meta.Game, Services.Player.Profile, null, null));
             else
                 reward.Hide();
 

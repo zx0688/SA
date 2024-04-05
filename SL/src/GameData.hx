@@ -17,6 +17,7 @@ class ProfileData {
 	public var Deck:List_1<String>;
 	public var Left:CardNextInfo;
 	public var Right:CardNextInfo;
+	public var DialogIndex:Int;
 
 	public var Cards:Dictionary_2<String, CardData>;
 	public var Items:Dictionary_2<String, ItemData>;

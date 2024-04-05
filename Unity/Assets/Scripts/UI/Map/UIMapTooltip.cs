@@ -52,7 +52,7 @@ namespace UI.Map
             background.Show("blue", meta.Name);
             background.gameObject.SetActive(true);
             gameObject.SetActive(true);
-            description.Localize(meta.Desc);
+            description.Localize(meta.Descs.GetCurrentDescription());
 
             icon.LoadCardImage(meta.Image);
 
@@ -67,7 +67,7 @@ namespace UI.Map
             {
                 textYouHere.gameObject.SetActive(true);
             }
-            else if (SL.CheckCondition(meta.Con, Services.Meta.Game, Services.Player.Profile, null))
+            else if (SL.CheckCondition(meta.Con[0], Services.Meta.Game, Services.Player.Profile, null))
             {
                 button.gameObject.SetActive(true);
                 button.interactable = true;//SetActiveButton(true);

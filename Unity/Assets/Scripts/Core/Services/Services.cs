@@ -73,7 +73,7 @@ public class Services : MonoBehaviour
 
         //there should be await PlatformAdapter.Init (Google Play, AppStore)
         if (loadText != null) loadText.text = "Loading language...";
-        await Assets.Localization(
+        await Assets.LoadLocalization(
                     "RU", // PlatformAdapter.GetLocale() 
                     Progress.Create<float>(x => UpdateProgressUI(x)));
 
@@ -90,8 +90,7 @@ public class Services : MonoBehaviour
                 true, // false on realease build                
                 Meta.Game,
                 // correct global time
-                serverTimestamp => GameTime.Fix(serverTimestamp),
-                GameTime.Get);
+                serverTimestamp => GameTime.Fix(serverTimestamp));
 
         UpdateTextUI("Loading profile...");
         await Player.Init(Progress.Create<float>(x => UpdateProgressUI(x)));
@@ -101,10 +100,6 @@ public class Services : MonoBehaviour
         UpdateTextUI("Loading icons...");
         //Resources.LoadAll<Sprite>("Cards");
         //Resources.LoadAll<Sprite>("Items");
-
-
-
-
         UpdateTextUI("Loading scene...");
         Scene s = SceneManager.GetActiveScene();
 

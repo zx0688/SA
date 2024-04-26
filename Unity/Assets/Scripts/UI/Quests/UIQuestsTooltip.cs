@@ -62,7 +62,7 @@ public class UIQuestsTooltip : MonoBehaviour
         this.data = data;
 
         target.SetItems(meta.SC, meta.ST);
-        reward.SetItems(SL.GetRewardByCondition(meta.SR, meta.SC, Services.Meta.Game, Services.Player.Profile, null, null));
+        reward.SetItems(SL.GetRewardByCondition(meta.SR, meta.SC, Services.Meta.Game, Services.Player.Profile, null));
 
         star.rectTransform.localScale = new Vector3(1f, 1f, 1f);
         star.gameObject.SetActive(Services.Player.FollowQuest == meta.Id);

@@ -26,6 +26,8 @@ namespace UI.ActionPanel
         [SerializeField] private RectTransform icon;
         [SerializeField] private List<Color32> colors;
         [SerializeField] private Image bordrer;
+        [SerializeField] private UILevelGroup levels;
+        [SerializeField] private Text skipText;
 
         private RectTransform rect => GetComponent<RectTransform>();
         private RectTransform rewardRect => reward.GetComponent<RectTransform>();
@@ -33,7 +35,7 @@ namespace UI.ActionPanel
         public void FadeIn()
         {
             rewardRect.DOScale(new Vector3(1.1f, 1.1f, 1.1f), 0.15f);
-            rect.DOScale(new Vector3(1.03f, 1.03f, 1.03f), 0.15f);
+            rect.DOScale(new Vector3(1.1f, 1.1f, 1.1f), 0.2f);
             bordrer.DOColor(new Color32(180, 180, 180, 255), 0.1f);
         }
 
@@ -46,6 +48,8 @@ namespace UI.ActionPanel
 
         public void ShowChoice(CardMeta ch, bool showFollowPrompt)
         {
+            gameObject.SetActive(true);
+
             rewardRect.DOKill();
             rewardRect.localScale = new Vector3(1f, 1f, 1f);
 
@@ -55,14 +59,30 @@ namespace UI.ActionPanel
             bordrer.DOKill();
             bordrer.color = new Color32(142, 129, 129, 255);
 
+            if (ch.Id == "28393500")
+            {
+                icon.gameObject.SetActive(false);
+                reward.gameObject.SetActive(false);
+                levels.gameObject.SetActive(false);
+                reward.Hide();
+                return;
+            }
+            else
+            {
+                levels.gameObject.SetActive(true);
+                icon.gameObject.SetActive(true);
+                reward.gameObject.SetActive(true);
+            }
+
             if (ch.Reward != null && ch.Reward.Length > 0)
-                reward.SetItems(SL.GetRewardByCondition(ch.Reward, ch.Con, Services.Meta.Game, Services.Player.Profile, null, null));
+                reward.SetItems(SL.GetRewardByCondition(ch.Reward, ch.Con, Services.Meta.Game, Services.Player.Profile, null));
             else
                 reward.Hide();
 
-            followPrompt.gameObject.SetActive(showFollowPrompt);
-            gameObject.SetActive(true);
 
+            levels.SetLevel(ch.Level);
+
+            followPrompt.gameObject.SetActive(showFollowPrompt);
 
             image.LoadCardImage(ch.Image);
             image.gameObject.SetActive(true);

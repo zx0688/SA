@@ -1,4 +1,5 @@
 // Profile Data
+import haxe.Int64;
 import GameMeta;
 import SL;
 #if cs
@@ -23,6 +24,7 @@ class ProfileData {
 	public var Items:Dictionary_2<String, ItemData>;
 	public var Skills:List_1<String>;
 	public var Accept:Dictionary_2<String, GameRequest>;
+	public var Triggers:Dictionary_2<String, TriggerData>;
 
 	public var ActiveQuests:List_1<String>;
 
@@ -37,6 +39,7 @@ class ProfileData {
 	public var LastChange:Int;
 	public var Created:Int;
 	public var Rerolls:Int;
+	public var History:List_1<String>;
 
 	// EVENTS
 	public var RewardEvents:List_1<RewardMeta>;
@@ -54,11 +57,23 @@ class CardData {
 		this.Value = 0;
 	}
 
-	public var Id:String;
 	public var CR:Int;
+	public var Id:String;
 	public var CT:Int;
 	public var Choice:String;
 	public var Value:Int;
+}
+
+@:nativeGen
+@:strict(SerializableAttribute)
+class TriggerData {
+	public function new(Id:String, Count:Int) {
+		this.Id = Id;
+		this.Count = Count;
+	}
+
+	public var Id:String;
+	public var Count:Int;
 }
 
 @:nativeGen
@@ -83,7 +98,7 @@ class GameRequest {
 	}
 
 	public var Rid:Int;
-	public var Timestamp:Int;
+	public var Timestamp:Int64;
 	public var Id:String;
 	public var Type:Int;
 	public var Tags:List_1<String>;
@@ -98,6 +113,9 @@ class GameResponse {
 	public var Error:String;
 	public var Profile:ProfileData;
 	public var Events:List_1<GameRequest>;
+
+	//
+	public var Debug:String;
 
 	public var Timestamp:Int;
 }

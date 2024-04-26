@@ -42,7 +42,7 @@ namespace Core
                 targetText.gameObject.SetActive(true);
             }
 
-            uIReward.SetItems(SL.GetRewardByCondition(data.Card.SR, data.Card.SC, Services.Meta.Game, Services.Player.Profile, null, null));
+            uIReward.SetItems(SL.GetRewardByCondition(data.Card.SR, data.Card.SC, Services.Meta.Game, Services.Player.Profile, null));
 
             //title.Localize(data.Card.Name, LocalizePartEnum.CardName);
 

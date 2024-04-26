@@ -75,6 +75,20 @@ public static class Extensions
         wrapper.Items = array;
         return JsonUtility.ToJson(wrapper);
     }
+    public static bool TryGet<T>(this T[] value, int index, out T result) where T : class
+    {
+        result = null;
+        if (value != null && index >= 0 && index < value.Length)
+        {
+            result = value[index];
+            return true;
+        }
+        return false;
+    }
+
+    public static bool HasCondition(this ConditionMeta[][] cond) => cond != null && cond.Length > 0 && cond[0].Length > 0;
+    public static bool HasTexts(this string[] texts) => texts != null && texts.Length > 0;
+    public static bool HasTriggers(this TriggerMeta[] trigger) => trigger != null && trigger.Length > 0;
 
     public static bool HasText(this string text) => text != null && text.Length > 0;
 

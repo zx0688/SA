@@ -22,6 +22,7 @@ namespace UI.ActionPanel
         [SerializeField] private UIConditions conditions;
         [SerializeField] private Text description;
         [SerializeField] private GameObject delem;
+        [SerializeField] private Text nextText;
 
         // [SerializeField] private GameObject choicePanel;
 
@@ -31,6 +32,7 @@ namespace UI.ActionPanel
         private bool choiceble = false;
         private int choice = -10;
         private float threshold = 0.1f;
+        private bool hasNextText = false;
 
 
         private SwipeData data;
@@ -63,22 +65,16 @@ namespace UI.ActionPanel
                 description.text = data.Card.Name.Localize(LocalizePartEnum.CardName);
                 description.color = colors[0];
             }
-            else if (data.Left == null && data.Right == null || (data.Left.Id == Services.Player.Profile.Deck.Last()))
+            else if (data.Card.Next.HasTriggers() && data.Card.Descs.HasTexts() && Services.Player.Profile.DialogIndex < data.Card.Descs.Length &&
+            (!Services.Player.Profile.Cards.TryGetValue(data.Card.Id, out cardData) || cardData.CT == 0))
             {
                 string desc = data.Card.Descs.GetCurrentDescription();
-                if (desc.HasText())
-                {
-                    description.gameObject.SetActive(true);
-                    description.text = desc.Localize(LocalizePartEnum.CardDescription);
-
-                    if (desc.Contains("ask"))
-                        description.color = colors[1];
-                    else if (desc.Contains("tell"))
-                        description.color = colors[2];
-                    else
-                        description.color = colors[0];
-
-                }
+                if (desc.HasText()) SetDecription(desc);
+            }
+            else if ((data.Left == null && data.Right == null) || (data.Left.Id == Services.Player.Profile.Deck.Last()))
+            {
+                string desc = data.Card.Descs.GetCurrentDescription();
+                if (desc.HasText()) SetDecription(desc);
             }
             else
             {
@@ -104,6 +100,11 @@ namespace UI.ActionPanel
         {
             if (data.Card == null || data.Card.Type != CardMeta.TYPE_CARD)
                 return;
+
+            if (hasNextText)
+            {
+                nextText.GetComponent<RectTransform>().DOScale(new Vector3(1.1f, 1.1f, 1.1f), 0.2f);
+            }
 
             if (data.Left != null && data.Left.Id == data.Right.Id)
             {
@@ -136,6 +137,9 @@ namespace UI.ActionPanel
             if (data.Card == null || data.Card.Type != CardMeta.TYPE_CARD)
                 return;
 
+            if (hasNextText)
+                nextText.GetComponent<RectTransform>().DOScale(new Vector3(1f, 1f, 1f), 0.15f);
+
             left.FadeOut();
             right.FadeOut();
 
@@ -147,6 +151,7 @@ namespace UI.ActionPanel
         public void Show(SwipeData data)
         {
             this.data = data;
+
 
             OnSet();
 
@@ -170,12 +175,44 @@ namespace UI.ActionPanel
             gameObject.SetActive(false);
         }
 
+        private void SetDecription(string desc)
+        {
+            hasNextText = true;
+            nextText.gameObject.SetActive(true);
+
+            if (data.Card.AText.HasText())
+            {
+                if (data.Card.AText.Contains("_r"))
+                    nextText.text = Services.Player.RewardCollected.Count > 0 ? data.Card.AText.Localize(LocalizePartEnum.GUI) : "Action.Next".Localize(LocalizePartEnum.GUI);
+                else
+                    nextText.text = data.Card.AText.Localize(LocalizePartEnum.GUI);
+            }
+            else
+                nextText.text = "Action.Next".Localize(LocalizePartEnum.GUI);
+
+
+            description.gameObject.SetActive(true);
+            description.text = desc.Localize(LocalizePartEnum.CardDescription);
+
+            if (desc.Contains("ask"))
+                description.color = colors[1];
+            else if (desc.Contains("tell"))
+                description.color = colors[2];
+            else
+                description.color = colors[0];
+        }
+
         private void HideAll()
         {
+            hasNextText = false;
+            nextText.gameObject.SetActive(false);
+            nextText.GetComponent<RectTransform>().localScale = new Vector3(1f, 1f, 1f);
+
             left.HideAll();
             right.HideAll();
             delem.SetActive(false);
             description.gameObject.SetActive(false);
+            nextText.gameObject.SetActive(false);
         }
 
         void OnChangeDeviation(float dev)

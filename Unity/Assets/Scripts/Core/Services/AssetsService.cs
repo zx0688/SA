@@ -46,7 +46,7 @@ public class AssetsService
 
     //private Dictionary<string, Sprite> spriteCache;
 
-    public async UniTask Localization(string lang, IProgress<float> progress = null)
+    public async UniTask LoadLocalization(string lang, IProgress<float> progress = null)
     {
         string json = await GetJson($"localization_{lang}", GOOGLE_DRIVE_LOCALIZATION, progress, LoadContentOption.UseFileVersion);
         Debug.Log(json);

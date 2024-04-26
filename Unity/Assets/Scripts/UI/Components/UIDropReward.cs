@@ -258,8 +258,8 @@ public class UIDropReward : ServiceBehaviour
             angle += step * i;
             for (int j = 0; j < item.Count; j++)
             {
-                float da = UnityEngine.Random.Range(-1.5f, 1.5f);
-                Vector3 pos = new Vector3(Mathf.Cos(angle + da) * radius, Mathf.Sin(angle + da) * radius, 0f);
+                float da = UnityEngine.Random.Range(0f, 6.28f);
+                Vector3 pos = new Vector3(Mathf.Cos(angle + da - 3.14f) * radius, Mathf.Sin(angle + da - 3.14f) * radius, 0f);
                 Add(itemsData[i], pos);
             }
         }

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Core;
 using Cysharp.Threading.Tasks;
 using GameServer;
@@ -32,6 +33,8 @@ public class PlayerService : IService
     public ProfileData Profile;
     private GameMeta Meta => Services.Meta.Game;
     private GameRequest request = null;
+
+    public List<RewardMeta> RewardCollected => Profile.RewardEvents.Where(r => !Services.Meta.Game.Items[r.Id].Hidden).ToList();
 
     public string FollowQuest
     {
@@ -134,6 +137,9 @@ public class PlayerService : IService
         request.Hash = swipe.Card.Id;
         request.Type = TriggerMeta.SWIPE;
         request.Value = swipe.Choice;
+
+        //if (swipe.Card.Next.HasTriggers() && swipe.Card.Descs.HasTexts() && Profile.DialogIndex < swipe.Card.Descs.Length)
+        //    request.Id = null;
         request.Id = swipe.Left != null ? (swipe.Choice == CardMeta.LEFT ? swipe.Left.Id : swipe.Right.Id) : null;
 
         HttpBatchServer.Change(request);
@@ -207,9 +213,42 @@ public class PlayerService : IService
         swipeData.Hero = swipeData.Card.Hero != null ? Meta.Heroes[swipeData.Card.Hero] : null;
 
         swipeData.Conditions = new List<ConditionMeta>();
-        foreach (TriggerMeta t in swipeData.Card.Next.OrEmptyIfNull())
-            if (Services.Meta.Game.Cards.TryGetValue(t.Id, out CardMeta c) && c.Con != null && c.Con.Length > 0)
-                swipeData.Conditions.Merge(c.Con[0].ToList());
+
+        if (swipeData.Card.Next.HasTriggers())
+        {
+
+            foreach (TriggerMeta trigger in swipeData.Card.Next)
+            {
+                List<TriggerMeta> ts = new List<TriggerMeta>();
+                if (trigger.Type == CardMeta.TYPE_GROUP)
+                {
+                    Meta.Groups.TryGetValue(trigger.Id, out GroupMeta groupMeta);
+                    foreach (TriggerMeta tg in groupMeta.Cards)
+                        ts.Add(tg);
+                }
+                else
+                {
+                    ts.Add(trigger);
+                }
+
+                foreach (TriggerMeta t in ts)
+                {
+                    Meta.Cards.TryGetValue(t.Id, out CardMeta c);
+                    if (c.Con.HasCondition())
+                        c.Con.ToList().ForEach(cc => swipeData.Conditions.Merge(cc.ToList()));
+
+                    if (c.Over.HasTriggers() && c.Over.TryGet(c.Over.Length - 1, out TriggerMeta o))
+                        if (Services.Meta.Game.Cards.TryGetValue(o.Id, out CardMeta co) && co.Con.HasCondition())
+                            co.Con.ToList().ForEach(cc => swipeData.Conditions.Merge(cc.ToList()));
+                }
+            }
+        }
+
+        if (Profile.Deck.Count > 1 && Meta.Cards.TryGetValue(Profile.Deck[Profile.Deck.Count - 2], out CardMeta nextCardMeta) && nextCardMeta.Con.HasCondition())
+            nextCardMeta.Con.ToList().ForEach(cc => swipeData.Conditions.Merge(cc.ToList()));
+
+        swipeData.Conditions = swipeData.Conditions.FindAll(c => c.Type == ConditionMeta.ITEM && Meta.Items.TryGetValue(c.Id, out ItemMeta item) && !item.Hidden);
+
         //swipeData.Conditions = swipeData.Conditions.Where(c => !Profile.Items.TryGetValue(c.Id, out ItemData value) || value.Count < c.Count).ToList();
 
         //we can't take away an item without choice

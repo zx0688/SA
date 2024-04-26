@@ -18,6 +18,7 @@ class GameMeta {
 	public var Skills:Dictionary_2<String, SkillMeta>;
 	public var Locations:Dictionary_2<String, CardMeta>;
 	public var Groups:Dictionary_2<String, GroupMeta>;
+	public var Triggers:Dictionary_2<String, CardTriggerMeta>;
 
 	public var Profile:PlayerMeta;
 	public var Config:ConfigMeta;
@@ -75,7 +76,7 @@ class ItemMeta {
 	public var Image:String;
 	public var Id:String;
 
-	public var Hide:Bool;
+	public var Hidden:Bool;
 	public var Type:Int;
 
 	public var HowTo:NativeArray<ConditionMeta>;
@@ -127,16 +128,25 @@ class ConditionMeta {
 	public static inline var LOCATION:Int = 3;
 	public static inline var QUEST:Int = 4;
 	public static inline var SKILL:Int = 5;
-	public static inline var CARD_COND:Int = 6;
 
+	// public static inline var CARD_COND:Int = 6;
 	public var Id:String;
 	public var Type:Int;
 	public var Tags:NativeArray<String>;
-	public var Invert:Bool;
+	// public var Invert:Bool;
 	public var Sign:String;
 	public var Choice:Int;
 	public var Count:Int;
 	public var Loc:NativeArray<Int>;
+}
+
+@:nativeGen
+@:strict(SerializableAttribute)
+class CardTriggerMeta {
+	public var Id:String;
+	public var Reward:NativeArray<NativeArray<RewardMeta>>;
+	public var Con:NativeArray<NativeArray<ConditionMeta>>;
+	public var Next:NativeArray<TriggerMeta>;
 }
 
 @:nativeGen
@@ -158,13 +168,16 @@ class CardMeta {
 	public static inline var QUEST_FAIL:Int = 2;
 
 	public var Id:String;
-	public var Tags:NativeArray<String>;
+
 	public var Pri:Int;
 	public var CT:Int;
 	public var CR:Int;
 	public var Hero:String;
 	public var Type:Int;
-	public var Delete:Bool;
+	public var Cut:Bool;
+	public var Shake:Bool;
+	public var Level:Int;
+	public var AText:String;
 
 	public var CN:String;
 

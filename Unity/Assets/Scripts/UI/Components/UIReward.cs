@@ -13,7 +13,7 @@ public class UIReward : MonoBehaviour
     [SerializeField] private UIRewardItem[] subItems;
     [SerializeField] private Color32[] colors;
     [SerializeField] private GameObject[] panels;
-    [SerializeField] private GameObject[] texts;
+    //[SerializeField] private GameObject[] texts;
 
 
     public void Hide() => SetItems(null);
@@ -32,18 +32,41 @@ public class UIReward : MonoBehaviour
 
         gameObject.SetActive(true);
         panels[0].SetActive(add.Count > 0);
-        texts[0].SetActive(add.Count > 0);
+        // texts[0].SetActive(add.Count > 0);
         panels[1].SetActive(sub.Count > 0);
-        texts[1].SetActive(sub.Count > 0);
+        // texts[1].SetActive(sub.Count > 0);
+
+        Dictionary<string, List<RewardMeta>> addmap = new Dictionary<string, List<RewardMeta>>();
+        add.ForEach(r =>
+        {
+            if (!addmap.TryGetValue(r.Id, out List<RewardMeta> value))
+            {
+                value = new List<RewardMeta>();
+                addmap[r.Id] = value;
+            }
+            value.Add(r);
+        });
+
+        Dictionary<string, List<RewardMeta>> submap = new Dictionary<string, List<RewardMeta>>();
+        sub.ForEach(r =>
+        {
+            if (!submap.TryGetValue(r.Id, out List<RewardMeta> value))
+            {
+                value = new List<RewardMeta>();
+                submap[r.Id] = value;
+            }
+            value.Add(r);
+        });
+
 
         for (int i = 0; i < addItems.Length; i++)
         {
             UIRewardItem item = addItems[i];
-            if (i < add.Count)
+            if (i < addmap.Count)
             {
-                RewardMeta r = add[i];
+
                 item.gameObject.SetActive(true);
-                item.SetItem(r, colors);
+                item.SetItem(addmap.ElementAt(i).Value, colors);
             }
             else
             {
@@ -55,11 +78,11 @@ public class UIReward : MonoBehaviour
         for (int i = 0; i < subItems.Length; i++)
         {
             UIRewardItem item = subItems[i];
-            if (i < sub.Count)
+            if (i < submap.Count)
             {
                 RewardMeta r = sub[i];
                 item.gameObject.SetActive(true);
-                item.SetItem(r, colors);
+                item.SetItem(submap.ElementAt(i).Value, colors);
             }
             else
             {

@@ -17,9 +17,9 @@ public class MetaService
 
 
 #if UNITY_STANDALONE_WIN
-    private static readonly string GOOGLE_DRIVE = "https://drive.google.com/uc?export=download&id=1dXlv4S11TvwJTnc6qqFJIJJ_K6yXgzel";
+    private static readonly string GOOGLE_DRIVE = "https://drive.google.com/uc?export=download&id=16pS8YzoOkOwu_sPPvm9JKKFya9-XUN96";
 #else
-    private static readonly string GOOGLE_DRIVE = "https://drive.google.com/uc?export=download&id=1dXlv4S11TvwJTnc6qqFJIJJ_K6yXgzel"; //"https://drive.google.com/uc?export=download&id=1tWCVbt3hUimhZPh6lABPLJefNZYotS8K";
+    private static readonly string GOOGLE_DRIVE = "https://drive.google.com/uc?export=download&id=16pS8YzoOkOwu_sPPvm9JKKFya9-XUN96"; //"https://drive.google.com/uc?export=download&id=1tWCVbt3hUimhZPh6lABPLJefNZYotS8K";
 #endif
     private static readonly string URL_META = "";
     private static readonly string URL_VERSION = "";

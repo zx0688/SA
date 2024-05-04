@@ -70,7 +70,7 @@ public class UIQuestsTooltip : MonoBehaviour
         Activebutton.SetAsDisabled = Services.Player.FollowQuest == meta.Id;
         activeText.Localize(Services.Player.FollowQuest != meta.Id ? "Quest.MakeActive" : "Quest.IsActived", LocalizePartEnum.GUI);
 
-        description.text = meta.Descs.GetCurrentDescription().Localize(LocalizePartEnum.CardDescription);
+        //description.text = meta.Descs.GetCurrentDescription().Localize(LocalizePartEnum.CardDescription);
         icon.LoadCardImage(meta.Image);
     }
 

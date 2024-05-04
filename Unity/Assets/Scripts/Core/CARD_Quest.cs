@@ -67,5 +67,10 @@ namespace Core
         {
 
         }
+
+        public void OnDoubleClick()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

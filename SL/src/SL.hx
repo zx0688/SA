@@ -56,7 +56,7 @@ class SL {
 		profile.Deck = new List_1();
 		profile.Accept = new Dictionary_2<String, GameRequest>();
 		profile.OpenedLocations = new List_1();
-		profile.DialogIndex = 0;
+		profile.CardStates = new List_1<Int>();
 		profile.Rid = 0;
 		profile.Sid = 0;
 		profile.SwipeCount = 0;
@@ -67,8 +67,8 @@ class SL {
 		// profile.Items.getOrCreate("5", f -> new ItemData("5", 2));
 		// profile.Items.getOrCreate("11", f -> new ItemData("11", 10));
 		// profile.Items.getOrCreate("62", f -> new ItemData("62", 10));
-		// for (i in 1...64)
-		// 	profile.Items.getOrCreate(i + "", f -> new ItemData(i + "", 10));
+		for (i in 1...64)
+			profile.Items.getOrCreate(i + "", f -> new ItemData(i + "", 10));
 		// 		profile.Items.getOrCreate("55", f -> new ItemData("55", 10));
 		// 		profile.Items.getOrCreate("42", f -> new ItemData("42", 1));
 		// 		profile.Items.getOrCreate("34", f -> new ItemData("34", 10));
@@ -93,7 +93,7 @@ class SL {
 		profile.History = new List_1();
 		profile.Rerolls = 0;
 
-		profile.RewardEvents = new List_1();
+		profile.RewardEvents = new Dictionary_2<String, ItemData>();
 		profile.QuestEvent = null;
 
 		// profile.Deck.push("28366105");
@@ -113,7 +113,8 @@ class SL {
 		// средний город
 		// profile.Deck.push("27905696");
 
-		CreateLeftRight(meta.Cards.tryGet(GetCurrentCard(profile)).Next, meta, profile, random);
+		profile.CardStates.push(CardData.CHOICE);
+		ApplyCardState(meta.Cards.tryGet(GetCurrentCard(profile)), meta, profile, random);
 
 		return profile;
 	}
@@ -147,7 +148,7 @@ class SL {
 		}
 
 		// just temp events for client, we can delete these safty
-		profile.RewardEvents = new List_1();
+		profile.RewardEvents = new Dictionary_2<String, ItemData>();
 		profile.QuestEvent = null;
 
 		switch (request.Type) {
@@ -191,28 +192,22 @@ class SL {
 					return;
 				}
 
-				var swipedCard:CardMeta = meta.Cards.tryGet(request.Hash);
-
-				if ((swipedCard.Descs != null && profile.DialogIndex > swipedCard.Descs.length)
-					|| (swipedCard.Descs == null && profile.DialogIndex > 0)) {
-					response.Error = "dialog index is out " + request.Hash;
-					return;
-				}
+				// if ((swipedCard.Descs != null && profile.DialogIndex > swipedCard.Descs.length)
+				// 	|| (swipedCard.Descs == null && profile.DialogIndex > 0)) {
+				// 	response.Error = "dialog index is out " + request.Hash;
+				// 	return;
+				// }
 
 				profile.SwipeCount++;
 
-				// only description card
-				if (swipedCard.Descs != null && swipedCard.Next != null && profile.DialogIndex < swipedCard.Descs.length) {
-					var card:CardData = profile.Cards.getOrCreate(request.Hash, f -> new CardData(request.Hash));
-					if (card.CT == 0) {
-						profile.DialogIndex++;
-						if (CheckCard(swipedCard, meta, profile, random))
-							return;
-					}
-				} else if (swipedCard.Descs != null && profile.DialogIndex < swipedCard.Descs.length - 1) {
-					profile.DialogIndex++;
+				if (profile.CardStates.getCount() > 1) {
+					profile.CardStates.pop();
+					var swipedCard:CardMeta = meta.Cards.tryGet(request.Hash);
+					ApplyCardState(swipedCard, meta, profile, random);
 					return;
 				}
+
+				deck.pop();
 
 				// Apply card
 				var card:CardData = profile.Cards.getOrCreate(request.Hash, f -> new CardData(request.Hash));
@@ -220,11 +215,9 @@ class SL {
 				card.CR++;
 				card.Choice = request.Id;
 				profile.History.push(card.Id);
-				profile.DialogIndex = 0;
+				profile.CardStates = profile.CardStates.getCount() > 0 ? new List_1<Int>() : profile.CardStates;
 
 				SetRandomSeedByTime(requestTimestamp);
-
-				deck.pop();
 
 				var nextCardInfo:CardNextInfo = null;
 				if (profile.Left != null && request.Id == profile.Left.Id)
@@ -279,24 +272,46 @@ class SL {
 				if (profile.Deck.getCount() > 0) {
 					var currentCard:CardMeta = meta.Cards.tryGet(GetCurrentCard(profile));
 
-					ApplyReward(GetRewardByCondition(currentCard.Reward, currentCard.Con, meta, profile, random), meta, profile, random);
-
-					if (currentCard.Type == CardMeta.TYPE_QUEST) {
-						var card:CardData = profile.Cards.tryGet(currentCard.Id);
-						if (card == null) {
-							card = new CardData(currentCard.Id);
-							card.Value = CardMeta.QUEST_ACTIVE;
-							profile.ActiveQuests.push(currentCard.Id);
-							profile.Cards.set(currentCard.Id, card);
-						} else if (card.Value == CardMeta.QUEST_SUCCESS) {
-							ApplyReward(GetRewardByCondition(currentCard.SR, currentCard.SC, meta, profile, random), meta, profile, random);
-						}
-						profile.QuestEvent = currentCard.Id;
-					} else {
-						if (currentCard.Next != null) {
-							CreateLeftRight(currentCard.Next, meta, profile, random);
+					if (currentCard.Next != null)
+						profile.CardStates.push(CardData.CHOICE);
+					if (currentCard.Reward != null) {
+						if (HasVisibleReward(currentCard, meta))
+							profile.CardStates.push(CardData.REWARD);
+						else
+							ApplyReward(GetRewardByCondition(currentCard.Reward, currentCard.Con, meta, profile, random), meta, profile, random);
+					}
+					if (currentCard.Descs != null && currentCard.Descs.length > 0) {
+						var cardProfile:CardData = profile.Cards.tryGet(currentCard.Id);
+						if (currentCard.ShowDesc || cardProfile == null || cardProfile.CT == 0) {
+							for (i in 0...currentCard.Descs.length)
+								profile.CardStates.push(CardData.DESCRIPTION);
 						}
 					}
+
+					ApplyCardState(currentCard, meta, profile, random);
+
+					// if ((currentCard.Descs != null && currentCard.Descs.length > 0)
+					// 	&& (currentCard.Next != null || currentCard.Reward != null || currentCard.Descs.length > 1)) {
+					//
+					// 	if (cardProfile == null || cardProfile.CT == 0) {
+					// 		profile.DialogIndex = currentCard.Next != null
+					// 			|| currentCard.Reward != null ? currentCard.Descs.length : currentCard.Descs.length;
+					// 		return;
+					// 	}
+					// }
+
+					// if (currentCard.Type == CardMeta.TYPE_QUEST) {
+					// 	var card:CardData = profile.Cards.tryGet(currentCard.Id);
+					// 	if (card == null) {
+					// 		card = new CardData(currentCard.Id);
+					// 		card.Value = CardMeta.QUEST_ACTIVE;
+					// 		profile.ActiveQuests.push(currentCard.Id);
+					// 		profile.Cards.set(currentCard.Id, card);
+					// 	} else if (card.Value == CardMeta.QUEST_SUCCESS) {
+					// 		ApplyReward(GetRewardByCondition(currentCard.SR, currentCard.SC, meta, profile, random), meta, profile, random);
+					// 	}
+					// 	profile.QuestEvent = currentCard.Id;
+					// } else {
 				} else {
 					profile.Cooldown = requestTimestamp;
 				}
@@ -323,19 +338,20 @@ class SL {
 				i.Count = i.Count < 0 ? 0 : i.Count;
 				profile.Deck.push(meta.Locations.tryGet(profile.CurrentLocation).Over[0].Id);
 				profile.Cooldown = 0;
+				profile.CardStates = new List_1<Int>();
 				profile.Rerolls++;
-				var r:RewardMeta = Type.createEmptyInstance(RewardMeta);
-				r.Id = id;
-				r.Type = ConditionMeta.ITEM;
-				r.Count = -price;
-				profile.RewardEvents.push(r);
+				/*var r:RewardMeta = Type.createEmptyInstance(RewardMeta);
+					r.Id = id;
+					r.Type = ConditionMeta.ITEM;
+					r.Count = -price; */
+				profile.RewardEvents.getOrCreate(id, f -> new ItemData(id, 0)).Count += -price;
 
 				for (c in profile.History)
 					profile.Cards.tryGet(c).CR = 0;
-
 				profile.History = new List_1();
 
-				CreateLeftRight(meta.Cards.tryGet(profile.Deck[0]).Next, meta, profile, random);
+				profile.CardStates.push(CardData.CHOICE);
+				ApplyCardState(meta.Cards.tryGet(profile.Deck[0]), meta, profile, random);
 
 			case TriggerMeta.START_GAME:
 
@@ -361,9 +377,19 @@ class SL {
 				response.Error = "unexpected request";
 				return;
 		}
-
 		profile.LastChange = requestTimestamp;
 		profile.Rid += 1;
+	}
+
+	private static function ApplyCardState(currentCard:CardMeta, meta:GameMeta, profile:ProfileData, random:Random) {
+		switch (GetCurrentState(profile)) {
+			case CardData.CHOICE:
+				CreateLeftRight(currentCard.Next, meta, profile, random);
+			case CardData.REWARD:
+				ApplyReward(GetRewardByCondition(currentCard.Reward, currentCard.Con, meta, profile, random), meta, profile, random);
+			case CardData.DESCRIPTION:
+				// nothing to do
+		}
 	}
 
 	private static function CheckAndClearDeck(meta:GameMeta, profile:ProfileData, random:Random) {
@@ -414,9 +440,19 @@ class SL {
 			}
 		}
 
-		if (currentCard.Descs != null || currentCard.Next != null) {
+		if (currentCard.Descs == null && currentCard.Reward == null && currentCard.Next == null) {
+			// nothing to show
+		} else if (currentCard.Descs != null && currentCard.Reward == null && currentCard.Next == null) {
+			// show card with description only one time
+			if (currentCard.ShowDesc == true)
+				deck.push(currentCard.Id);
+			else {
+				var cardProfile:CardData = profile.Cards.tryGet(currentCard.Id);
+				if (cardProfile == null || cardProfile.CT == 0)
+					deck.push(currentCard.Id);
+			}
+		} else
 			deck.push(currentCard.Id);
-		}
 
 		if (currentCard.Over != null) {
 			var candidates:List_1<TriggerMeta> = new List_1();
@@ -449,7 +485,7 @@ class SL {
 		if (!CheckCardTrigger(card, null, meta, profile, random))
 			return false;
 
-		if (card.Next != null && (card.Descs == null || profile.DialogIndex > 0)) {
+		if (card.Next != null) {
 			var hasNext:Bool = false;
 			for (c in card.Next) {
 				var cm:CardMeta = meta.Cards.tryGet(c.Id);
@@ -555,13 +591,17 @@ class SL {
 					var m:SkillMeta = meta.Skills.tryGet(r.Id);
 					profile.Skills[cast m.Slot] = r.Id;
 			}
-
-			profile.RewardEvents.push(r);
+			var ir:ItemData = new ItemData(r.Id, r.Count);
+			profile.RewardEvents.getOrCreate(r.Id, f -> new ItemData(r.Id, 0)).Count += r.Count;
 		}
 	}
 
 	public static function GetCurrentCard(profile:ProfileData):String {
 		return profile.Deck[profile.Deck.getCount() - 1];
+	}
+
+	public static function GetCurrentState(profile:ProfileData):Int {
+		return profile.CardStates.getCount() > 0 ? profile.CardStates[profile.CardStates.getCount() - 1] : -1;
 	}
 
 	private static function RecursiveGroup(candidates:Array<CardMeta>, nextDict:Dictionary_2<String, String>, nextCard:String, next:NativeArray<TriggerMeta>,
@@ -642,6 +682,14 @@ class SL {
 				arr[i] = arr[randomIndex];
 				arr[randomIndex] = temp;
 			}
+	}
+
+	private static function HasVisibleReward(currentCard:CardMeta, meta:GameMeta):Bool {
+		for (rr in currentCard.Reward)
+			for (r in rr)
+				if (!meta.Items.tryGet(r.Id).Hidden)
+					return true;
+		return false;
 	}
 }
 

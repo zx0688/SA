@@ -52,7 +52,7 @@ namespace UI.Map
             background.Show("blue", meta.Name);
             background.gameObject.SetActive(true);
             gameObject.SetActive(true);
-            description.Localize(meta.Descs.GetCurrentDescription());
+            description.Localize(meta.Descs[0]);
 
             icon.LoadCardImage(meta.Image);
 

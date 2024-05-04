@@ -34,7 +34,7 @@ public class PlayerService : IService
     private GameMeta Meta => Services.Meta.Game;
     private GameRequest request = null;
 
-    public List<RewardMeta> RewardCollected => Profile.RewardEvents.Where(r => !Services.Meta.Game.Items[r.Id].Hidden).ToList();
+    public List<ItemData> RewardCollected => Profile.RewardEvents.Values.ToList().Where(r => !Services.Meta.Game.Items[r.Id].Hidden).ToList();
 
     public string FollowQuest
     {
@@ -215,34 +215,7 @@ public class PlayerService : IService
         swipeData.Conditions = new List<ConditionMeta>();
 
         if (swipeData.Card.Next.HasTriggers())
-        {
-
-            foreach (TriggerMeta trigger in swipeData.Card.Next)
-            {
-                List<TriggerMeta> ts = new List<TriggerMeta>();
-                if (trigger.Type == CardMeta.TYPE_GROUP)
-                {
-                    Meta.Groups.TryGetValue(trigger.Id, out GroupMeta groupMeta);
-                    foreach (TriggerMeta tg in groupMeta.Cards)
-                        ts.Add(tg);
-                }
-                else
-                {
-                    ts.Add(trigger);
-                }
-
-                foreach (TriggerMeta t in ts)
-                {
-                    Meta.Cards.TryGetValue(t.Id, out CardMeta c);
-                    if (c.Con.HasCondition())
-                        c.Con.ToList().ForEach(cc => swipeData.Conditions.Merge(cc.ToList()));
-
-                    if (c.Over.HasTriggers() && c.Over.TryGet(c.Over.Length - 1, out TriggerMeta o))
-                        if (Services.Meta.Game.Cards.TryGetValue(o.Id, out CardMeta co) && co.Con.HasCondition())
-                            co.Con.ToList().ForEach(cc => swipeData.Conditions.Merge(cc.ToList()));
-                }
-            }
-        }
+            RecursiveFindAllCardTriggers(swipeData.Card.Next, swipeData);
 
         if (Profile.Deck.Count > 1 && Meta.Cards.TryGetValue(Profile.Deck[Profile.Deck.Count - 2], out CardMeta nextCardMeta) && nextCardMeta.Con.HasCondition())
             nextCardMeta.Con.ToList().ForEach(cc => swipeData.Conditions.Merge(cc.ToList()));
@@ -269,6 +242,44 @@ public class PlayerService : IService
             if (left == false) cards = findAllNextPossibleCards(swipeData.Right);
             bool right = !left && quest.Next.ToList().Exists(t => swipeData.Right.Id == t.Id || findCardIdDeepRecursive(cards, t.Id, 4));
             swipeData.FollowPrompt = left ? CardMeta.LEFT : (right ? CardMeta.RIGHT : -1);
+        }
+    }
+
+    private void RecursiveFindAllGroupCardTriggers(TriggerMeta trigger, List<TriggerMeta> ts)
+    {
+        if (trigger.Type == CardMeta.TYPE_GROUP)
+        {
+            Meta.Groups.TryGetValue(trigger.Id, out GroupMeta groupMeta);
+            if (groupMeta == null)
+                Debug.LogError("group trigger error " + trigger.Id);
+            foreach (TriggerMeta tg in groupMeta.Cards)
+                RecursiveFindAllGroupCardTriggers(tg, ts);
+        }
+        else
+        {
+            ts.Add(trigger);
+        }
+    }
+
+    private void RecursiveFindAllCardTriggers(TriggerMeta[] next, SwipeData data, bool stop = false)
+    {
+        foreach (TriggerMeta trigger in next)
+        {
+            List<TriggerMeta> ts = new List<TriggerMeta>();
+            RecursiveFindAllGroupCardTriggers(trigger, ts);
+            foreach (TriggerMeta t in ts)
+            {
+                Meta.Cards.TryGetValue(t.Id, out CardMeta c);
+
+                if (c.Descs == null && c.Over == null && c.Under == null && c.Next.HasTriggers() && !stop)
+                    RecursiveFindAllCardTriggers(c.Next, data, true);
+                if (c.Con.HasCondition())
+                    c.Con.ToList().ForEach(cc => data.Conditions.Merge(cc.ToList()));
+
+                if (c.Over.HasTriggers() && c.Over.TryGet(c.Over.Length - 1, out TriggerMeta o))
+                    if (Services.Meta.Game.Cards.TryGetValue(o.Id, out CardMeta co) && co.Con.HasCondition())
+                        co.Con.ToList().ForEach(cc => data.Conditions.Merge(cc.ToList()));
+            }
         }
     }
 

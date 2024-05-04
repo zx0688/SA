@@ -83,6 +83,7 @@ namespace Core
             Swipe.OnDrop += OnDrop;
             Swipe.OnChangeDeviation += OnChangeDeviation;
             Swipe.OnChangeDirection += OnChangeDirection;
+            Swipe.OnDoubleClickDetected += OnDoubleClick;
         }
 
         private void RemoveListeners()
@@ -92,6 +93,12 @@ namespace Core
             Swipe.OnDrop -= OnDrop;
             Swipe.OnChangeDeviation -= OnChangeDeviation;
             Swipe.OnChangeDirection -= OnChangeDirection;
+            Swipe.OnDoubleClickDetected -= OnDoubleClick;
+        }
+
+        private void OnDoubleClick()
+        {
+            hud.OnDoubleClick();
         }
 
         private void OnChangeDeviation(float obj)

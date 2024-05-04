@@ -31,7 +31,8 @@ public class AssetsService
     public string Localize(string key, LocalizePartEnum part) => part switch
     {
         LocalizePartEnum.GUI => LocalDic.GUI.TryGetValue(key, out string res) ? res : $"[{key}]",
-        LocalizePartEnum.CardDescription => LocalDic.CardDescription.TryGetValue(key, out string res) ? res : key,////$"[{key}]",
+        LocalizePartEnum.CardDescription => LocalDic.CardDescription.TryGetValue(key, out string res) ? res : key,
+        //LocalizePartEnum.CardAction => LocalDic.CardAction.TryGetValue(key, out string res) ? res : key,
         LocalizePartEnum.CardName => LocalDic.CardName.TryGetValue(key, out string res) ? res : key,//$"[{key}]",
         //LocalizePartEnum.ChoiceText => LocalDic.ChoiceText.TryGetValue(key, out string res) ? res : key,//$"[{key}]",
         _ => $"[{key}]"
@@ -350,7 +351,7 @@ public enum LoadContentOption
 
 public enum LocalizePartEnum
 {
-    GUI, CardName, CardDescription
+    GUI, CardName, CardDescription, CardAction
 }
 
 [Serializable]
@@ -360,6 +361,7 @@ public class LocalizationData
     public Dictionary<String, String> GUI;
     public Dictionary<String, String> CardName;
     public Dictionary<String, String> CardDescription;
-    //public Dictionary<String, String> ChoiceText;
+    public Dictionary<String, String> CardAction;
+
     public int Version;
 }

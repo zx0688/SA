@@ -31,6 +31,8 @@ namespace Core
         [HideInInspector] public static event Action OnDrop;
         [HideInInspector] public static event Action OnRestoring;
 
+        [HideInInspector] public static event Action OnDoubleClickDetected;
+
         [HideInInspector] public float Deviation;
         [HideInInspector] public Vector2 Vector;
 
@@ -127,8 +129,6 @@ namespace Core
                         MovingDispatcher();
                     }
 
-                    break;
-                    // for the future features!
                     bool tapDetected = false;
 #if PLATFORM_ARCH_64 || UNITY_EDITOR || PLATFORM_STANDALONE
                     tapDetected = Input.GetMouseButtonDown(0);
@@ -144,6 +144,7 @@ namespace Core
                         if (Time.time - lastTapThreshold <= doubleTapThreshold)
                         {
                             lastTapThreshold = 0;
+                            OnDoubleClickDetected?.Invoke();
 
                         }
                         else

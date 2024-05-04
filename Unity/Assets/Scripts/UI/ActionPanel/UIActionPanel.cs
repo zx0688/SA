@@ -10,6 +10,7 @@ using System.Data;
 using UI.Components;
 using System.Linq;
 using System.Drawing;
+using haxe.root;
 
 namespace UI.ActionPanel
 {
@@ -22,9 +23,7 @@ namespace UI.ActionPanel
         [SerializeField] private UIConditions conditions;
         [SerializeField] private Text description;
         [SerializeField] private GameObject delem;
-        [SerializeField] private Text nextText;
-
-        // [SerializeField] private GameObject choicePanel;
+        [SerializeField] private UICurrent backpack;
 
 
         [SerializeField] private List<Color32> colors;
@@ -32,7 +31,7 @@ namespace UI.ActionPanel
         private bool choiceble = false;
         private int choice = -10;
         private float threshold = 0.1f;
-        private bool hasNextText = false;
+        //private bool hasNextText = false;
 
 
         private SwipeData data;
@@ -43,7 +42,6 @@ namespace UI.ActionPanel
             Swipe.OnDrop += OnDrop;
             Swipe.OnTakeCard += OnTakeCard;
             Swipe.OnEndSwipe += Hide;
-
 
             Swipe.OnEndSwipe -= Hide;
             Swipe.OnEndSwipe -= Hide;
@@ -59,30 +57,44 @@ namespace UI.ActionPanel
 
             HideAll();
 
-            if (data.Card.Type == CardMeta.TYPE_QUEST && Services.Player.Profile.Cards.TryGetValue(data.Card.Id, out CardData cardData))
+            //Services.Player.Profile.Cards.TryGetValue(data.Card.Id, out CardData cardData);
+
+            // if (data.Card.Type == CardMeta.TYPE_QUEST && Services.Player.Profile.Cards.TryGetValue(data.Card.Id, out CardData cardData))
+            // {
+            //     description.gameObject.SetActive(true);
+            //     description.text = data.Card.Name.Localize(LocalizePartEnum.CardName);
+            //     description.color = colors[0];
+            // }
+            // else if (data.Card.Next.HasTriggers() && data.Card.Descs.HasTexts() && Services.Player.Profile.DialogIndex < data.Card.Descs.Length &&
+            // (!Services.Player.Profile.Cards.TryGetValue(data.Card.Id, out cardData) || cardData.CT == 0))
+            // {
+            //     string desc = data.Card.Descs.GetCurrentDescription();
+            //     if (desc.HasText()) SetDecription(desc);
+            // }
+
+            int currentCardState = SL.GetCurrentState(Services.Player.Profile);
+            if (currentCardState == CardData.DESCRIPTION)
             {
-                description.gameObject.SetActive(true);
-                description.text = data.Card.Name.Localize(LocalizePartEnum.CardName);
-                description.color = colors[0];
+                string desc = data.Card.Descs[data.Card.Descs.Length - Services.Player.Profile.CardStates.Where(c => c == 0).ToList().Count];
+                SetDecription(desc);
             }
-            else if (data.Card.Next.HasTriggers() && data.Card.Descs.HasTexts() && Services.Player.Profile.DialogIndex < data.Card.Descs.Length &&
-            (!Services.Player.Profile.Cards.TryGetValue(data.Card.Id, out cardData) || cardData.CT == 0))
+            else if (currentCardState == CardData.REWARD)
             {
-                string desc = data.Card.Descs.GetCurrentDescription();
-                if (desc.HasText()) SetDecription(desc);
+                if (Services.Player.RewardCollected.Count > 0)
+                {
+                    backpack.gameObject.SetActive(true);
+                    backpack.SetItems(Services.Player.RewardCollected, Services.Player.Profile, Services.Meta.Game);
+                }
+                else
+                {
+                    SetDecription("noint1");
+                }
             }
-            else if ((data.Left == null && data.Right == null) || (data.Left.Id == Services.Player.Profile.Deck.Last()))
-            {
-                string desc = data.Card.Descs.GetCurrentDescription();
-                if (desc.HasText()) SetDecription(desc);
-            }
-            else
+            else if (currentCardState == CardData.CHOICE)
             {
                 if (data.Left.Id == data.Right.Id)
                 {
-
                     left.ShowChoice(data.Left, data.FollowPrompt == CardMeta.LEFT);
-
                 }
                 else
                 {
@@ -91,41 +103,43 @@ namespace UI.ActionPanel
                     right.ShowChoice(data.Right, data.FollowPrompt == CardMeta.RIGHT);
                     delem.SetActive(true);
                 }
-
-
+            }
+            else
+            {
+                Services.Meta.Game.Cards.TryGetValue("28393500", out CardMeta nextDefaultCard);
+                left.ShowChoice(nextDefaultCard, data.FollowPrompt == CardMeta.LEFT);
             }
         }
+
+
+        // if (data.Card.Next.HasTriggers() && data.Card.Descs.HasTexts() && Services.Player.Profile.DialogIndex < data.Card.Descs.Length &&
+        // // (!Services.Player.Profile.Cards.TryGetValue(data.Card.Id, out cardData) || cardData.CT == 0))
+        // // {
+        // //     string desc = data.Card.Descs.GetCurrentDescription();
+        // //     if (desc.HasText()) SetDecription(desc);
+        // // }
+        // if ((data.Left == null && data.Right == null) || (data.Left.Id == Services.Player.Profile.Deck.Last()))
+        // {
+        //     //string desc = data.Card.Descs.GetCurrentDescription();
+        //     //if (desc.HasText()) SetDecription(desc);
+        // }
+
 
         void OnTakeCard()
         {
             if (data.Card == null || data.Card.Type != CardMeta.TYPE_CARD)
                 return;
 
-            if (hasNextText)
-            {
-                nextText.GetComponent<RectTransform>().DOScale(new Vector3(1.1f, 1.1f, 1.1f), 0.2f);
-            }
+            //if (backpack.gameObject.activeInHierarchy)
+            //    backpack.TakeCard();
 
             if (data.Left != null && data.Left.Id == data.Right.Id)
             {
-                // if (firstTake == true)
-                // {
-                //     left.ShowChoice(data.Left, data.FollowPrompt == CardMeta.LEFT);
-                // }
-
                 left.FadeIn();
-
             }
-            else if (data.Left != null)
+            else if (data.Left == null && data.Right == null)
             {
-                // choiceble = true;
-                // left.ShowChoice(data.Left, data.FollowPrompt == CardMeta.LEFT);
-                // right.ShowChoice(data.Right, data.FollowPrompt == CardMeta.RIGHT);
-                //delem.SetActive(true);
-            }
-            else if (data.Left == null)
-            {
-
+                left.FadeIn();
             }
 
             choice = -10;
@@ -137,8 +151,8 @@ namespace UI.ActionPanel
             if (data.Card == null || data.Card.Type != CardMeta.TYPE_CARD)
                 return;
 
-            if (hasNextText)
-                nextText.GetComponent<RectTransform>().DOScale(new Vector3(1f, 1f, 1f), 0.15f);
+            //if (backpack.gameObject.activeInHierarchy)
+            //    backpack.DropCard();
 
             left.FadeOut();
             right.FadeOut();
@@ -177,20 +191,6 @@ namespace UI.ActionPanel
 
         private void SetDecription(string desc)
         {
-            hasNextText = true;
-            nextText.gameObject.SetActive(true);
-
-            if (data.Card.AText.HasText())
-            {
-                if (data.Card.AText.Contains("_r"))
-                    nextText.text = Services.Player.RewardCollected.Count > 0 ? data.Card.AText.Localize(LocalizePartEnum.GUI) : "Action.Next".Localize(LocalizePartEnum.GUI);
-                else
-                    nextText.text = data.Card.AText.Localize(LocalizePartEnum.GUI);
-            }
-            else
-                nextText.text = "Action.Next".Localize(LocalizePartEnum.GUI);
-
-
             description.gameObject.SetActive(true);
             description.text = desc.Localize(LocalizePartEnum.CardDescription);
 
@@ -204,22 +204,19 @@ namespace UI.ActionPanel
 
         private void HideAll()
         {
-            hasNextText = false;
-            nextText.gameObject.SetActive(false);
-            nextText.GetComponent<RectTransform>().localScale = new Vector3(1f, 1f, 1f);
+            backpack.gameObject.SetActive(false);
 
             left.HideAll();
             right.HideAll();
             delem.SetActive(false);
             description.gameObject.SetActive(false);
-            nextText.gameObject.SetActive(false);
         }
 
         void OnChangeDeviation(float dev)
         {
             if (data == null || Swipe.State != Swipe.States.DRAG || choiceble == false) return;
 
-            else if (Math.Abs(dev) < threshold)
+            else if (System.Math.Abs(dev) < threshold)
             {
                 if (choice == -10)
                     return;

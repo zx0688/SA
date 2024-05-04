@@ -79,6 +79,7 @@ namespace UI.ActionPanel
             else
                 reward.Hide();
 
+            skipText.text = "Action.Continue".Localize(LocalizePartEnum.GUI);
 
             levels.SetLevel(ch.Level);
 
@@ -95,11 +96,7 @@ namespace UI.ActionPanel
             else
                 hero.gameObject.SetActive(false);
 
-            if (ch.ActionT.HasText())
-                action.Localize(ch.ActionT, LocalizePartEnum.CardName);
-            else
-                action.Localize(ch.Name, LocalizePartEnum.CardName);
-
+            action.Localize(ch.Name, LocalizePartEnum.CardName);
 
             action.gameObject.SetActive(true);
             //action.color = colors[0];

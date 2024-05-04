@@ -20,6 +20,7 @@ namespace Core
         [SerializeField] private Image hero;
         [SerializeField] private Text name;
         [SerializeField] private GameObject eventIcon;
+        [SerializeField] private Text description;
 
         private CardMeta card => data.Card;
         private string current;
@@ -152,6 +153,48 @@ namespace Core
 
 
         }
+
+        public void OnDoubleClick()
+        {
+            //             if (!data.Card.Descs.HasTexts())
+            //                 return;
+            // 
+            //             if (groupDescription.gameObject.activeInHierarchy)
+            //                 DescriptionFadeOut();
+            //             else
+            //                 DescriptionFadeIn();
+        }
+
+        //         private void DescriptionFadeIn()
+        //         {
+        //             string desc = data.Card.Descs.GetCurrentDescription();
+        //             if (desc.HasText())
+        //             {
+        //                 //this.transform.DORotate(new Vector3(0f, 180f, 0f), 0.7f, RotateMode.Fast);
+        //                 groupDescription.gameObject.SetActive(true);
+        //                 groupDescription.alpha = 0f;
+        //                 description.gameObject.SetActive(true);
+        //                 description.text = desc.Localize(LocalizePartEnum.CardDescription);
+        //                 groupDescription.DOKill();
+        //                 groupDescription.DOFade(1f, 0.15f).OnComplete(() =>
+        //                 {
+        //                     //description.gameObject.SetActive(true);
+        //                     description.text = desc.Localize(LocalizePartEnum.CardDescription);
+        //                 });
+        //             }
+        //         }
+        // 
+        //         private void DescriptionFadeOut()
+        //         {
+        //             //this.transform.DORotate(new Vector3(0f, 0f, 0f), 0.7f, RotateMode.Fast);
+        //             groupDescription.DOKill();
+        //             groupDescription.DOFade(0f, 0.15f).OnComplete(() =>
+        //             {
+        //                 description.gameObject.SetActive(false);
+        //                 groupDescription.gameObject.SetActive(false);
+        //             });
+        //         }
+
     }
 
 }

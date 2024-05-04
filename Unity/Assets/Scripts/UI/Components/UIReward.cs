@@ -18,7 +18,7 @@ public class UIReward : MonoBehaviour
 
     public void Hide() => SetItems(null);
 
-    public void SetItems(RewardMeta[] rewards)
+    public void SetItems(RewardMeta[] rewards, bool animate = false)
     {
         if (rewards == null || rewards.Length == 0)
         {
@@ -66,7 +66,7 @@ public class UIReward : MonoBehaviour
             {
 
                 item.gameObject.SetActive(true);
-                item.SetItem(addmap.ElementAt(i).Value, colors);
+                item.SetItem(addmap.ElementAt(i).Value, colors, animate);
             }
             else
             {
@@ -82,7 +82,7 @@ public class UIReward : MonoBehaviour
             {
                 RewardMeta r = sub[i];
                 item.gameObject.SetActive(true);
-                item.SetItem(submap.ElementAt(i).Value, colors);
+                item.SetItem(submap.ElementAt(i).Value, colors, animate);
             }
             else
             {

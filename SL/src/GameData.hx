@@ -18,7 +18,7 @@ class ProfileData {
 	public var Deck:List_1<String>;
 	public var Left:CardNextInfo;
 	public var Right:CardNextInfo;
-	public var DialogIndex:Int;
+	public var CardStates:List_1<Int>;
 
 	public var Cards:Dictionary_2<String, CardData>;
 	public var Items:Dictionary_2<String, ItemData>;
@@ -42,13 +42,17 @@ class ProfileData {
 	public var History:List_1<String>;
 
 	// EVENTS
-	public var RewardEvents:List_1<RewardMeta>;
+	public var RewardEvents:Dictionary_2<String, ItemData>;
 	public var QuestEvent:String;
 }
 
 @:nativeGen
 @:strict(SerializableAttribute)
 class CardData {
+	public static inline var DESCRIPTION:Int = 0;
+	public static inline var REWARD:Int = 1;
+	public static inline var CHOICE:Int = 2;
+
 	public function new(Id:String) {
 		this.Id = Id;
 		this.CT = 0;
@@ -82,6 +86,10 @@ class ItemData {
 	public function new(Id:String, Count:Int) {
 		this.Id = Id;
 		this.Count = Count;
+	}
+
+	public function Copy():ItemData {
+		return new ItemData(this.Id, this.Count);
 	}
 
 	public var Id:String;

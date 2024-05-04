@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
-
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,37 +11,12 @@ public class UIRewardItem : MonoBehaviour
 {
     [SerializeField] private Text value;
     [SerializeField] private Image icon;
-    //[SerializeField] private Image randomIcon;
-
 
     private RewardMeta data;
     private bool isEmpty;
 
-    //protected IShowTooltip<ItemMeta> tooltip;
-    //public Button showTooltipBtn;
 
-    // [HideInInspector]
-    // protected Text timer;
-    // [HideInInspector]
-    // protected GameObject coin;
-    // [HideInInspector]
-    // protected GameObject timerPanel;
-
-    //protected Image back;
-
-    // public bool SetCountVisible
-    // {
-    //     get
-    //     {
-    //         return count.gameObject.activeInHierarchy && count.gameObject.activeSelf;
-    //     }
-    //     set
-    //     {
-    //         count.gameObject.SetActive(value);
-    //     }
-    // }
-
-    public virtual void SetItem(List<RewardMeta> rewards, Color32[] colors = null)
+    public void SetItem(List<RewardMeta> rewards, Color32[] colors = null, bool animate = false)
     {
         if (rewards == null || rewards.Count == 0)
         {
@@ -57,38 +32,27 @@ public class UIRewardItem : MonoBehaviour
 
         if (reward.Type == ConditionMeta.ITEM && value != null)
         {
-            value.text = max == min ? $"{min}x" : $"{min}-{max}x";
+            if (animate)
+            {
+                int cur = Services.Player.Profile.Items.TryGetValue(reward.Id, out ItemData i) ? i.Count : 0;
+                int prev = Math.Max(cur - reward.Count, 0);
+                value.text = prev.ToString();
+                DOTween.To(() => prev, x => prev = x, cur, 0.3f).SetEase(Ease.InExpo).OnUpdate(() => value.text = prev.ToString());
+            }
+            else
+            {
+                value.text = max == min ? $"{min}" : $"{min}-{max}";
+            }
             value.color = reward.Count > 0 ? (colors == null || colors.Length == 0 ? Color.green : colors[0]) : (colors == null || colors.Length == 0 ? Color.red : colors[1]);
         }
 
         isEmpty = false;
 
-        //if (this.data != null && this.data.Id == reward.Id && this.data.Type == reward.Type)
-        //    return;
-
         this.data = reward;
         this.gameObject.SetActive(true);
 
-        //if (tooltip != null)
-        //    showTooltipBtn.interactable = true;
         if (reward.Type == ConditionMeta.ITEM)
-        {
             icon.LoadItemIcon(reward.Id);
-
-            //randomIcon.gameObject.SetActive(reward.Chance > 0);
-            //            count.gameObject.SetActive(false);
-
-            // if (Services.Player.Profile.Items.TryGetValue(reward.Id, out ItemData i))
-            // {
-            //     count.gameObject.SetActive(true);
-            //     count.text = i.Count.ToString();
-            // }
-            // else
-            // {
-            //     count.gameObject.SetActive(false);
-            // }
-
-        }
     }
 
     public bool IsEmpty()
@@ -102,18 +66,9 @@ public class UIRewardItem : MonoBehaviour
         isEmpty = true;
 
         icon.sprite = null;
-
         this.gameObject.SetActive(false);
-
-        //if (tooltip != null)
-        //    showTooltipBtn.interactable = false;
     }
 
-    void Start()
-    {
-        // if (tooltip != null)
-        //     showTooltipBtn.onClick.AddListener(OnClick);
-    }
     protected virtual void Awake()
     {
         Clear();

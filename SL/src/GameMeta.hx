@@ -177,15 +177,13 @@ class CardMeta {
 	public var Cut:Bool;
 	public var Shake:Bool;
 	public var Level:Int;
-	public var AText:String;
 
 	public var CN:String;
+	public var ShowDesc:Bool;
 
 	public var Name:String;
 	public var Descs:NativeArray<String>;
 	public var Image:String;
-
-	public var ActionT:String;
 
 	public var Reward:NativeArray<NativeArray<RewardMeta>>;
 	public var Next:NativeArray<TriggerMeta>;

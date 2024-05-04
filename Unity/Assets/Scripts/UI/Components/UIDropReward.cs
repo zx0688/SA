@@ -14,6 +14,7 @@ using Cysharp.Threading.Tasks;
 
 public class UIDropReward : ServiceBehaviour
 {
+    public static Action OnDropArraved;
     public float radius = 300f;
 
     [SerializeField] private BlackLayer layer;
@@ -156,6 +157,7 @@ public class UIDropReward : ServiceBehaviour
                 item.gameObject.transform.DOKill();
 
                 CheckWaiting();
+                OnDropArraved?.Invoke();
             });
             item.gameObject.transform.DOScale(new Vector3(0.2f, 0.2f, 0.2f), 0.4f).SetDelay(0.5f);
         });
@@ -187,28 +189,31 @@ public class UIDropReward : ServiceBehaviour
 
         Vector3 position = positionSpendAnimation.transform.position;
 
-        item.gameObject.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
+        item.gameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+        item.gameObject.transform.DOMove(position, 0.35f, true).SetDelay(delay);
 
-        item.gameObject.transform.DOMove(position, 0.5f, true).SetDelay(delay).OnComplete(() =>
+
+        Image i = item.GetComponent<Image>();
+        i.DOKill();
+        Color32 color = i.color;
+        color.a = 255;
+        i.color = color;
+
+        i.DOFade(0.1f, 0.1f).SetDelay(0.8f + delay).OnComplete(() =>
         {
             item.gameObject.SetActive(false);
             item.gameObject.transform.DOKill();
 
-            // Image i = item.GetComponent<Image>();
-            // Color32 color = i.color;
-            // color.a = 255;
-            // i.color = color;
-            // i.DOKill();
+            Image i = item.GetComponent<Image>();
+            i.DOKill();
+            Color32 color = i.color;
+            color.a = 255;
+            i.color = color;
+
             CheckWaiting();
         });
 
-        // Image i = item.GetComponent<Image>();
-        // Color32 color = i.color;
-        // color.a = 255;
-        // i.color = color;
-
-        //i.DOFade(0.1f, 0.1f).SetDelay(0.4f + delay);
-        item.gameObject.transform.DOScale(new Vector3(0.5f, 0.5f, 0.5f), 0.6f).SetDelay(delay);
+        item.gameObject.transform.DOScale(new Vector3(0.4f, 0.4f, 0.4f), 0.35f).SetDelay(delay);
 
     }
 
@@ -232,10 +237,8 @@ public class UIDropReward : ServiceBehaviour
         ScriptITEM(item, new Vector3(0, 0, 0), positionQuestAnimation);
     }
 
-    private void OnItemReceived(List<RewardMeta> rewards)
+    private void OnItemReceived(List<ItemData> itemsData)
     {
-        List<ItemData> itemsData = rewards.Where(r => r.Type == ConditionMeta.ITEM).Select(r => new ItemData(Id: r.Id, Count: r.Count)).ToList();
-
         if (itemsData.Count == 1 && itemsData[0].Count == 1)
         {
             if (itemsData[0].Count > 0)

@@ -17,7 +17,7 @@ namespace GameServer
     public class HttpBatchServer
     {
         public static event Action<GameResponse> OnResponse;
-        public static event Action<List<RewardMeta>> OnGetReward;
+        public static event Action<List<ItemData>> OnGetReward;
 
         public static bool HasFatal { get; private set; }
 
@@ -203,17 +203,18 @@ namespace GameServer
             SL.Change(request, meta, profile, GameTime.Get(), response);
 
             if (response.Debug != null)
-                Debug.LogError($"DebugMessage:{response.Debug}");
+                Debug.LogWarning($"DebugMessage:{response.Debug}");
 
             if (response.Error != null)
                 throw new Exception(response.Error);
 
             Debug.Log($"DECK:{JSON.Serialize(profile.Deck)} LEFT:{(profile.Left != null ? profile.Left.Id : "no")} RIGHT:{(profile.Right != null ? profile.Right.Id : "no")}");
             Debug.Log($"LEFT NEXT:{(profile.Left != null ? profile.Left.Next : "no")} RIGHT NEXT:{(profile.Right != null ? profile.Right.Next : "no")}");
+            Debug.Log($"CARD STATES:{JSON.Serialize(profile.CardStates)}");
 
             if (profile.RewardEvents.Count > 0)
             {
-                OnGetReward?.Invoke(profile.RewardEvents.Where(r => !Services.Meta.Game.Items[r.Id].Hidden).ToList());
+                OnGetReward?.Invoke(Services.Player.RewardCollected);
                 Debug.Log($"Reward: {JSON.Serialize(profile.RewardEvents.ToList())}");
             }
 

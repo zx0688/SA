@@ -72,15 +72,15 @@ public class Services : MonoBehaviour
         GameTime.Fix((int)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds);
 
         //there should be await PlatformAdapter.Init (Google Play, AppStore)
-        if (loadText != null) loadText.text = "Loading language...";
+        if (loadText != null) loadText.text = $"{PreLoadingText("RU")}...";
         await Assets.LoadLocalization(
                     "RU", // PlatformAdapter.GetLocale() 
                     Progress.Create<float>(x => UpdateProgressUI(x)));
 
-        UpdateTextUI("Loading assets...");
+        UpdateTextUI("Loading.Assets");
         await Assets.Init(Progress.Create<float>(x => UpdateProgressUI(x)));
 
-        UpdateTextUI("Loading game data...");
+        UpdateTextUI("Loading.Data");
         await Meta.Init(Progress.Create<float>(x => UpdateProgressUI(x)));
 
         await HttpBatchServer.Init(
@@ -92,15 +92,15 @@ public class Services : MonoBehaviour
                 // correct global time
                 serverTimestamp => GameTime.Fix(serverTimestamp));
 
-        UpdateTextUI("Loading profile...");
+        UpdateTextUI("Loading.Profile");
         await Player.Init(Progress.Create<float>(x => UpdateProgressUI(x)));
 
         TimeFormat.Init();
 
-        UpdateTextUI("Loading icons...");
+        UpdateTextUI("Loading icons");
         //Resources.LoadAll<Sprite>("Cards");
         //Resources.LoadAll<Sprite>("Items");
-        UpdateTextUI("Loading scene...");
+        UpdateTextUI("Loading.Scene");
         Scene s = SceneManager.GetActiveScene();
 
         if (s.name != "Main")
@@ -123,12 +123,25 @@ public class Services : MonoBehaviour
     private void UpdateTextUI(string text)
     {
         if (loadText != null)
-            loadText.text = text.Localize(LocalizePartEnum.GUI);
+            loadText.text = $"{text.Localize(LocalizePartEnum.GUI)}...";
     }
     private void UpdateProgressUI(float progress)
     {
         if (slider != null)
             slider.value = progress;
+    }
+
+    private string PreLoadingText(string locale)
+    {
+        switch (locale)
+        {
+            case "RU":
+                return "Загрузка локализации";
+            case "EN":
+                return "Loading language";
+            default:
+                return "Loading language";
+        }
     }
 
 }

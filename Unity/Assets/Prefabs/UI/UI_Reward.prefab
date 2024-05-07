@@ -472,7 +472,11 @@ MonoBehaviour:
   - {fileID: 8549042793602900271}
   - {fileID: 9078888249898062643}
   - {fileID: 2175523129027928015}
-  colors: []
+  colors:
+  - serializedVersion: 2
+    rgba: 4278255412
+  - serializedVersion: 2
+    rgba: 4278463999
   panels:
   - {fileID: 8317140654674528488}
   - {fileID: 1110657882089354786}

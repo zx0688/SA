@@ -131,11 +131,13 @@ class GameResponse {
 @:nativeGen
 @:strict(SerializableAttribute)
 class CardNextInfo {
-	public function new(Id:String, Next:String) {
+	public function new(Id:String, Next:String, RewardIndex:Int) {
 		this.Id = Id;
 		this.Next = Next;
+		this.RewardIndex = RewardIndex;
 	}
 
+	public var RewardIndex:Int;
 	public var Id:String;
 	public var Next:String;
 }

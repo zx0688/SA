@@ -32,6 +32,7 @@ namespace UI.ActionPanel
         private int choice = -10;
         private float threshold = 0.1f;
         //private bool hasNextText = false;
+        private ProfileData profile => Services.Player.Profile;
 
 
         private SwipeData data;
@@ -72,10 +73,10 @@ namespace UI.ActionPanel
             //     if (desc.HasText()) SetDecription(desc);
             // }
 
-            int currentCardState = SL.GetCurrentState(Services.Player.Profile);
+            int currentCardState = SL.GetCurrentState(profile);
             if (currentCardState == CardData.DESCRIPTION)
             {
-                string desc = data.Card.Descs[data.Card.Descs.Length - Services.Player.Profile.CardStates.Where(c => c == 0).ToList().Count];
+                string desc = data.Card.Descs[data.Card.Descs.Length - profile.CardStates.Where(c => c == 0).ToList().Count];
                 SetDecription(desc);
             }
             else if (currentCardState == CardData.REWARD)
@@ -83,7 +84,7 @@ namespace UI.ActionPanel
                 if (Services.Player.RewardCollected.Count > 0)
                 {
                     backpack.gameObject.SetActive(true);
-                    backpack.SetItems(Services.Player.RewardCollected, Services.Player.Profile, Services.Meta.Game);
+                    backpack.SetItems(Services.Player.RewardCollected, profile, Services.Meta.Game);
                 }
                 else
                 {
@@ -94,20 +95,20 @@ namespace UI.ActionPanel
             {
                 if (data.Left.Id == data.Right.Id)
                 {
-                    left.ShowChoice(data.Left, data.FollowPrompt == CardMeta.LEFT);
+                    left.ShowChoice(data.Left, profile.Left, data.FollowPrompt == CardMeta.LEFT);
                 }
                 else
                 {
                     choiceble = true;
-                    left.ShowChoice(data.Left, data.FollowPrompt == CardMeta.LEFT);
-                    right.ShowChoice(data.Right, data.FollowPrompt == CardMeta.RIGHT);
+                    left.ShowChoice(data.Left, profile.Left, data.FollowPrompt == CardMeta.LEFT);
+                    right.ShowChoice(data.Right, profile.Right, data.FollowPrompt == CardMeta.RIGHT);
                     delem.SetActive(true);
                 }
             }
             else
             {
                 Services.Meta.Game.Cards.TryGetValue("28393500", out CardMeta nextDefaultCard);
-                left.ShowChoice(nextDefaultCard, data.FollowPrompt == CardMeta.LEFT);
+                left.ShowChoice(nextDefaultCard, null, data.FollowPrompt == CardMeta.LEFT);
             }
         }
 

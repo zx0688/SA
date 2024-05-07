@@ -46,7 +46,7 @@ namespace UI.ActionPanel
             bordrer.DOColor(new Color32(142, 129, 129, 255), 0.1f);
         }
 
-        public void ShowChoice(CardMeta ch, bool showFollowPrompt)
+        public void ShowChoice(CardMeta cardMeta, CardNextInfo info, bool showFollowPrompt)
         {
             gameObject.SetActive(true);
 
@@ -59,7 +59,7 @@ namespace UI.ActionPanel
             bordrer.DOKill();
             bordrer.color = new Color32(142, 129, 129, 255);
 
-            if (ch.Id == "28393500")
+            if (cardMeta.Id == "28393500")
             {
                 icon.gameObject.SetActive(false);
                 reward.gameObject.SetActive(false);
@@ -74,29 +74,30 @@ namespace UI.ActionPanel
                 reward.gameObject.SetActive(true);
             }
 
-            if (ch.Reward != null && ch.Reward.Length > 0)
-                reward.SetItems(SL.GetRewardByCondition(ch.Reward, ch.Con, Services.Meta.Game, Services.Player.Profile, null));
+            int index = info != null ? info.RewardIndex : 0;
+            if (index != -1)
+                reward.SetItems(cardMeta.Reward != null && index < cardMeta.Reward.Length ? cardMeta.Reward[index] : null, cardMeta.Cost != null && index < cardMeta.Cost.Length ? cardMeta.Cost[index] : null);
             else
                 reward.Hide();
 
             skipText.text = "Action.Continue".Localize(LocalizePartEnum.GUI);
 
-            levels.SetLevel(ch.Level);
+            levels.SetLevel(cardMeta.Level);
 
             followPrompt.gameObject.SetActive(showFollowPrompt);
 
-            image.LoadCardImage(ch.Image);
+            image.LoadCardImage(cardMeta.Image);
             image.gameObject.SetActive(true);
 
-            if (ch.Hero != null)
+            if (cardMeta.Hero != null)
             {
-                hero.LoadHeroImage(ch.Hero);
+                hero.LoadHeroImage(cardMeta.Hero);
                 hero.gameObject.SetActive(true);
             }
             else
                 hero.gameObject.SetActive(false);
 
-            action.Localize(ch.Name, LocalizePartEnum.CardName);
+            action.Localize(cardMeta.Name, LocalizePartEnum.CardName);
 
             action.gameObject.SetActive(true);
             //action.color = colors[0];

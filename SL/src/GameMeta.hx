@@ -185,7 +185,11 @@ class CardMeta {
 	public var Descs:NativeArray<String>;
 	public var Image:String;
 
+	public var ScaleCost:Bool;
+
 	public var Reward:NativeArray<NativeArray<RewardMeta>>;
+	public var Cost:NativeArray<NativeArray<RewardMeta>>;
+
 	public var Next:NativeArray<TriggerMeta>;
 	public var Over:NativeArray<TriggerMeta>;
 	public var Under:NativeArray<TriggerMeta>;

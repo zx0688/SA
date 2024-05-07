@@ -16,57 +16,60 @@ public class UIReward : MonoBehaviour
     //[SerializeField] private GameObject[] texts;
 
 
-    public void Hide() => SetItems(null);
+    public void Hide() => SetItems(null, null);
 
-    public void SetItems(RewardMeta[] rewards, bool animate = false)
+    public void SetItems(RewardMeta[] rewards, RewardMeta[] costs, bool animate = false)
     {
-        if (rewards == null || rewards.Length == 0)
+        if ((rewards == null || rewards.Length == 0) && (costs == null || costs.Length == 0))
         {
             gameObject.SetActive(false);
             return;
         }
 
-        List<RewardMeta> prepared = rewards.Where(r => r.Type == ConditionMeta.ITEM).ToList();
-        List<RewardMeta> add = prepared.Where(r => r.Count > 0).ToList();
-        List<RewardMeta> sub = prepared.Where(r => r.Count < 0).ToList();
+        List<RewardMeta> add = rewards != null ? rewards.Where(r => r.Count > 0 && r.Type == ConditionMeta.ITEM).ToList() : new List<RewardMeta>();
+        List<RewardMeta> sub = rewards != null ? rewards.Where(r => r.Count < 0 && r.Type == ConditionMeta.ITEM).ToList() : new List<RewardMeta>();
+
+        if (costs != null)
+            sub.AddRange(costs);
 
         gameObject.SetActive(true);
         panels[0].SetActive(add.Count > 0);
-        // texts[0].SetActive(add.Count > 0);
         panels[1].SetActive(sub.Count > 0);
-        // texts[1].SetActive(sub.Count > 0);
 
-        Dictionary<string, List<RewardMeta>> addmap = new Dictionary<string, List<RewardMeta>>();
-        add.ForEach(r =>
+        Set(addItems, add, colors[0], animate);
+        Set(subItems, sub, colors[1], animate);
+
+    }
+
+    private void Set(UIRewardItem[] uiItems, List<RewardMeta> items, Color32 color, bool animate)
+    {
+        Dictionary<string, List<RewardMeta>> map = new Dictionary<string, List<RewardMeta>>();
+        items.ForEach(r =>
         {
-            if (!addmap.TryGetValue(r.Id, out List<RewardMeta> value))
+            if (!map.TryGetValue(r.Id, out List<RewardMeta> value))
             {
                 value = new List<RewardMeta>();
-                addmap[r.Id] = value;
-            }
-            value.Add(r);
-        });
-
-        Dictionary<string, List<RewardMeta>> submap = new Dictionary<string, List<RewardMeta>>();
-        sub.ForEach(r =>
-        {
-            if (!submap.TryGetValue(r.Id, out List<RewardMeta> value))
-            {
-                value = new List<RewardMeta>();
-                submap[r.Id] = value;
+                map[r.Id] = value;
             }
             value.Add(r);
         });
 
 
-        for (int i = 0; i < addItems.Length; i++)
+        for (int i = 0; i < uiItems.Length; i++)
         {
-            UIRewardItem item = addItems[i];
-            if (i < addmap.Count)
+            UIRewardItem item = uiItems[i];
+            if (i < map.Count)
             {
-
                 item.gameObject.SetActive(true);
-                item.SetItem(addmap.ElementAt(i).Value, colors, animate);
+                List<RewardMeta> data = map.ElementAt(i).Value;
+
+                int min = 0;
+                data.Where(r => r.Chance == 0).ToList().ForEach(r => min += Math.Abs(r.Count));
+                int max = min;
+                data.Where(r => r.Chance > 0).ToList().ForEach(r => max += Math.Abs(r.Count));
+
+                ItemData itemData = new ItemData(data[0].Id, min);
+                item.SetItem(itemData, max, color, animate);
             }
             else
             {
@@ -74,23 +77,6 @@ public class UIReward : MonoBehaviour
                 item.gameObject.SetActive(false);
             }
         }
-
-        for (int i = 0; i < subItems.Length; i++)
-        {
-            UIRewardItem item = subItems[i];
-            if (i < submap.Count)
-            {
-                RewardMeta r = sub[i];
-                item.gameObject.SetActive(true);
-                item.SetItem(submap.ElementAt(i).Value, colors, animate);
-            }
-            else
-            {
-                item.Clear();
-                item.gameObject.SetActive(false);
-            }
-        }
-
     }
 
 }

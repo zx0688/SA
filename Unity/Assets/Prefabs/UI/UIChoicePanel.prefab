@@ -110,8 +110,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 259}
-  m_SizeDelta: {x: 512.3242, y: 99.6846}
+  m_AnchoredPosition: {x: 0, y: 243.66649}
+  m_SizeDelta: {x: 512.3242, y: 107.1427}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &40164651077429808
 CanvasRenderer:
@@ -148,13 +148,14 @@ MonoBehaviour:
     m_BestFit: 0
     m_MinSize: 7
     m_MaxSize: 88
-    m_Alignment: 7
+    m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
-    m_LineSpacing: 1
-  m_Text: "\u0421\u0442\u0430\u0440\u0438\u043D\u043D\u0430\u044F \u043A\u0443\u0437\u043D\u0438\u0446\u0430"
+    m_LineSpacing: 0.7
+  m_Text: "\u0421\u0442\u0430\u0440\u0438\u043D\u043D\u0430\u044F \u043A\u0443\u0437\u043D\u0438\u0446\u0430
+    hkjhjkhk h"
 --- !u!114 &1795917736001807981
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -372,10 +373,10 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1162545375349636042}
   - {fileID: 1431715032715387046}
   - {fileID: 8592899318199820462}
   - {fileID: 7954159653365826993}
+  - {fileID: 1162545375349636042}
   - {fileID: 5696807938495856123}
   - {fileID: 313525023330723076}
   m_Father: {fileID: 0}

@@ -156,7 +156,10 @@ namespace GameServer
                 //     profile = JSON.Deserialize<ProfileData>(SecurePlayerPrefs.GetString("profile"));
                 //     return profile;
                 // 
-                profile = SL.CreateProfile(meta, GameTime.Get(), SL.GetRandomInstance());
+                GameRequest request = new GameRequest(0);
+                request.Timestamp = GameTime.Get64();
+
+                profile = SL.CreateProfile(request, meta, GameTime.Get());
                 return profile;
             }
 

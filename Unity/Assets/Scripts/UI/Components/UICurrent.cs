@@ -11,7 +11,6 @@ public class UICurrent : MonoBehaviour
 {
     [SerializeField] private UICurrentItem[] items;
     [SerializeField] private Image backpack;
-    [SerializeField] private Text next;
 
     void Start()
     {
@@ -28,14 +27,14 @@ public class UICurrent : MonoBehaviour
 
     public void TakeCard()
     {
-        next.GetComponent<RectTransform>().DOKill();
-        next.GetComponent<RectTransform>().DOScale(1.1f, 0.15f);
+        //next.GetComponent<RectTransform>().DOKill();
+        //next.GetComponent<RectTransform>().DOScale(1.1f, 0.15f);
     }
 
     public void DropCard()
     {
-        next.GetComponent<RectTransform>().DOKill();
-        next.GetComponent<RectTransform>().DOScale(1.0f, 0.15f);
+        //next.GetComponent<RectTransform>().DOKill();
+        //next.GetComponent<RectTransform>().DOScale(1.0f, 0.15f);
     }
 
     public void Hide() => SetItems(null, null, null);
@@ -48,8 +47,8 @@ public class UICurrent : MonoBehaviour
             return;
         }
 
-        next.gameObject.SetActive(false);
-        next.GetComponent<RectTransform>().localScale = new Vector3(1f, 1f, 1f);
+        //next.gameObject.SetActive(false);
+        //next.GetComponent<RectTransform>().localScale = new Vector3(1f, 1f, 1f);
 
         gameObject.SetActive(true);
 

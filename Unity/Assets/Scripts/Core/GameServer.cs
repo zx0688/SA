@@ -211,14 +211,17 @@ namespace GameServer
             if (response.Error != null)
                 throw new Exception(response.Error);
 
-            Debug.Log($"DECK:{JSON.Serialize(profile.Deck)} LEFT:{(profile.Left != null ? profile.Left.Id : "no")} RIGHT:{(profile.Right != null ? profile.Right.Id : "no")}");
-            Debug.Log($"LEFT NEXT:{(profile.Left != null ? profile.Left.Next : "no")} RIGHT NEXT:{(profile.Right != null ? profile.Right.Next : "no")}");
-            Debug.Log($"CARD STATES:{JSON.Serialize(profile.CardStates)}");
+            Debug.Log($"DECK:{JSON.Serialize(profile.Deck)} CURRENT {(profile.Deck.Count > 0 ? SL.GetCurrentCard(profile).ColorizeHH("00FF00") : "-")}  LEFT:{(profile.Left != null ? profile.Left.Id : "no")} RIGHT:{(profile.Right != null ? profile.Right.Id : "no")}");
+            if (response.Log != null)
+                Debug.Log($"LOG:{response.Log}");
+
+            //Debug.Log($"LEFT NEXT:{(profile.Left != null ? profile.Left.Next : "no")} RIGHT NEXT:{(profile.Right != null ? profile.Right.Next : "no")}");
+            //Debug.Log($"CARD STATES:{JSON.Serialize(profile.CardStates)}");
 
             if (profile.RewardEvents.Count > 0)
             {
                 OnGetReward?.Invoke(Services.Player.RewardCollected);
-                Debug.Log($"Reward: {JSON.Serialize(profile.RewardEvents.ToList())}");
+                //Debug.Log($"Reward: {JSON.Serialize(profile.RewardEvents.ToList())}");
             }
 
 

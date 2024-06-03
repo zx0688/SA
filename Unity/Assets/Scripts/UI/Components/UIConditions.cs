@@ -10,11 +10,11 @@ using UnityEngine.UI;
 
 namespace UI.Components
 {
-    public class UIConditions : MonoBehaviour, ISetData<List<ConditionMeta>>
+    public class UIConditions : MonoBehaviour, ISetData<List<ItemTypeData>>
     {
         [SerializeField] private UIConditionItem[] items;
 
-        public List<ConditionMeta> Data { get; private set; }
+        public List<ItemTypeData> Data { get; private set; }
 
         void Awake()
         {
@@ -36,7 +36,7 @@ namespace UI.Components
             return true;
         }
 
-        public void SetItem(List<ConditionMeta> data)
+        public void SetItem(List<ItemTypeData> data)
         {
             Data = data;
 
@@ -51,7 +51,8 @@ namespace UI.Components
                 UIConditionItem item = items[i];
                 if (i < data.Count)
                 {
-                    item.SetItem(data[i]);
+                    ItemTypeData c = data[i];
+                    item.SetItem(c);
                 }
                 else
                 {

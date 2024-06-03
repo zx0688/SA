@@ -32,7 +32,7 @@ public class AssetsService
     {
         LocalizePartEnum.GUI => LocalDic.GUI.TryGetValue(key, out string res) ? res : $"[{key}]",
         LocalizePartEnum.CardDescription => LocalDic.CardDescription.TryGetValue(key, out string res) ? res : key,
-        //LocalizePartEnum.CardAction => LocalDic.CardAction.TryGetValue(key, out string res) ? res : key,
+        LocalizePartEnum.CardAction => LocalDic.ActionText.TryGetValue(key, out string res) ? res : key,
         LocalizePartEnum.CardName => LocalDic.CardName.TryGetValue(key, out string res) ? res : key,//$"[{key}]",
         //LocalizePartEnum.ChoiceText => LocalDic.ChoiceText.TryGetValue(key, out string res) ? res : key,//$"[{key}]",
         _ => $"[{key}]"
@@ -361,7 +361,7 @@ public class LocalizationData
     public Dictionary<String, String> GUI;
     public Dictionary<String, String> CardName;
     public Dictionary<String, String> CardDescription;
-    public Dictionary<String, String> CardAction;
+    public Dictionary<String, String> ActionText;
 
     public int Version;
 }

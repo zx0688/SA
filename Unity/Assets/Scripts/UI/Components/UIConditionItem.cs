@@ -8,14 +8,14 @@ using UnityEngine.UI;
 
 namespace UI.Components
 {
-    public class UIConditionItem : MonoBehaviour, ISetData<ConditionMeta>
+    public class UIConditionItem : MonoBehaviour, ISetData<ItemTypeData>
     {
         [SerializeField] private Text count;
         [SerializeField] private Image icon;
 
-        public ConditionMeta Data { get; private set; }
+        public ItemTypeData Data { get; private set; }
 
-        public void SetItem(ConditionMeta cond)
+        public void SetItem(ItemTypeData cond)
         {
             if (cond == null)
             {
@@ -27,7 +27,7 @@ namespace UI.Components
 
             if (cond.Type == ConditionMeta.ITEM)
             {
-                count.text = cond.Sign == ">" ? Math.Abs(cond.Count + 1).ToString() : Math.Abs(cond.Count).ToString();
+                count.text = Math.Abs(cond.Count).ToString();
                 count.gameObject.SetActive(cond.Count != 0);
             }
             else if (cond.Type == ConditionMeta.CARD)

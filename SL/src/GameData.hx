@@ -24,7 +24,7 @@ class ProfileData {
 	public var Items:Dictionary_2<String, ItemData>;
 	public var Skills:List_1<String>;
 	public var Accept:Dictionary_2<String, GameRequest>;
-	public var Triggers:Dictionary_2<String, TriggerData>;
+	public var Triggers:Dictionary_2<String, ItemTypeData>;
 
 	public var ActiveQuests:List_1<String>;
 
@@ -52,6 +52,8 @@ class CardData {
 	public static inline var DESCRIPTION:Int = 0;
 	public static inline var REWARD:Int = 1;
 	public static inline var CHOICE:Int = 2;
+	public static inline var NOTHING:Int = 3;
+	public static inline var ONLY_ONCE:Int = 4;
 
 	public function new(Id:String) {
 		this.Id = Id;
@@ -70,18 +72,6 @@ class CardData {
 
 @:nativeGen
 @:strict(SerializableAttribute)
-class TriggerData {
-	public function new(Id:String, Count:Int) {
-		this.Id = Id;
-		this.Count = Count;
-	}
-
-	public var Id:String;
-	public var Count:Int;
-}
-
-@:nativeGen
-@:strict(SerializableAttribute)
 class ItemData {
 	public function new(Id:String, Count:Int) {
 		this.Id = Id;
@@ -94,6 +84,17 @@ class ItemData {
 
 	public var Id:String;
 	public var Count:Int;
+}
+
+@:nativeGen
+@:strict(SerializableAttribute)
+class ItemTypeData extends ItemData {
+	public function new(Id:String, Count:Int, Type:Int) {
+		super(Id, Count);
+		this.Type = Type;
+	}
+
+	public var Type:Int;
 }
 
 @:nativeGen
@@ -124,6 +125,7 @@ class GameResponse {
 
 	//
 	public var Debug:String;
+	public var Log:String;
 
 	public var Timestamp:Int;
 }

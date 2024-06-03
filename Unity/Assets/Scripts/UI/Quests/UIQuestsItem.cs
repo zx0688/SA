@@ -41,7 +41,7 @@ public class UIQuestsItem : MonoBehaviour, ISetData<ItemData>
             throw new Exception("quest should have a card profile data");
 
         star.SetActive(Services.Player.FollowQuest == data.Id);
-        target.SetItems(meta.SC, meta.ST);
+        //target.SetItems(meta.SC, meta.ST);
 
         this.data = data;
 

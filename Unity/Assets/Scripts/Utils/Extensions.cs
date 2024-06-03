@@ -21,16 +21,18 @@ public static class Extensions
     public static string Localize(this string key, LocalizePartEnum part = LocalizePartEnum.GUI) => Services.Assets.Localize(key ?? "", part);
     public static void Localize(this Text textField, string key, LocalizePartEnum part = LocalizePartEnum.GUI) => textField.text = Services.Assets.Localize(key ?? "", part);
 
-    //public static List<RewardMeta> MakeCopy(this List<RewardMeta> key) => Services.Assets.Localize(key);
+    public static RewardMeta[] GetOnlyConstantReward(this RewardMeta[] reward) => reward.Where(r => r.Chance == 0).ToArray();
 
-    public static List<ConditionMeta> Merge(this List<ConditionMeta> conditions, List<ConditionMeta> other)
+    public static string ColorizeHH(this string text, string color) => $"<color=#{color}>{text}</color>";
+
+    public static List<ItemTypeData> Merge(this List<ItemTypeData> conditions, List<ItemTypeData> other)
     {
-        foreach (ConditionMeta m in other)
+        other.ForEach(m =>
         {
-            ConditionMeta c = conditions.Find(c => c.Id == m.Id);
+            ItemTypeData c = conditions.Find(c => c.Id == m.Id && c.Type == m.Type);
             if (c == null)
                 conditions.Add(m);
-        }
+        });
         return conditions;
     }
 

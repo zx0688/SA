@@ -62,11 +62,11 @@ public class MetaService
         string asset = await Services.Assets.GetJson("meta", GOOGLE_DRIVE, progress, LoadContentOption.UseFileVersion);
         Debug.Log(asset);
 
-        await UniTask.SwitchToThreadPool();
+        //await UniTask.SwitchToThreadPool();
         Game = JSON.Deserialize<GameMeta>(asset);
-        await UniTask.SwitchToMainThread();
+        //await UniTask.SwitchToMainThread();
 
-        Debug.Log(JsonUtility.ToJson(Game.Cards["28440109"]));
+        //Debug.Log(JsonUtility.ToJson(Game.Cards["28440109"]));
     }
 
 }

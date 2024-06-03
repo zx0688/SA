@@ -36,7 +36,7 @@ namespace Core
             }
             else if (cardData.Value == CardMeta.QUEST_ACTIVE)
             {
-                uITarget.SetItems(data.Card.SC, data.Card.ST);
+                //uITarget.SetItems(data.Card.SC, data.Card.ST);
                 descr.Localize(data.Card.Descs[0], LocalizePartEnum.CardDescription);
                 descr.gameObject.SetActive(true);
                 targetText.gameObject.SetActive(true);

@@ -27,7 +27,6 @@ namespace UI.ActionPanel
         [SerializeField] private List<Color32> colors;
         [SerializeField] private Image bordrer;
         [SerializeField] private UILevelGroup levels;
-        [SerializeField] private Text skipText;
 
         private RectTransform rect => GetComponent<RectTransform>();
         private RectTransform rewardRect => reward.GetComponent<RectTransform>();
@@ -59,28 +58,30 @@ namespace UI.ActionPanel
             bordrer.DOKill();
             bordrer.color = new Color32(142, 129, 129, 255);
 
-            if (cardMeta.Id == "28393500")
-            {
-                icon.gameObject.SetActive(false);
-                reward.gameObject.SetActive(false);
-                levels.gameObject.SetActive(false);
-                reward.Hide();
-                return;
-            }
-            else
-            {
-                levels.gameObject.SetActive(true);
-                icon.gameObject.SetActive(true);
-                reward.gameObject.SetActive(true);
-            }
+            // if (cardMeta.Id == "28393500")
+            // {
+            //     icon.gameObject.SetActive(false);
+            //     reward.gameObject.SetActive(false);
+            //     levels.gameObject.SetActive(false);
+            //     reward.Hide();
+            //     return;
+            // }
+            // else
+            // {
+            levels.gameObject.SetActive(true);
+            icon.gameObject.SetActive(true);
+            reward.gameObject.SetActive(true);
+            //}
 
             int index = info != null ? info.RewardIndex : 0;
             if (index != -1)
-                reward.SetItems(cardMeta.Reward != null && index < cardMeta.Reward.Length ? cardMeta.Reward[index] : null, cardMeta.Cost != null && index < cardMeta.Cost.Length ? cardMeta.Cost[index] : null);
+                reward.SetItems(cardMeta.Reward != null &&
+                index < cardMeta.Reward.Length ? cardMeta.Reward[index].Where(r => r.Chance == 0).ToArray() : null,
+                cardMeta.Cost != null && index < cardMeta.Cost.Length ? cardMeta.Cost[index].Where(r => r.Chance == 0).ToArray() : null);
             else
                 reward.Hide();
 
-            skipText.text = "Action.Continue".Localize(LocalizePartEnum.GUI);
+            //skipText.text = "Action.Continue".Localize(LocalizePartEnum.GUI);
 
             levels.SetLevel(cardMeta.Level);
 
@@ -97,7 +98,10 @@ namespace UI.ActionPanel
             else
                 hero.gameObject.SetActive(false);
 
-            action.Localize(cardMeta.Name, LocalizePartEnum.CardName);
+            if (cardMeta.Act != null)
+                action.Localize(cardMeta.Act, LocalizePartEnum.CardAction);
+            else
+                action.Localize(cardMeta.Name, LocalizePartEnum.CardName);
 
             action.gameObject.SetActive(true);
             //action.color = colors[0];

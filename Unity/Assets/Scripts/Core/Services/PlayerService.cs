@@ -212,15 +212,17 @@ public class PlayerService : IService
         swipeData.LastCard = swipeData.Left == null && swipeData.Right == null && Profile.Deck.Count <= 1;
         swipeData.Hero = swipeData.Card.Hero != null ? Meta.Heroes[swipeData.Card.Hero] : null;
 
-        swipeData.Conditions = new List<ConditionMeta>();
+        swipeData.Conditions = new List<ItemTypeData>();
 
         if (swipeData.Card.Next.HasTriggers())
             RecursiveFindAllCardTriggers(swipeData.Card.Next, swipeData);
 
-        if (Profile.Deck.Count > 1 && Meta.Cards.TryGetValue(Profile.Deck[Profile.Deck.Count - 2], out CardMeta nextCardMeta) && nextCardMeta.Con.HasCondition())
-            nextCardMeta.Con.ToList().ForEach(cc => swipeData.Conditions.Merge(cc.ToList()));
+        //if (Profile.Deck.Count > 1 && Meta.Cards.TryGetValue(Profile.Deck[Profile.Deck.Count - 2], out CardMeta nextCardMeta) && nextCardMeta.Con.HasCondition())
+        //    nextCardMeta.Con.ToList().ForEach(cc => swipeData.Conditions.Merge(cc.ToList()));
 
-        swipeData.Conditions = swipeData.Conditions.FindAll(c => c.Type == ConditionMeta.ITEM && Meta.Items.TryGetValue(c.Id, out ItemMeta item) && !item.Hidden);
+        //swipeData.Conditions = swipeData.Conditions.FindAll(c => c.Type == ConditionMeta.ITEM && Meta.Items.TryGetValue(c.Id, out ItemMeta item) && !item.Hidden);
+        //if(swipeData.Card.)
+        //swipeData.Card.Reward[0]
 
         //swipeData.Conditions = swipeData.Conditions.Where(c => !Profile.Items.TryGetValue(c.Id, out ItemData value) || value.Count < c.Count).ToList();
 
@@ -270,15 +272,25 @@ public class PlayerService : IService
             foreach (TriggerMeta t in ts)
             {
                 Meta.Cards.TryGetValue(t.Id, out CardMeta c);
+                if (c == null)
+                    throw new Exception("trigger Id " + t.Id);
 
-                if (c.Descs == null && c.Over == null && c.Under == null && c.Next.HasTriggers() && !stop)
-                    RecursiveFindAllCardTriggers(c.Next, data, true);
+                //if (c.Descs == null && c.Over == null && c.Under == null && c.Next.HasTriggers() && !stop)
+                //    RecursiveFindAllCardTriggers(c.Next, data, true);
+                if (c.Cost != null)
+                {
+                    foreach (RewardMeta[] cc in c.Cost)
+                        data.Conditions.Merge(cc.Select(c => new ItemTypeData(c.Id, c.Count, c.Type)).ToList());
+                }
                 if (c.Con.HasCondition())
-                    c.Con.ToList().ForEach(cc => data.Conditions.Merge(cc.ToList()));
+                {
+                    foreach (ConditionMeta[] cc in c.Con)
+                        data.Conditions.Merge(cc.Select(c => new ItemTypeData(c.Id, c.Count, c.Type)).ToList());
+                }
 
-                if (c.Over.HasTriggers() && c.Over.TryGet(c.Over.Length - 1, out TriggerMeta o))
-                    if (Services.Meta.Game.Cards.TryGetValue(o.Id, out CardMeta co) && co.Con.HasCondition())
-                        co.Con.ToList().ForEach(cc => data.Conditions.Merge(cc.ToList()));
+                //if (c.Over.HasTriggers() && c.Over.TryGet(c.Over.Length - 1, out TriggerMeta o))
+                //     if (Services.Meta.Game.Cards.TryGetValue(o.Id, out CardMeta co) && co.Con.HasCondition())
+                //        co.Con.ToList().ForEach(cc => data.Conditions.Merge(cc.ToList()));
             }
         }
     }

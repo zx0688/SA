@@ -22,6 +22,9 @@ namespace Core
         [SerializeField] private GameObject eventIcon;
         [SerializeField] private Text description;
 
+        [SerializeField] private GameObject random;
+        [SerializeField] private Text randomValue;
+
         private CardMeta card => data.Card;
         private string current;
         private int ind;
@@ -150,6 +153,9 @@ namespace Core
             {
                 hero.gameObject.SetActive(false);
             }
+
+            random.SetActive(card.Chance > 0);
+            randomValue.text = $"{card.Chance}%";
 
 
         }

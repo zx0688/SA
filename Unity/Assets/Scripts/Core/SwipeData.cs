@@ -14,7 +14,7 @@ namespace Core
 
 
         public CardData Data;
-        public List<ConditionMeta> Conditions;
+        public List<ItemTypeData> Conditions;
 
         public int Choice;
     }

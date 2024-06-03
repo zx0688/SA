@@ -61,7 +61,7 @@ public class UIQuestsTooltip : MonoBehaviour
         this.meta = meta;
         this.data = data;
 
-        target.SetItems(meta.SC, meta.ST);
+        //target.SetItems(meta.SC, meta.ST);
         //reward.SetItems(SL.GetRewardByCondition(meta.SR, meta.SC, Services.Meta.Game, Services.Player.Profile, null));
 
         star.rectTransform.localScale = new Vector3(1f, 1f, 1f);

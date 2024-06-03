@@ -117,6 +117,7 @@ class TriggerMeta {
 	public var Value:Int;
 	public var Chance:Int;
 	public var Next:String;
+	public var IfNot:String;
 }
 
 @:nativeGen
@@ -169,9 +170,9 @@ class CardMeta {
 
 	public var Id:String;
 
-	public var Pri:Int;
 	public var CT:Int;
 	public var CR:Int;
+	public var Chance:Int;
 	public var Hero:String;
 	public var Type:Int;
 	public var Cut:Bool;
@@ -179,13 +180,15 @@ class CardMeta {
 	public var Level:Int;
 
 	public var CN:String;
-	public var ShowDesc:Bool;
+	public var Act:String;
 
 	public var Name:String;
 	public var Descs:NativeArray<String>;
-	public var Image:String;
+	public var IfNothing:NativeArray<String>;
+	public var OnlyOnce:NativeArray<String>;
+	public var RewardText:String;
 
-	public var ScaleCost:Bool;
+	public var Image:String;
 
 	public var Reward:NativeArray<NativeArray<RewardMeta>>;
 	public var Cost:NativeArray<NativeArray<RewardMeta>>;
@@ -193,18 +196,11 @@ class CardMeta {
 	public var Next:NativeArray<TriggerMeta>;
 	public var Over:NativeArray<TriggerMeta>;
 	public var Under:NativeArray<TriggerMeta>;
+	public var IfNot:NativeArray<TriggerMeta>;
 
+	public var Pri:Int;
 	public var Con:NativeArray<NativeArray<ConditionMeta>>;
 	public var Text:String;
 
 	public var Sound:NativeArray<String>;
-
-	// Quest
-	public var SR:NativeArray<NativeArray<RewardMeta>>;
-	public var FR:NativeArray<RewardMeta>;
-	public var SC:NativeArray<NativeArray<ConditionMeta>>;
-	public var FC:NativeArray<NativeArray<ConditionMeta>>;
-	public var ST:NativeArray<TriggerMeta>;
-	public var FT:NativeArray<TriggerMeta>;
-	public var Duration:Int;
 }

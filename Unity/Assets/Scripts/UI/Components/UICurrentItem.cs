@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using DG.Tweening.Core;
+using DG.Tweening.Plugins.Options;
 using haxe.lang;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,19 +13,42 @@ using UnityEngine.UI;
 public class UICurrentItem : MonoBehaviour
 {
     [SerializeField] private Text value;
+    [SerializeField] private Text difText;
     [SerializeField] private Image icon;
 
     private ItemMeta data;
     private bool isEmpty;
 
-
     public void SetItem(Null<ItemData> item, Null<ItemData> current, ItemMeta itemMeta)
     {
         int cur = current.hasValue ? current.value.Count : 0;
         int prev = Math.Max(cur - (item.hasValue ? item.value.Count : 0), 0);
-        value.text = prev.ToString();
-        DOTween.To(() => prev, x => prev = x, cur, 0.2f).SetEase(Ease.OutCirc).OnUpdate(() => value.text = prev.ToString());
+        int dif = cur - prev;
+        difText.text = (dif < 0 ? "-" : "+") + Math.Abs(dif);
+        difText.color = dif < 0 ? Color.red : Color.green;
+        CanvasGroup cg = difText.GetComponent<CanvasGroup>();
+        cg.alpha = 0f;
+        cg.DOKill();
+        cg.DOFade(1f, 0.2f).OnComplete(() =>
+        {
+            cg.DOFade(0f, 0.2f).SetDelay(2.5f);
+        }).SetDelay(0.2f);
 
+        //         difText.color = dif < 0 ? Color.red : Color.green;
+        //         Color32 color32 = difText.color;
+        //         color32.a = 0;
+        //         difText.color = color32;
+        //         color32.a = 255;
+        // 
+        //         difText.DOKill();
+        //         difText.DOColor(color32, 0.3f).OnComplete(() =>
+        //         {
+        //             color32.a = 0;
+        //             difText.DOColor(color32, 0.15f).SetDelay(0.3f);
+        //         });
+
+        value.text = prev.ToString();
+        DOTween.To(() => prev, x => prev = x, cur, 0.25f).OnUpdate(() => value.text = prev.ToString()).SetDelay(0.2f);
         isEmpty = false;
 
         this.data = itemMeta;

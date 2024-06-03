@@ -34,8 +34,8 @@ public class UIInventoryTooltip : MonoBehaviour
         gameObject.SetActive(true);
 
         this.meta = meta;
-        howTo.SetItem(meta.HowTo != null ? meta.HowTo.ToList() : null);
-        whereTo.SetItem(meta.WhereTo != null ? meta.WhereTo.ToList() : null);
+        //howTo.SetItem(meta.HowTo != null ? meta.HowTo.ToList() : null);
+        //whereTo.SetItem(meta.WhereTo != null ? meta.WhereTo.ToList() : null);
 
         howText.SetActive(meta.HowTo != null && meta.HowTo.Length > 0);
         whereText.SetActive(meta.WhereTo != null && meta.WhereTo.Length > 0);

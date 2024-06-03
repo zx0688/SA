@@ -21,10 +21,15 @@ namespace UI.ActionPanel
         [SerializeField] private UIChoicePanel right;
 
         [SerializeField] private UIConditions conditions;
+
+        [SerializeField] private UIReward randomReward;
+
         [SerializeField] private Text description;
+        [SerializeField] private GameObject descPanel;
+
         [SerializeField] private GameObject delem;
         [SerializeField] private UICurrent backpack;
-
+        [SerializeField] private Text next;
 
         [SerializeField] private List<Color32> colors;
 
@@ -58,42 +63,53 @@ namespace UI.ActionPanel
 
             HideAll();
 
-            //Services.Player.Profile.Cards.TryGetValue(data.Card.Id, out CardData cardData);
-
-            // if (data.Card.Type == CardMeta.TYPE_QUEST && Services.Player.Profile.Cards.TryGetValue(data.Card.Id, out CardData cardData))
-            // {
-            //     description.gameObject.SetActive(true);
-            //     description.text = data.Card.Name.Localize(LocalizePartEnum.CardName);
-            //     description.color = colors[0];
-            // }
-            // else if (data.Card.Next.HasTriggers() && data.Card.Descs.HasTexts() && Services.Player.Profile.DialogIndex < data.Card.Descs.Length &&
-            // (!Services.Player.Profile.Cards.TryGetValue(data.Card.Id, out cardData) || cardData.CT == 0))
-            // {
-            //     string desc = data.Card.Descs.GetCurrentDescription();
-            //     if (desc.HasText()) SetDecription(desc);
-            // }
+            next.transform.localScale = new Vector3(1f, 1f, 1f);
+            next.gameObject.SetActive(true);
+            next.text = "Дальше";
 
             int currentCardState = SL.GetCurrentState(profile);
-            if (currentCardState == CardData.DESCRIPTION)
+            if (currentCardState == CardData.NOTHING)
             {
-                string desc = data.Card.Descs[data.Card.Descs.Length - profile.CardStates.Where(c => c == 0).ToList().Count];
-                SetDecription(desc);
+                conditions.SetItem(data.Conditions);
+                if (data.Card.IfNothing == null)
+                    throw new Exception("Description is needed if choice unavailable");
+
+                SetDecription(data.Card.IfNothing[data.Card.IfNothing.Length - profile.CardStates.Where(c => c == CardData.NOTHING).ToList().Count]);
+            }
+            else if (currentCardState == CardData.ONLY_ONCE)
+            {
+                SetDecription(data.Card.OnlyOnce[data.Card.OnlyOnce.Length - profile.CardStates.Where(c => c == CardData.ONLY_ONCE).ToList().Count]);
+            }
+            else if (currentCardState == CardData.DESCRIPTION)
+            {
+                SetDecription(data.Card.Descs[data.Card.Descs.Length - profile.CardStates.Where(c => c == CardData.DESCRIPTION).ToList().Count]);
             }
             else if (currentCardState == CardData.REWARD)
             {
+                randomReward.SetItems(data.Card.Reward != null ? data.Card.Reward[0] : null, data.Card.Cost != null ? data.Card.Cost[0] : null, false);
+
                 if (Services.Player.RewardCollected.Count > 0)
                 {
                     backpack.gameObject.SetActive(true);
                     backpack.SetItems(Services.Player.RewardCollected, profile, Services.Meta.Game);
+
+                    if (data.Card.RewardText == null)
+                        throw new Exception($"Description is needed for reward {data.Card.Id}");
+                    SetDecription(data.Card.RewardText);
                 }
                 else
-                {
                     SetDecription("noint1");
-                }
+
             }
             else if (currentCardState == CardData.CHOICE)
             {
-                if (data.Left.Id == data.Right.Id)
+                conditions.SetItem(data.Conditions);
+
+                if (data.Left == null && data.Right == null)
+                {
+                    throw new Exception($"State Choice should have any next card {data.Card.Id}");
+                }
+                else if (data.Left.Id == data.Right.Id)
                 {
                     left.ShowChoice(data.Left, profile.Left, data.FollowPrompt == CardMeta.LEFT);
                 }
@@ -107,29 +123,18 @@ namespace UI.ActionPanel
             }
             else
             {
-                Services.Meta.Game.Cards.TryGetValue("28393500", out CardMeta nextDefaultCard);
-                left.ShowChoice(nextDefaultCard, null, data.FollowPrompt == CardMeta.LEFT);
+                throw new Exception($"Card {data.Card.Id} has no state");
             }
         }
-
-
-        // if (data.Card.Next.HasTriggers() && data.Card.Descs.HasTexts() && Services.Player.Profile.DialogIndex < data.Card.Descs.Length &&
-        // // (!Services.Player.Profile.Cards.TryGetValue(data.Card.Id, out cardData) || cardData.CT == 0))
-        // // {
-        // //     string desc = data.Card.Descs.GetCurrentDescription();
-        // //     if (desc.HasText()) SetDecription(desc);
-        // // }
-        // if ((data.Left == null && data.Right == null) || (data.Left.Id == Services.Player.Profile.Deck.Last()))
-        // {
-        //     //string desc = data.Card.Descs.GetCurrentDescription();
-        //     //if (desc.HasText()) SetDecription(desc);
-        // }
 
 
         void OnTakeCard()
         {
             if (data.Card == null || data.Card.Type != CardMeta.TYPE_CARD)
                 return;
+
+            if (next.gameObject.activeInHierarchy)
+                next.GetComponent<RectTransform>().DOScale(1.2f, 0.15f);
 
             //if (backpack.gameObject.activeInHierarchy)
             //    backpack.TakeCard();
@@ -152,6 +157,9 @@ namespace UI.ActionPanel
             if (data.Card == null || data.Card.Type != CardMeta.TYPE_CARD)
                 return;
 
+            if (next.gameObject.activeInHierarchy)
+                next.GetComponent<RectTransform>().DOScale(1.0f, 0.15f);
+
             //if (backpack.gameObject.activeInHierarchy)
             //    backpack.DropCard();
 
@@ -171,19 +179,13 @@ namespace UI.ActionPanel
             OnSet();
 
             gameObject.SetActive(true);
-
-            if (data.Conditions.Count > 0)
-                conditions.SetItem(data.Conditions);
-            else
-                conditions.Hide();
-
         }
 
         public void Hide()
         {
             //conditions.Hide();
             //rewardLeft.Hide();
-            description.gameObject.SetActive(false);
+            //description.gameObject.SetActive(false);
             //followPrompt.gameObject.SetActive(false);
             HideAll();
 
@@ -192,7 +194,9 @@ namespace UI.ActionPanel
 
         private void SetDecription(string desc)
         {
-            description.gameObject.SetActive(true);
+            descPanel.gameObject.SetActive(true);
+
+            //description.gameObject.SetActive(true);
             description.text = desc.Localize(LocalizePartEnum.CardDescription);
 
             if (desc.Contains("ask"))
@@ -205,12 +209,17 @@ namespace UI.ActionPanel
 
         private void HideAll()
         {
+            conditions.Hide();
+            randomReward.Hide();
             backpack.gameObject.SetActive(false);
+            next.gameObject.SetActive(false);
+            next.GetComponent<RectTransform>().DOKill();
 
             left.HideAll();
             right.HideAll();
             delem.SetActive(false);
-            description.gameObject.SetActive(false);
+
+            descPanel.gameObject.SetActive(false);
         }
 
         void OnChangeDeviation(float dev)

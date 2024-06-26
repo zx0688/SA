@@ -11,6 +11,7 @@ using UI.Components;
 using System.Linq;
 using System.Drawing;
 using haxe.root;
+using Random = UnityEngine.Random;
 
 namespace UI.ActionPanel
 {
@@ -82,7 +83,10 @@ namespace UI.ActionPanel
             }
             else if (currentCardState == CardData.DESCRIPTION)
             {
-                SetDecription(data.Card.Descs[data.Card.Descs.Length - profile.CardStates.Where(c => c == CardData.DESCRIPTION).ToList().Count]);
+                if (data.Card.RStory)
+                    SetDecription(data.Card.Descs[Random.Range(0, data.Card.Descs.Length)]);
+                else
+                    SetDecription(data.Card.Descs[data.Card.Descs.Length - profile.CardStates.Where(c => c == CardData.DESCRIPTION).ToList().Count]);
             }
             else if (currentCardState == CardData.REWARD)
             {
@@ -97,6 +101,8 @@ namespace UI.ActionPanel
                         throw new Exception($"Description is needed for reward {data.Card.Id}");
                     SetDecription(data.Card.RewardText);
                 }
+                else if (data.Card.IfNothing != null && data.Card.IfNothing.Length > 0 && data.Card.Next == null)
+                    SetDecription(data.Card.IfNothing[0]);
                 else
                     SetDecription("noint1");
 

@@ -19,6 +19,7 @@ class ProfileData {
 	public var Left:CardNextInfo;
 	public var Right:CardNextInfo;
 	public var CardStates:List_1<Int>;
+	public var Called:String;
 
 	public var Cards:Dictionary_2<String, CardData>;
 	public var Items:Dictionary_2<String, ItemData>;

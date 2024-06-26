@@ -60,14 +60,12 @@ public class Services : MonoBehaviour
     {
         Application.targetFrameRate = 60;
         Application.backgroundLoadingPriority = ThreadPriority.Low;
-
-        //DontDestroyOnLoad(canvas.gameObject);
+      
         Init().Forget();
     }
 
     public async UniTaskVoid Init()
     {
-
         //create global time
         GameTime.Fix((int)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds);
 

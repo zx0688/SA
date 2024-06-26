@@ -178,6 +178,7 @@ class CardMeta {
 	public var Cut:Bool;
 	public var Shake:Bool;
 	public var Level:Int;
+	public var Call:Bool;
 
 	public var CN:String;
 	public var Act:String;
@@ -187,6 +188,7 @@ class CardMeta {
 	public var IfNothing:NativeArray<String>;
 	public var OnlyOnce:NativeArray<String>;
 	public var RewardText:String;
+	public var RStory:Bool;
 
 	public var Image:String;
 

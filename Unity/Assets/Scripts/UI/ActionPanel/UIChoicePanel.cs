@@ -99,7 +99,7 @@ namespace UI.ActionPanel
                 hero.gameObject.SetActive(false);
 
             if (cardMeta.Act != null)
-                action.Localize(cardMeta.Act, LocalizePartEnum.CardAction);
+                action.Localize(cardMeta.Act, LocalizePartEnum.CardName);
             else
                 action.Localize(cardMeta.Name, LocalizePartEnum.CardName);
 

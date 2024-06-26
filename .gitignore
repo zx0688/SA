@@ -26,8 +26,8 @@ Unity/ExportedObj/
 *.sln
 *.suo
 *.tmp
-№*.user
-№*.userprefs
+# *.user
+# *.userprefs
 *.pidb
 *.booproj
 *.svd

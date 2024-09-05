@@ -20,7 +20,7 @@ typedef Dictionary_2<T, K> = Map<T, K>;
 class SL {
 	private static var random:Random;
 
-	private static var startCard:String = "27901222"; // "28387804"; // "28387804"; // "28387804";
+	private static var startCard:String = "27901213"; // "27901222"; // "28387804"; // "28387804"; // "28387804";
 
 	// random based on shared timestamp
 	private static function GetRandomInstance():Random {
@@ -75,8 +75,8 @@ class SL {
 		// profile.Items.getOrCreate("5", f -> new ItemData("5", 2));
 		// profile.Items.getOrCreate("11", f -> new ItemData("11", 10));
 		// profile.Items.getOrCreate("62", f -> new ItemData("62", 10));
-		// for (i in 1...64)
-		// 	profile.Items.getOrCreate(i + "", f -> new ItemData(i + "", 10));
+		for (i in 1...64)
+			profile.Items.getOrCreate(i + "", f -> new ItemData(i + "", 10));
 		// profile.Items.getOrCreate("55", f -> new ItemData("55", 10));
 		// 		profile.Items.getOrCreate("42", f -> new ItemData("42", 1));
 		// 		profile.Items.getOrCreate("34", f -> new ItemData("34", 10));
@@ -118,6 +118,8 @@ class SL {
 		// profile.Deck.push("28390976");
 		// кристалические пещеры
 		// profile.Deck.push("27901213");
+
+		var startCard:String = meta.Config.StartCard;
 
 		profile.Deck.push(startCard);
 
@@ -554,24 +556,6 @@ class SL {
 			}
 		}
 
-		// if (card.Next != null) {
-		// 	var hasNext:Bool = false;
-		// 	for (c in card.Next) {
-		// 		if (c.Type == CardMeta.TYPE_GROUP && CheckCardsInGroup(c.Id, meta, profile, random)) {
-		// 			hasNext = true;
-		// 			break;
-		// 		} else {
-		// 			var cm:CardMeta = meta.Cards.tryGet(c.Id);
-		// 			if (CheckCard(cm, meta, profile, random)) {
-		// 				hasNext = true;
-		// 				break;
-		// 			}
-		// 		}
-		// 	}
-		// 	if (hasNext == false)
-		// 		return false;
-		// }
-
 		if (card.Cost != null && card.Cost.length > 0) {
 			var match:Bool = false;
 			for (c in card.Cost) {
@@ -643,6 +627,16 @@ class SL {
 						if (invert && IfCardLeftRightAvailable(cm.Next, cm, meta, profile, random))
 							return false;
 						if (!invert && !IfCardLeftRightAvailable(cm.Next, cm, meta, profile, random))
+							return false;
+						continue;
+					}
+
+					if (c.Sign == "B") {
+						var cm:CardMeta = meta.Cards.tryGet(c.Id);
+						var invert:Bool = c.Count == 1;
+						if (invert && CheckCard(cm, meta, profile, random))
+							return false;
+						if (!invert && !CheckCard(cm, meta, profile, random))
 							return false;
 						continue;
 					}
@@ -760,6 +754,9 @@ class SL {
 	}
 
 	private static function IfCardLeftRightAvailable(next:NativeArray<TriggerMeta>, current:CardMeta, meta:GameMeta, profile:ProfileData, random:Random):Bool {
+		if (next == null)
+			return false;
+
 		var candidates:Array<CardMeta> = new Array<CardMeta>();
 		var nextDict:Dictionary_2<String, String> = new Dictionary_2<String, String>();
 

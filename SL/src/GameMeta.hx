@@ -39,6 +39,7 @@ class PlayerMeta {
 class ConfigMeta {
 	public var DurationReroll:Int;
 	public var PriceReroll:NativeArray<RewardMeta>;
+	public var StartCard:String;
 }
 
 @:nativeGen

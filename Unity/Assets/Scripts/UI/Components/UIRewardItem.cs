@@ -11,10 +11,12 @@ public class UIRewardItem : MonoBehaviour
 {
     [SerializeField] private Text value;
     [SerializeField] private Image icon;
+    [SerializeField] private Text chanceValue;
+    [SerializeField] private Color32[] colors;
 
     private bool isEmpty;
 
-    public void SetItem(ItemData item, int max, Color32 color, bool animate = false)
+    public void SetItem(RewardMeta item, bool asCost)
     {
         if (item == null)
         {
@@ -22,18 +24,23 @@ public class UIRewardItem : MonoBehaviour
             return;
         }
 
-        if (animate)
-        {
-            int cur = Services.Player.Profile.Items.TryGetValue(item.Id, out ItemData i) ? i.Count : 0;
-            int prev = Math.Max(cur - item.Count, 0);
-            value.text = prev.ToString();
-            DOTween.To(() => prev, x => prev = x, cur, 0.3f).SetEase(Ease.InExpo).OnUpdate(() => value.text = prev.ToString());
-        }
-        else
-        {
-            value.text = max == item.Count ? $"{item.Count}" : $"{item.Count}-{max}";
-        }
-        value.color = color;
+        // if (animate)
+        // {
+        //     int cur = Services.Player.Profile.Items.TryGetValue(item.Id, out ItemData i) ? i.Count : 0;
+        //     int prev = Math.Max(cur - item.Count, 0);
+        //     value.text = prev.ToString();
+        //     DOTween.To(() => prev, x => prev = x, cur, 0.3f).SetEase(Ease.InExpo).OnUpdate(() => value.text = prev.ToString());
+        // }
+        // else
+        // {
+        //     value.text = max == item.Count ? $"{item.Count}" : $"{item.Count}-{max}";
+        // }
+        value.text = $"{Math.Abs(item.Count)}";
+        value.color = asCost || item.Count < 0 ? colors[1] : colors[0];
+
+        chanceValue.gameObject.SetActive(item.Chance > 0);
+        if (item.Chance != 0)
+            chanceValue.text = $"{item.Chance}%";
 
         isEmpty = false;
 

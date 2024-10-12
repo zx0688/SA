@@ -15,10 +15,12 @@ class ProfileData {
 	public function new() {}
 
 	public var SwipeCount:Int;
-	public var Deck:List_1<String>;
-	public var Left:CardNextInfo;
-	public var Right:CardNextInfo;
-	public var CardStates:List_1<Int>;
+	public var Deck:List_1<DeckItem>;
+	public var Choices:List_1<ChoiceInfo>;
+
+	// public var Left:CardNextInfo;
+	// public var Right:CardNextInfo;
+	// public var CardStates:List_1<Int>;
 	public var Called:String;
 
 	public var Cards:Dictionary_2<String, CardData>;
@@ -54,7 +56,8 @@ class CardData {
 	public static inline var REWARD:Int = 1;
 	public static inline var CHOICE:Int = 2;
 	public static inline var NOTHING:Int = 3;
-	public static inline var ONLY_ONCE:Int = 4;
+
+	// public static inline var ONLY_ONCE:Int = 4;
 
 	public function new(Id:String) {
 		this.Id = Id;
@@ -133,7 +136,7 @@ class GameResponse {
 
 @:nativeGen
 @:strict(SerializableAttribute)
-class CardNextInfo {
+class ChoiceInfo {
 	public function new(Id:String, Next:String, RewardIndex:Int) {
 		this.Id = Id;
 		this.Next = Next;
@@ -145,7 +148,17 @@ class CardNextInfo {
 	public var Next:String;
 }
 
-// class CardMetaNextInfo {
-// 	public var Card:CardMeta;
-// 	public var Next:String;
-// }
+@:nativeGen
+@:strict(SerializableAttribute)
+class DeckItem {
+	public function new(Id:String, State:Int, DescIndex:Int) {
+		this.Id = Id;
+		this.State = State;
+		this.DescIndex = DescIndex;
+	}
+
+	public var DescIndex:Int;
+
+	public var Id:String;
+	public var State:Int;
+}

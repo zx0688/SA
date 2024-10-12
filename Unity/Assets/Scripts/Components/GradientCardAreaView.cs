@@ -23,10 +23,10 @@ public class GradientCardAreaView : MonoBehaviour
         gradient = GetComponent<UIGradient>();
         image = GetComponent<Image>();
 
-        Swipe.OnChangeDeviation += OnChangeDeviation;
-        Swipe.OnChangeDirection += OnChangeDirection;
-        Swipe.OnReadySwipe += OnStartSwipe;
-        Swipe.OnEndSwipe += OnEndSwipe;
+        // Swipe.OnChangeDeviation += OnChangeDeviation;
+        // Swipe.OnChangeDirection += OnChangeDirection;
+        // Swipe.OnReadySwipe += OnStartSwipe;
+        // Swipe.OnEndSwipe += OnEndSwipe;
     }
 
     private void OnChangeDirection(int choice)

@@ -18,7 +18,7 @@ namespace Core
 
         [SerializeField] private Image art;
         [SerializeField] private Image hero;
-        [SerializeField] private Text name;
+        //[SerializeField] private Text name;
         [SerializeField] private GameObject eventIcon;
         [SerializeField] private Text description;
 
@@ -45,22 +45,22 @@ namespace Core
                 return;
             }
 
-            if (data.LastCard)
-            {
-                ChangeArt("endturn");
-            }
-            else if (data.Right == null && data.Left == null)
-            {
-                DropCard();
-            }
-            else if (ind == CardMeta.LEFT || data.Right == null)
-            {
-                ChangeArt(data.Left.Image);
-            }
-            else
-            {
-                ChangeArt(data.Right.Image);
-            }
+            // if (data.LastCard)
+            // {
+            //     ChangeArt("endturn");
+            // }
+            // else if (data.Down == null && data.Up == null)
+            // {
+            //     DropCard();
+            // }
+            // else if (ind == CardMeta.LEFT || data.Down == null)
+            // {
+            //     ChangeArt(data.Up.Image);
+            // }
+            // else
+            // {
+            //     ChangeArt(data.Down.Image);
+            // }
         }
 
         public void ChangeDirection(int i)
@@ -123,14 +123,14 @@ namespace Core
         {
             this.data = data;
 
-            if (data.Card.Hero == null)
+            /*if (data.Card.Hero == null)
             {
                 name.Localize(data.Card.Name, LocalizePartEnum.CardName);
             }
             else
             {
                 name.Localize(data.Hero.Name, LocalizePartEnum.CardName);
-            }
+            }*/
 
             if (card.Image != null)
             {

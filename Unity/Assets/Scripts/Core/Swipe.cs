@@ -22,21 +22,21 @@ namespace Core
 
         [System.Serializable] public class mEvent : UnityEvent { }
 
-        [HideInInspector] public int CurrentChoise;
-        [HideInInspector] public static event Action<float> OnChangeDeviation;
-        [HideInInspector] public static event Action<int> OnChangeDirection;
-        [HideInInspector] public static event Action OnTakeCard;
-        [HideInInspector] public static event Action OnReadySwipe;
-        [HideInInspector] public static event Action OnEndSwipe;
-        [HideInInspector] public static event Action OnDrop;
-        [HideInInspector] public static event Action OnRestoring;
+        [HideInInspector] public int CurrentChoice;
+        [HideInInspector] public event Action<float> OnChangeDeviation;
+        [HideInInspector] public event Action<int> OnChangeDirection;
+        [HideInInspector] public event Action OnTakeCard;
+        [HideInInspector] public event Action OnReadySwipe;
+        [HideInInspector] public event Action OnEndSwipe;
+        [HideInInspector] public event Action OnDrop;
+        [HideInInspector] public event Action OnRestoring;
 
-        [HideInInspector] public static event Action OnDoubleClickDetected;
+        [HideInInspector] public event Action OnDoubleClickDetected;
 
         [HideInInspector] public float Deviation;
         [HideInInspector] public Vector2 Vector;
 
-        public static States State { get; private set; }
+        public States State { get; private set; }
 
         private RectTransform _rectTransform;
         private int _direction;
@@ -71,11 +71,17 @@ namespace Core
             //Vector2 left = new Vector2(_pivotPoint.x - 150, _pivotPoint.y);
         }
 
+        public void Disable()
+        {
+            ConstructNewSwipe();
+            State = States.DISABLE;
+        }
+
         public void ConstructNewSwipe()
         {
             Deviation = 0;
             Vector = Vector2.zero;
-            CurrentChoise = -1;
+            CurrentChoice = -1;
             StopAllCoroutines();
 
             _rectTransform.anchoredPosition = _pivotPoint;
@@ -89,7 +95,7 @@ namespace Core
         public void WaitSwipe()
         {
             State = States.IDLE;
-            CurrentChoise = -1;
+            CurrentChoice = -1;
             returnCardBack = false;
             lastTapThreshold = 0;
             waitTapMode = false;
@@ -128,6 +134,7 @@ namespace Core
                         _rectTransform.rotation = Quaternion.Euler(0, 0, (_rectTransform.anchoredPosition.x - _pivotPoint.x) * _fRotation);
                         MovingDispatcher();
                     }
+                    return;
 
                     bool tapDetected = false;
 #if PLATFORM_ARCH_64 || UNITY_EDITOR || PLATFORM_STANDALONE
@@ -231,7 +238,7 @@ namespace Core
 
             if (distance.magnitude >= _swipeDetectionLimit_LR)// && choiceAvailable)
             {
-                CurrentChoise = _direction;
+                CurrentChoice = _direction;
                 State = States.DISABLE;
 
                 eventData.pointerDrag = null;

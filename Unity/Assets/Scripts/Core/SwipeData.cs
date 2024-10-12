@@ -4,10 +4,10 @@ namespace Core
 {
     public class SwipeData
     {
+        public bool ChoiceMode;
         public CardMeta Card;
 
-        public CardMeta Left;
-        public CardMeta Right;
+        public List<CardMeta> Choices;
         public ItemMeta Hero;
         public bool LastCard;
         public int FollowPrompt;
@@ -16,7 +16,7 @@ namespace Core
         public CardData Data;
         public List<ItemTypeData> Conditions;
 
-        public int Choice;
+        public int CurrentChoice;
     }
 
 }

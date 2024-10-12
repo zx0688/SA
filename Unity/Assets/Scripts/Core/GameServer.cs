@@ -199,7 +199,7 @@ namespace GameServer
             response.Debug = null;
             //Debug.Log($"REQUEST:{JSON.Serialize(request)}");
             if (request.Id != null)
-                Debug.Log($"HASH:{request.Hash} TO {request.Id}");
+                Debug.Log($"HASH:{request.Hash} ID {request.Id}");
             else
                 Debug.Log($"HASH:{request.Hash}");
 
@@ -211,10 +211,11 @@ namespace GameServer
             if (response.Error != null)
                 throw new Exception(response.Error);
 
-            Debug.Log($"DECK:{JSON.Serialize(profile.Deck)} CURRENT {(profile.Deck.Count > 0 ? SL.GetCurrentCard(profile).ColorizeHH("00FF00") : "-")}  LEFT:{(profile.Left != null ? profile.Left.Id : "no")} RIGHT:{(profile.Right != null ? profile.Right.Id : "no")}");
+            Debug.Log($"DECK:{JSON.Serialize(profile.Deck)} \nCURRENT {(profile.Deck.Count > 0 ? SL.GetCurrentCard(profile).Id.ColorizeHH("00FF00") : "-")}");
             if (response.Log != null)
                 Debug.Log($"LOG:{response.Log}");
 
+            profile.Choices.ForEach(c => Debug.Log($"LEFT NEXT:{JSON.Serialize(c)}"));
             //Debug.Log($"LEFT NEXT:{(profile.Left != null ? profile.Left.Next : "no")} RIGHT NEXT:{(profile.Right != null ? profile.Right.Next : "no")}");
             //Debug.Log($"CARD STATES:{JSON.Serialize(profile.CardStates)}");
 

@@ -39,7 +39,7 @@ namespace Core
 
             rectTransform.localScale = new Vector3(0.75f, 0.75f, 0.75f);
             rectTransform.DOKill();
-            rectTransform.DOScale(new Vector3(1f, 1f, 1f), 0.15f).OnComplete(() =>
+            rectTransform.DOScale(new Vector3(1f, 1f, 1f), 0.08f).OnComplete(() =>
             {
                 AddListeners();
                 //   GC.Collect();
@@ -78,22 +78,22 @@ namespace Core
 
         private void AddListeners()
         {
-            Swipe.OnReadySwipe += OnStartSwipe;
-            Swipe.OnTakeCard += OnTakeCard;
-            Swipe.OnDrop += OnDrop;
-            Swipe.OnChangeDeviation += OnChangeDeviation;
-            Swipe.OnChangeDirection += OnChangeDirection;
-            Swipe.OnDoubleClickDetected += OnDoubleClick;
+            swipe.OnReadySwipe += OnStartSwipe;
+            swipe.OnTakeCard += OnTakeCard;
+            swipe.OnDrop += OnDrop;
+            swipe.OnChangeDeviation += OnChangeDeviation;
+            swipe.OnChangeDirection += OnChangeDirection;
+            swipe.OnDoubleClickDetected += OnDoubleClick;
         }
 
         private void RemoveListeners()
         {
-            Swipe.OnReadySwipe -= OnStartSwipe;
-            Swipe.OnTakeCard -= OnTakeCard;
-            Swipe.OnDrop -= OnDrop;
-            Swipe.OnChangeDeviation -= OnChangeDeviation;
-            Swipe.OnChangeDirection -= OnChangeDirection;
-            Swipe.OnDoubleClickDetected -= OnDoubleClick;
+            swipe.OnReadySwipe -= OnStartSwipe;
+            swipe.OnTakeCard -= OnTakeCard;
+            swipe.OnDrop -= OnDrop;
+            swipe.OnChangeDeviation -= OnChangeDeviation;
+            swipe.OnChangeDirection -= OnChangeDirection;
+            swipe.OnDoubleClickDetected -= OnDoubleClick;
         }
 
         private void OnDoubleClick()

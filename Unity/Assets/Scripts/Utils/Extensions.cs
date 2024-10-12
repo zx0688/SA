@@ -91,6 +91,7 @@ public static class Extensions
     public static bool HasTriggers(this TriggerMeta[] trigger) => trigger != null && trigger.Length > 0;
 
     public static bool HasText(this string text) => text != null && text.Length > 0;
+    public static bool HasReward(this RewardMeta[][] reward) => reward != null && reward.Length > 0;
 
     public static bool TryGetRandom<T>(this IEnumerable<T> source, out T value) where T : class
     {
@@ -101,6 +102,8 @@ public static class Extensions
         return true;
     }
 
+    public static int GetCountIfNull(this RewardMeta[] source)
+        => source != null ? source.Length : 0;
 
     public static IEnumerable<T> OrEmptyIfNull<T>(this IEnumerable<T> source) where T : class
     => source ?? Enumerable.Empty<T>();

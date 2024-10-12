@@ -30,16 +30,12 @@ namespace Core
         [SerializeField] private UIActionPanel action;
         [SerializeField] private UIAcceleratePanel accelerate;
         [SerializeField] private AudioSource audioSource;
+        [SerializeField] private UICHPanel choicePanel;
 
-        // [SerializeField]
-        //public List<CardData> queue;
         public States State;
-        //private Coroutine waitingTrigger;
 
-        //public GameObject backCard;
-
-        // private CardIconQueue cardIconQueue;
         private List<GameObject> cards;
+
         private GameObject currentCardObject;
 
         private SwipeData swipeData;
@@ -70,8 +66,6 @@ namespace Core
             accelerate.Hide();
 
             Loop().Forget();
-
-
             //StartCoroutine (TriggerTimer ());
         }
 
@@ -104,9 +98,19 @@ namespace Core
             while (true)
             {
                 await UniTask.WaitUntil(() => State == States.IDLE);
-                Swipe swipe = currentSwipe;
-                await UniTask.WaitUntil(() => swipe.CurrentChoise != -1);
-                swipeData.Choice = swipe.CurrentChoise;
+
+                if (swipeData.ChoiceMode)
+                {
+                    await UniTask.WaitUntil(() => choicePanel.CurrentChoice() != -1);
+                    swipeData.CurrentChoice = choicePanel.CurrentChoice();
+                }
+                else
+                {
+                    Swipe swipe = currentSwipe;
+                    await UniTask.WaitUntil(() => swipe.CurrentChoice != -1);
+                    swipeData.CurrentChoice = swipe.CurrentChoice;
+                }
+
                 Services.Player.Swipe(swipeData);
                 StopAllCoroutines();
 
@@ -114,6 +118,7 @@ namespace Core
                 {
                     action.Hide();
                     accelerate.Show();
+                    choicePanel.Hide();
                 }
 
                 await UniTask.WaitUntil(() => Services.Player.Profile.Deck.Count > 0);
@@ -128,7 +133,6 @@ namespace Core
 
                 }*/
 
-                //noCardTimer.gameObject.SetActive (false);
                 OpenCard();
             }
         }
@@ -136,6 +140,28 @@ namespace Core
         private void OpenCard()
         {
             Services.Player.CreateSwipeData(swipeData);
+
+            if (swipeData.ChoiceMode)
+            {
+                choicePanel.Show(swipeData);
+                action.Hide();
+                return;
+                // choiceCards.ForEach(c =>
+                // {
+                //     c.gameObject.SetActive(true);
+                //     c.GetComponent<RectTransform>().SetAsFirstSibling();
+                //     c.ConstructNewSwipe();
+                //     c.WaitSwipe();
+                // });
+                // return;
+            }
+            choicePanel.Hide();
+            // 
+            //             choiceCards.ForEach(c =>
+            //             {
+            //                 c.Disable();
+            //                 c.gameObject.SetActive(false);
+            //             });
 
             int i = currentCardObject != null ? cards.IndexOf(currentCardObject) + 1 : 0;
             i = i >= cards.Count ? 0 : i;
@@ -148,7 +174,7 @@ namespace Core
             currentSwipe.ConstructNewSwipe();
             currentCard.UpdateData(swipeData);
 
-            action.Show(swipeData);
+            action.Show(swipeData, currentSwipe);
 
             currentCard.FadeIn(() => GC.Collect());
 

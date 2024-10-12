@@ -40,6 +40,7 @@ class ConfigMeta {
 	public var DurationReroll:Int;
 	public var PriceReroll:NativeArray<RewardMeta>;
 	public var StartCard:String;
+	public var GodMode:Bool;
 }
 
 @:nativeGen
@@ -119,6 +120,7 @@ class TriggerMeta {
 	public var Chance:Int;
 	public var Next:String;
 	public var IfNot:String;
+	public var Over:String;
 }
 
 @:nativeGen
@@ -182,7 +184,6 @@ class CardMeta {
 	public var Call:Bool;
 
 	public var CN:String;
-	public var Act:String;
 
 	public var Name:String;
 	public var Descs:NativeArray<String>;
@@ -190,11 +191,13 @@ class CardMeta {
 	public var OnlyOnce:NativeArray<String>;
 	public var RewardText:String;
 	public var RStory:Bool;
+	public var Shure:String;
 
 	public var Image:String;
 
 	public var Reward:NativeArray<NativeArray<RewardMeta>>;
 	public var Cost:NativeArray<NativeArray<RewardMeta>>;
+	public var Act:String;
 
 	public var Next:NativeArray<TriggerMeta>;
 	public var Over:NativeArray<TriggerMeta>;

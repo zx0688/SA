@@ -12,32 +12,33 @@ using System.Linq;
 using System.Drawing;
 using haxe.root;
 using Random = UnityEngine.Random;
+using UnityEditor;
+using UnityJSON;
+using UnityEngine.Assertions.Must;
+using UnityEditor.Tilemaps;
 
 namespace UI.ActionPanel
 {
     public class UIActionPanel : MonoBehaviour
     {
-
-        [SerializeField] private UIChoicePanel left;
-        [SerializeField] private UIChoicePanel right;
-
-        [SerializeField] private UIConditions conditions;
+        [SerializeField] private Text name;
+        [SerializeField] private UIReward needed;
+        //[SerializeField] private UIChoicePanel left;
+        //[SerializeField] private UIChoicePanel right;
 
         [SerializeField] private UIReward randomReward;
 
         [SerializeField] private Text description;
         [SerializeField] private GameObject descPanel;
 
-        [SerializeField] private GameObject delem;
+        //[SerializeField] private GameObject delem;
         [SerializeField] private UICurrent backpack;
-        [SerializeField] private Text next;
+        //[SerializeField] private Text next;
 
         [SerializeField] private List<Color32> colors;
 
-        private bool choiceble = false;
-        private int choice = -10;
-        private float threshold = 0.1f;
-        //private bool hasNextText = false;
+        private Swipe swipe;
+
         private ProfileData profile => Services.Player.Profile;
 
 
@@ -45,52 +46,64 @@ namespace UI.ActionPanel
 
         void Awake()
         {
-            Swipe.OnChangeDeviation += OnChangeDeviation;
-            Swipe.OnDrop += OnDrop;
-            Swipe.OnTakeCard += OnTakeCard;
-            Swipe.OnEndSwipe += Hide;
 
-            Swipe.OnEndSwipe -= Hide;
-            Swipe.OnEndSwipe -= Hide;
-            Swipe.OnEndSwipe -= Hide;
 
             //followPrompt.gameObject.SetActive(false);
         }
 
+        //         void AddListeners()
+        //         {
+        //             swipe.OnChangeDeviation += OnChangeDeviation;
+        //             swipe.OnDrop += OnDrop;
+        //             swipe.OnTakeCard += OnTakeCard;
+        //             swipe.OnEndSwipe += Hide;
+        //         }
+        // 
+        //         void RemoveListeners()
+        //         {
+        //             swipe.OnChangeDeviation -= OnChangeDeviation;
+        //             swipe.OnDrop -= OnDrop;
+        //             swipe.OnTakeCard -= OnTakeCard;
+        //             swipe.OnEndSwipe -= Hide;
+        //         }
+
         void OnSet()
         {
-            choiceble = false;
-            choice = -10;
-
             HideAll();
 
-            next.transform.localScale = new Vector3(1f, 1f, 1f);
-            next.gameObject.SetActive(true);
-            next.text = "Дальше";
+            name.Localize(data.Card.Name, LocalizePartEnum.CardName);
 
-            int currentCardState = SL.GetCurrentState(profile);
-            if (currentCardState == CardData.NOTHING)
+            DeckItem deckItem = SL.GetCurrentCard(profile);
+            if (deckItem.State == CardData.NOTHING)
             {
-                conditions.SetItem(data.Conditions);
-                if (data.Card.IfNothing == null)
-                    throw new Exception("Description is needed if choice unavailable");
-
-                SetDecription(data.Card.IfNothing[data.Card.IfNothing.Length - profile.CardStates.Where(c => c == CardData.NOTHING).ToList().Count]);
+                if (data.Card.Call && data.Card.Next.HasTriggers())
+                {
+                    var cards = data.Card.Next.Select(n => Services.Meta.Game.Cards[n.Id]).ToList();
+                    RewardMeta[] cost = cards.SelectMany(c => c.Cost.SelectMany(r => r)).ToArray();
+                    needed.SetItems(null, cost, false);
+                }
+                SetDecription(data.Card.IfNothing[(data.Card.IfNothing.Length - 1) - deckItem.DescIndex]);
             }
-            else if (currentCardState == CardData.ONLY_ONCE)
+            else if (deckItem.State == CardData.DESCRIPTION)
             {
-                SetDecription(data.Card.OnlyOnce[data.Card.OnlyOnce.Length - profile.CardStates.Where(c => c == CardData.ONLY_ONCE).ToList().Count]);
+                if (data.Card.OnlyOnce.HasTexts())
+                {
+                    if (!profile.Cards.TryGetValue(data.Card.Id, out CardData _card) || _card.CT == 0)
+                        SetDecription(data.Card.OnlyOnce[(data.Card.OnlyOnce.Length - 1) - deckItem.DescIndex]);
+                }
+                else if (data.Card.Descs.HasTexts())
+                {
+                    if (data.Card.RStory)
+                        SetDecription(data.Card.Descs[Random.Range(0, data.Card.Descs.Length)]);
+                    else
+                        SetDecription(data.Card.Descs[(data.Card.Descs.Length - 1) - deckItem.DescIndex]);
+                }
+                else throw new Exception("for this card there must be an description Desc or OnlyOnce");
             }
-            else if (currentCardState == CardData.DESCRIPTION)
+            else if (deckItem.State == CardData.REWARD)
             {
-                if (data.Card.RStory)
-                    SetDecription(data.Card.Descs[Random.Range(0, data.Card.Descs.Length)]);
-                else
-                    SetDecription(data.Card.Descs[data.Card.Descs.Length - profile.CardStates.Where(c => c == CardData.DESCRIPTION).ToList().Count]);
-            }
-            else if (currentCardState == CardData.REWARD)
-            {
-                randomReward.SetItems(data.Card.Reward != null ? data.Card.Reward[0] : null, data.Card.Cost != null ? data.Card.Cost[0] : null, false);
+                if (data.Card.Reward != null)
+                    randomReward.SetItems(data.Card.Reward[0].Where(r => r.Chance > 0).ToArray(), null, false);
 
                 if (Services.Player.RewardCollected.Count > 0)
                 {
@@ -101,31 +114,10 @@ namespace UI.ActionPanel
                         throw new Exception($"Description is needed for reward {data.Card.Id}");
                     SetDecription(data.Card.RewardText);
                 }
-                else if (data.Card.IfNothing != null && data.Card.IfNothing.Length > 0 && data.Card.Next == null)
+                else if (data.Card.IfNothing != null && data.Card.IfNothing.Length > 0)
                     SetDecription(data.Card.IfNothing[0]);
                 else
-                    SetDecription("noint1");
-
-            }
-            else if (currentCardState == CardData.CHOICE)
-            {
-                conditions.SetItem(data.Conditions);
-
-                if (data.Left == null && data.Right == null)
-                {
-                    throw new Exception($"State Choice should have any next card {data.Card.Id}");
-                }
-                else if (data.Left.Id == data.Right.Id)
-                {
-                    left.ShowChoice(data.Left, profile.Left, data.FollowPrompt == CardMeta.LEFT);
-                }
-                else
-                {
-                    choiceble = true;
-                    left.ShowChoice(data.Left, profile.Left, data.FollowPrompt == CardMeta.LEFT);
-                    right.ShowChoice(data.Right, profile.Right, data.FollowPrompt == CardMeta.RIGHT);
-                    delem.SetActive(true);
-                }
+                    throw new Exception("card must have no reward message");
             }
             else
             {
@@ -134,52 +126,48 @@ namespace UI.ActionPanel
         }
 
 
-        void OnTakeCard()
-        {
-            if (data.Card == null || data.Card.Type != CardMeta.TYPE_CARD)
-                return;
-
-            if (next.gameObject.activeInHierarchy)
-                next.GetComponent<RectTransform>().DOScale(1.2f, 0.15f);
-
-            //if (backpack.gameObject.activeInHierarchy)
-            //    backpack.TakeCard();
-
-            if (data.Left != null && data.Left.Id == data.Right.Id)
-            {
-                left.FadeIn();
-            }
-            else if (data.Left == null && data.Right == null)
-            {
-                left.FadeIn();
-            }
-
-            choice = -10;
-        }
+        //         void OnTakeCard()
+        //         {
+        //             if (data.Card == null || data.Card.Type != CardMeta.TYPE_CARD)
+        //                 return;
+        // 
+        //             // if (next.gameObject.activeInHierarchy)
+        //             //     next.GetComponent<RectTransform>().DOScale(1.2f, 0.15f);
+        // 
+        //             //if (backpack.gameObject.activeInHierarchy)
+        //             //    backpack.TakeCard();
+        // 
+        // 
+        // 
+        //             choice = -10;
+        //         }
 
 
-        void OnDrop()
-        {
-            if (data.Card == null || data.Card.Type != CardMeta.TYPE_CARD)
-                return;
-
-            if (next.gameObject.activeInHierarchy)
-                next.GetComponent<RectTransform>().DOScale(1.0f, 0.15f);
-
-            //if (backpack.gameObject.activeInHierarchy)
-            //    backpack.DropCard();
-
-            left.FadeOut();
-            right.FadeOut();
-
-            choice = -10;
-        }
+        //         void OnDrop()
+        //         {
+        //             if (data.Card == null || data.Card.Type != CardMeta.TYPE_CARD)
+        //                 return;
+        //             // 
+        //             //             if (next.gameObject.activeInHierarchy)
+        //             //                 next.GetComponent<RectTransform>().DOScale(1.0f, 0.15f);
+        // 
+        //             //if (backpack.gameObject.activeInHierarchy)
+        //             //    backpack.DropCard();
+        // 
+        //             //left.FadeOut();
+        //             //right.FadeOut();
+        // 
+        //             choice = -10;
+        //         }
 
 
 
-        public void Show(SwipeData data)
+        public void Show(SwipeData data, Swipe swipe)
         {
             this.data = data;
+            this.swipe = swipe;
+
+            MetaService.ShowUnvalidateCards(data.Card);
 
 
             OnSet();
@@ -202,7 +190,7 @@ namespace UI.ActionPanel
         {
             descPanel.gameObject.SetActive(true);
 
-            //description.gameObject.SetActive(true);
+            description.gameObject.SetActive(true);
             description.text = desc.Localize(LocalizePartEnum.CardDescription);
 
             if (desc.Contains("ask"))
@@ -215,24 +203,26 @@ namespace UI.ActionPanel
 
         private void HideAll()
         {
-            conditions.Hide();
             randomReward.Hide();
+            needed.Hide();
             backpack.gameObject.SetActive(false);
-            next.gameObject.SetActive(false);
-            next.GetComponent<RectTransform>().DOKill();
+            // next.gameObject.SetActive(false);
+            // next.GetComponent<RectTransform>().DOKill();
+            description.gameObject.SetActive(false);
 
-            left.HideAll();
-            right.HideAll();
-            delem.SetActive(false);
+            //left.HideAll();
+            //right.HideAll();
+            //delem.SetActive(false);
 
             descPanel.gameObject.SetActive(false);
         }
 
+        /*
         void OnChangeDeviation(float dev)
         {
-            if (data == null || Swipe.State != Swipe.States.DRAG || choiceble == false) return;
+            //if (data == null || this.State != Swipe.States.DRAG || choiceble == false) return;
 
-            else if (System.Math.Abs(dev) < threshold)
+            if (System.Math.Abs(dev) < threshold)
             {
                 if (choice == -10)
                     return;
@@ -253,22 +243,22 @@ namespace UI.ActionPanel
 
             if (choice == -10)
             {
-                left.FadeOut();
-                right.FadeOut();
+                // left.FadeOut();
+                // right.FadeOut();
             }
             else if (choice == CardMeta.LEFT)
             {
-                left.FadeIn();
-                right.FadeOut();
+                // left.FadeIn();
+                // right.FadeOut();
             }
             else if (choice == CardMeta.RIGHT)
             {
-                left.FadeOut();
-                right.FadeIn();
+                // left.FadeOut();
+                // right.FadeIn();
             }
 
 
-        }
+        } */
 
     }
 }

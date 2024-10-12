@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 
 using UnityEditor;
+using UnityEditor.Search;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityJSON;
@@ -66,7 +67,35 @@ public class MetaService
         Game = JSON.Deserialize<GameMeta>(asset);
         //await UniTask.SwitchToMainThread();
 
+        //ShowUnvalidateCards();
         //Debug.Log(JsonUtility.ToJson(Game.Cards["28440109"]));
+    }
+
+    public static void ShowUnvalidateCards(CardMeta card)
+    {
+        if (!(card.Reward.HasReward() || card.Cost.HasReward()) && card.RewardText.HasText())
+            CardException(card, "есть текст награды и должна быть задана награда!");
+        if ((card.Reward.HasReward() || card.Cost.HasReward()) && !card.RewardText.HasText())
+            CardException(card, "должен быть задан текст награды!");
+        if (card.Reward.HasReward() && !card.Reward.ToList().Exists(r => r.ToList().Exists(rr => rr.Chance == 0)) &&
+            !card.IfNothing.HasTexts())
+            CardException(card, "карта должна содержать текст если награды нет");
+        if (card.Shure != null && card.Next == null)
+            CardException(card, "карта должна содержать карточку подтверждения!");
+        if (card.Call && card.Next == null)
+            CardException(card, "карта вызываема и должна иметь выбор");
+        if (card.Call && card.Next != null && card.Next.Any(n => n.Next != null))
+            CardException(card, "карта с вызовом не должна иметь Next в выборах");
+
+
+
+    }
+
+    private static void CardException(CardMeta card, string message)
+    {
+        string m = $"card {card.Id.ColorizeHH("ff0000")}: {message} ";
+        Debug.LogError(m);
+        //throw new Exception();
     }
 
 }

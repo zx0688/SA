@@ -136,11 +136,11 @@ public class PlayerService : IService
     {
         request.Hash = swipe.Card.Id;
         request.Type = TriggerMeta.SWIPE;
-        request.Value = swipe.Choice;
+        request.Value = swipe.CurrentChoice;
 
         //if (swipe.Card.Next.HasTriggers() && swipe.Card.Descs.HasTexts() && Profile.DialogIndex < swipe.Card.Descs.Length)
         //    request.Id = null;
-        request.Id = swipe.Left != null ? (swipe.Choice == CardMeta.LEFT ? swipe.Left.Id : swipe.Right.Id) : null;
+        request.Id = swipe.ChoiceMode ? (swipe.CurrentChoice == CardMeta.LEFT ? swipe.Choices[0].Id : swipe.Choices[1].Id) : null;
 
         HttpBatchServer.Change(request);
 
@@ -201,15 +201,20 @@ public class PlayerService : IService
 
     public void CreateSwipeData(SwipeData swipeData)
     {
-        swipeData.Choice = -1;
+        swipeData.CurrentChoice = -1;
+
+
 
         //default card
-        string nextCardId = Profile.Deck[Profile.Deck.Count - 1];
+        DeckItem ditem = Profile.Deck[Profile.Deck.Count - 1];
+        string nextCardId = ditem.Id;
         swipeData.Data = Profile.Cards.GetValueOrDefault(nextCardId);
         swipeData.Card = Meta.Cards.GetValueOrDefault(nextCardId);
-        swipeData.Left = Profile.Left != null ? Meta.Cards[Profile.Left.Id] : null;
-        swipeData.Right = Profile.Right != null ? Meta.Cards[Profile.Right.Id] : swipeData.Left;
-        swipeData.LastCard = swipeData.Left == null && swipeData.Right == null && Profile.Deck.Count <= 1;
+        swipeData.Choices = Profile.Choices.Select(c => Meta.Cards[c.Id]).ToList(); //Profile.Left != null ? Meta.Cards[Profile.Left.Id] : null;
+        //swipeData.Down = null; //Profile.Right != null ? Meta.Cards[Profile.Right.Id] : swipeData.Up;
+
+
+        //swipeData.LastCard = swipeData.Up == null && swipeData.Down == null && Profile.Deck.Count <= 1;
         swipeData.Hero = swipeData.Card.Hero != null ? Meta.Heroes[swipeData.Card.Hero] : null;
 
         swipeData.Conditions = new List<ItemTypeData>();
@@ -233,18 +238,20 @@ public class PlayerService : IService
 */
 
         swipeData.FollowPrompt = -1;
-        if (FollowQuest != null
-            && swipeData.Left != null
-            && swipeData.Left.Id != swipeData.Right.Id
-            && Services.Meta.Game.Cards.TryGetValue(FollowQuest, out CardMeta quest))
-        {
-            List<CardMeta> cards = findAllNextPossibleCards(swipeData.Left);
-            bool left = quest.Next.ToList().Exists(t => swipeData.Left.Id == t.Id || findCardIdDeepRecursive(cards, t.Id, 4));
+        //         if (FollowQuest != null
+        //             && swipeData.Up != null
+        //             && swipeData.Up.Id != swipeData.Down.Id
+        //             && Services.Meta.Game.Cards.TryGetValue(FollowQuest, out CardMeta quest))
+        //         {
+        //             List<CardMeta> cards = findAllNextPossibleCards(swipeData.Up);
+        //             bool left = quest.Next.ToList().Exists(t => swipeData.Up.Id == t.Id || findCardIdDeepRecursive(cards, t.Id, 4));
+        // 
+        //             if (left == false) cards = findAllNextPossibleCards(swipeData.Down);
+        //             bool right = !left && quest.Next.ToList().Exists(t => swipeData.Down.Id == t.Id || findCardIdDeepRecursive(cards, t.Id, 4));
+        //             swipeData.FollowPrompt = left ? CardMeta.LEFT : (right ? CardMeta.RIGHT : -1);
+        //         }
 
-            if (left == false) cards = findAllNextPossibleCards(swipeData.Right);
-            bool right = !left && quest.Next.ToList().Exists(t => swipeData.Right.Id == t.Id || findCardIdDeepRecursive(cards, t.Id, 4));
-            swipeData.FollowPrompt = left ? CardMeta.LEFT : (right ? CardMeta.RIGHT : -1);
-        }
+        swipeData.ChoiceMode = SL.GetCurrentCard(Profile).State == CardData.CHOICE;
     }
 
     private void RecursiveFindAllGroupCardTriggers(TriggerMeta trigger, List<TriggerMeta> ts)

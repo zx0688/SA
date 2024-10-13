@@ -105,7 +105,6 @@ class SL {
 		profile.ActiveQuests = new List_1();
 		profile.History = new List_1();
 
-		profile.Called = null;
 		profile.Rerolls = 0;
 
 		profile.RewardEvents = new Dictionary_2<String, ItemData>();
@@ -223,25 +222,15 @@ class SL {
 
 				SetRandomSeedByTime(request.Timestamp);
 
-				profile.SwipeCount++;
-
 				// var swipedCard:CardMeta = meta.Cards.tryGet(request.Hash);
 				// if (profile.CardStates.getCount() > 1) {
 				// 	profile.CardStates.pop();
 				// 	ApplyCardState(swipedCard, nextCardInfo, meta, profile, random, response);
 				// 	return;
 				// }
-				var card:CardData = profile.Cards.getOrCreate(request.Hash, f -> new CardData(request.Hash));
-				card.CT++;
-				card.CR++;
-
-				if (currentDeckItem.State == CardData.CHOICE) {
-					card.Choice = request.Id;
-					profile.Choices = new List_1();
-				}
-
-				profile.History.push(card.Id);
+				UpdatePlayerData(request, currentDeckItem, choiceInfo, meta, profile, response);
 				// profile.CardStates = profile.CardStates.getCount() > 0 ? new List_1<Int>() : profile.CardStates;
+
 				CreateDeck(request.Id, choiceInfo, meta, profile, random, response, requestTimestamp);
 			// 				if (nextCardInfo != null && nextCardInfo.Next != null) {
 			// 					var nextCard:CardMeta = meta.Cards.tryGet(nextCardInfo.Next);
@@ -295,7 +284,7 @@ class SL {
 				for (c in profile.History)
 					profile.Cards.tryGet(c).CR = 0;
 				profile.History = new List_1();
-				profile.Called = null;
+
 				setStartCard(profile, meta, random);
 
 				// profile.CardStates.push(CardData.CHOICE);
@@ -338,14 +327,49 @@ class SL {
 		RecursiveCreateDeck(card, meta, profile, random, null, 0);
 	}
 
+	private static function UpdatePlayerData(request:GameRequest, currentDeckItem:DeckItem, choice:ChoiceInfo, meta:GameMeta, profile:ProfileData,
+			response:GameResponse) {
+		profile.SwipeCount++;
+
+		var cardMeta:CardMeta = meta.Cards.tryGet(request.Hash);
+
+		response.Debug += " d" + currentDeckItem.State + " id" + currentDeckItem.Id;
+		var card:CardData = profile.Cards.getOrCreate(request.Hash, f -> new CardData(cardMeta.Id));
+		if ((cardMeta.Next != null && currentDeckItem.State == CardData.CHOICE)
+			|| (cardMeta.Next == null && (cardMeta.Reward != null || cardMeta.Cost != null) && currentDeckItem.State == CardData.REWARD)
+			|| (cardMeta.Next == null && cardMeta.Reward == null && cardMeta.Cost == null)) {
+			card.CT++;
+			card.CR++;
+		}
+
+		response.Debug += " ct" + card.CT;
+
+		if (currentDeckItem.State == CardData.CHOICE) {
+			// card.Choice = request.Id;
+			profile.Choices = new List_1();
+		}
+
+		profile.History.push(cardMeta.Id);
+	}
+
 	private static function CreateDeck(nextCardId:String, choice:ChoiceInfo, meta:GameMeta, profile:ProfileData, random:Random, response:GameResponse,
 			requestTimestamp:Int) {
 		profile.Deck.pop();
 
-		if (choice != null && choice.Id == choice.Next) {
-			nextCardId = null;
-		} else if (choice != null && choice.Next != null) {
-			RecursiveCreateDeck(meta.Cards.tryGet(choice.Next), meta, profile, random, response, 0);
+		if (choice != null) {
+			if (choice.Id != null) {
+				var card = meta.Cards.tryGet(choice.Id);
+				// убираем награду базы если карта блокирует награду
+				if (card.BlockReward && choice.Base != null) {
+					profile.Deck.removeItem(profile.Deck.findList(d -> d.State == CardData.REWARD && d.Id == choice.Base));
+				}
+			}
+
+			if (choice.Id == choice.Next) {
+				nextCardId = null;
+			} else if (choice.Next != null) {
+				RecursiveCreateDeck(meta.Cards.tryGet(choice.Next), meta, profile, random, response, 0);
+			}
 		}
 
 		var nextCard:CardMeta = null;
@@ -368,6 +392,7 @@ class SL {
 			ApplyReward(nextCard, GetRewardIndex(nextCard, meta, profile, random), meta, profile, random);
 		} else if (deckInfo.State == CardData.CHOICE) {
 			nextCard = meta.Cards.tryGet(deckInfo.Id);
+			response.Debug = "Choice: " + nextCard.Name + " (" + nextCard.Id + ")";
 			CreateLeftRight(nextCard.Next, nextCard, meta, profile, random, response);
 			if (profile.Choices.getCount() == 0) {
 				profile.Deck.removeItem(profile.Deck.findList(d -> d.State == CardData.REWARD && d.Id == deckInfo.Id));
@@ -445,8 +470,8 @@ class SL {
 	private static function CheckAndClearDeck(meta:GameMeta, profile:ProfileData, random:Random) {
 		var currentCard:CardMeta = null;
 		while (profile.Deck.getCount() > 0) {
-			var id:String = GetCurrentCard(profile).Id;
-			currentCard = meta.Cards.tryGet(id);
+			var deckItem = GetCurrentCard(profile);
+			currentCard = meta.Cards.tryGet(deckItem.Id);
 			if (!CheckCard(currentCard, meta, profile, random)) {
 				profile.Deck.RemoveAt(profile.Deck.getCount() - 1);
 				continue;
@@ -802,15 +827,15 @@ class SL {
 			return;
 		} else if (candidates.length == 1 && candidates[0].length == 1) {
 			profile.Choices.push(new ChoiceInfo(candidates[0][0].Id, nextDict.tryGet(candidates[0][0].Id),
-				GetRewardIndex(candidates[0][0], meta, profile, random)));
+				GetRewardIndex(candidates[0][0], meta, profile, random), current.Id));
 			return;
 		} else if (candidates.length == 1 && candidates[0].length == 2) {
 			if (current.Shake == true)
 				Shake(candidates[0], random);
 			profile.Choices.push(new ChoiceInfo(candidates[0][0].Id, nextDict.tryGet(candidates[0][0].Id),
-				GetRewardIndex(candidates[0][0], meta, profile, random)));
+				GetRewardIndex(candidates[0][0], meta, profile, random), current.Id));
 			profile.Choices.push(new ChoiceInfo(candidates[0][1].Id, nextDict.tryGet(candidates[0][1].Id),
-				GetRewardIndex(candidates[0][1], meta, profile, random)));
+				GetRewardIndex(candidates[0][1], meta, profile, random), current.Id));
 			return;
 		}
 		for (c in candidates.copy()) {
@@ -840,10 +865,10 @@ class SL {
 		// 		}
 		// 	}
 		if (left != null)
-			profile.Choices.push(new ChoiceInfo(left.Id, nextDict.tryGet(left.Id), GetRewardIndex(left, meta, profile, random)));
+			profile.Choices.push(new ChoiceInfo(left.Id, nextDict.tryGet(left.Id), GetRewardIndex(left, meta, profile, random), current.Id));
 
 		if (right != null)
-			profile.Choices.push(new ChoiceInfo(right.Id, nextDict.tryGet(right.Id), GetRewardIndex(right, meta, profile, random)));
+			profile.Choices.push(new ChoiceInfo(right.Id, nextDict.tryGet(right.Id), GetRewardIndex(right, meta, profile, random), current.Id));
 	}
 
 	private static function Shake<T>(arr:Array<T>, random:Random):Void {

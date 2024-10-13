@@ -15,7 +15,6 @@ using Random = UnityEngine.Random;
 using UnityEditor;
 using UnityJSON;
 using UnityEngine.Assertions.Must;
-using UnityEditor.Tilemaps;
 
 namespace UI.ActionPanel
 {
@@ -76,10 +75,11 @@ namespace UI.ActionPanel
             DeckItem deckItem = SL.GetCurrentCard(profile);
             if (deckItem.State == CardData.NOTHING)
             {
-                if (data.Card.Call && data.Card.Next.HasTriggers())
+                if (data.Card.Next.HasTriggers())
                 {
-                    var cards = data.Card.Next.Select(n => Services.Meta.Game.Cards[n.Id]).ToList();
-                    RewardMeta[] cost = cards.SelectMany(c => c.Cost.SelectMany(r => r)).ToArray();
+                    var cards = new List<CardMeta>();
+                    Services.Meta.GetAllRecursiveCardsFromGroup(data.Card.Next, cards);
+                    RewardMeta[] cost = cards.SelectMany(c => c.Cost[0]).ToArray();
                     needed.SetItems(null, cost, false);
                 }
                 SetDecription(data.Card.IfNothing[(data.Card.IfNothing.Length - 1) - deckItem.DescIndex]);

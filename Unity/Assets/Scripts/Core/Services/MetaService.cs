@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 
 using UnityEditor;
-using UnityEditor.Search;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityJSON;
@@ -70,6 +69,28 @@ public class MetaService
         //ShowUnvalidateCards();
         //Debug.Log(JsonUtility.ToJson(Game.Cards["28440109"]));
     }
+
+    public void GetAllRecursiveCardsFromGroup(TriggerMeta[] triggers, List<CardMeta> cards)
+    {
+        if (triggers == null)
+            return;
+        foreach (TriggerMeta trigger in triggers)
+        {
+            if (trigger.Type == CardMeta.TYPE_CARD)
+            {
+                var card = Game.Cards[trigger.Id];
+                cards.Add(card);
+            }
+            else if (trigger.Type == CardMeta.TYPE_GROUP)
+            {
+                var group = Game.Groups[trigger.Id];
+                GetAllRecursiveCardsFromGroup(group.Cards, cards);
+            }
+        }
+    }
+
+
+    //------------------
 
     public static void ShowUnvalidateCards(CardMeta card)
     {

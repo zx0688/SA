@@ -204,6 +204,8 @@ class CardMeta {
 	public var Under:NativeArray<TriggerMeta>;
 	public var IfNot:NativeArray<TriggerMeta>;
 
+	public var BlockReward:Bool;
+
 	public var Pri:Int;
 	public var Con:NativeArray<NativeArray<ConditionMeta>>;
 	public var Text:String;

@@ -21,8 +21,7 @@ class ProfileData {
 	// public var Left:CardNextInfo;
 	// public var Right:CardNextInfo;
 	// public var CardStates:List_1<Int>;
-	public var Called:String;
-
+	// public var Called:String;
 	public var Cards:Dictionary_2<String, CardData>;
 	public var Items:Dictionary_2<String, ItemData>;
 	public var Skills:List_1<String>;
@@ -137,15 +136,17 @@ class GameResponse {
 @:nativeGen
 @:strict(SerializableAttribute)
 class ChoiceInfo {
-	public function new(Id:String, Next:String, RewardIndex:Int) {
+	public function new(Id:String, Next:String, RewardIndex:Int, Base:String) {
 		this.Id = Id;
 		this.Next = Next;
 		this.RewardIndex = RewardIndex;
+		this.Base = Base;
 	}
 
 	public var RewardIndex:Int;
 	public var Id:String;
 	public var Next:String;
+	public var Base:String;
 }
 
 @:nativeGen

@@ -90,9 +90,26 @@ namespace UI.ActionPanel
             reward.gameObject.SetActive(true);
 
             int index = info != null ? info.RewardIndex : 0;
-            if (index != -1)
+            if (cardMeta.TradeLimit > 0)
             {
-                RewardMeta[] r = cardMeta.Reward != null ? cardMeta.Reward[index].Where(rr => rr.Count > 0).ToArray() : null;
+                RewardMeta rr = new RewardMeta();
+                rr.Id = cardMeta.Reward[0][info.RewardIndex].Id;
+                rr.Count = SL.GetRewardMinCount(rr.Id, cardMeta, Services.Meta.Game);
+                reward.SetItems(new RewardMeta[1] { rr }, null, false);
+                allRewards.Add(rr.Id);
+
+                rr = new RewardMeta();
+                rr.Id = cardMeta.Cost[0][info.CostIndex].Id;
+                rr.Count = SL.GetRewardMinCount(rr.Id, cardMeta, Services.Meta.Game);
+                cost.SetItems(null, new RewardMeta[1] { rr }, false);
+                allRewards.Add(rr.Id);
+
+                costText.gameObject.SetActive(true);
+                rewardText.gameObject.SetActive(true);
+            }
+            else if (index != -1)
+            {
+                RewardMeta[] r = cardMeta.Reward != null ? cardMeta.Reward[index].Where(rr => rr.Count > 0).ToArray() : null; ;
                 reward.SetItems(r, null, false);
                 rewardText.gameObject.SetActive(r.GetCountIfNull() > 0);
                 if (cardMeta.Reward != null)
@@ -132,7 +149,7 @@ namespace UI.ActionPanel
             // }
             // else
             //     hero.gameObject.SetActive(false);
-            if (info.Next == info.Id)
+            if (info.Next == info.Id && cardMeta.TradeLimit == 0)
                 action.Localize(cardMeta.Shure, LocalizePartEnum.CardAction);
             else if (cardMeta.Act.HasText())
                 action.Localize(cardMeta.Act, LocalizePartEnum.CardAction);

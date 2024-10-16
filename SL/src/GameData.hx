@@ -136,17 +136,19 @@ class GameResponse {
 @:nativeGen
 @:strict(SerializableAttribute)
 class ChoiceInfo {
-	public function new(Id:String, Next:String, RewardIndex:Int, Base:String) {
+	public function new(Id:String, Next:String, RewardIndex:Int, Base:String, CostIndex:Int) {
 		this.Id = Id;
 		this.Next = Next;
 		this.RewardIndex = RewardIndex;
 		this.Base = Base;
+		this.CostIndex = CostIndex;
 	}
 
 	public var RewardIndex:Int;
 	public var Id:String;
 	public var Next:String;
 	public var Base:String;
+	public var CostIndex:Int;
 }
 
 @:nativeGen

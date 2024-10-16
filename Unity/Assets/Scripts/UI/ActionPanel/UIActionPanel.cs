@@ -90,6 +90,13 @@ namespace UI.ActionPanel
                 {
                     if (!profile.Cards.TryGetValue(data.Card.Id, out CardData _card) || _card.CT == 0)
                         SetDecription(data.Card.OnlyOnce[(data.Card.OnlyOnce.Length - 1) - deckItem.DescIndex]);
+                    else if (data.Card.Descs.HasTexts())
+                    {
+                        if (data.Card.RStory)
+                            SetDecription(data.Card.Descs[Random.Range(0, data.Card.Descs.Length)]);
+                        else
+                            SetDecription(data.Card.Descs[(data.Card.Descs.Length - 1) - deckItem.DescIndex]);
+                    }
                 }
                 else if (data.Card.Descs.HasTexts())
                 {
@@ -114,10 +121,12 @@ namespace UI.ActionPanel
                         throw new Exception($"Description is needed for reward {data.Card.Id}");
                     SetDecription(data.Card.RewardText);
                 }
+                else if (data.Card.Reward == null && data.Card.Cost == null && data.Card.Over != null)
+                    SetDecription(data.Card.RewardText);
                 else if (data.Card.IfNothing != null && data.Card.IfNothing.Length > 0)
                     SetDecription(data.Card.IfNothing[0]);
                 else
-                    throw new Exception("card must have no reward message");
+                    throw new Exception($"card {data.Card.Id} must have no reward message");
             }
             else
             {

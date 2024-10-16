@@ -83,6 +83,7 @@ class ItemMeta {
 
 	public var HowTo:NativeArray<ConditionMeta>;
 	public var WhereTo:NativeArray<ConditionMeta>;
+	public var Price:Int;
 }
 
 @:nativeGen
@@ -204,7 +205,7 @@ class CardMeta {
 	public var Under:NativeArray<TriggerMeta>;
 	public var IfNot:NativeArray<TriggerMeta>;
 
-	public var BlockReward:Bool;
+	public var TradeLimit:Int;
 
 	public var Pri:Int;
 	public var Con:NativeArray<NativeArray<ConditionMeta>>;

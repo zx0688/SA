@@ -94,7 +94,7 @@ public class MetaService
 
     public static void ShowUnvalidateCards(CardMeta card)
     {
-        if (!(card.Reward.HasReward() || card.Cost.HasReward()) && card.RewardText.HasText())
+        if (!(card.Reward.HasReward() || card.Cost.HasReward()) && card.RewardText.HasText() && card.Over == null)
             CardException(card, "есть текст награды и должна быть задана награда!");
         if ((card.Reward.HasReward() || card.Cost.HasReward()) && !card.RewardText.HasText())
             CardException(card, "должен быть задан текст награды!");
@@ -107,6 +107,11 @@ public class MetaService
             CardException(card, "карта вызываема и должна иметь выбор");
         if (card.Call && card.Next != null && card.Next.Any(n => n.Next != null))
             CardException(card, "карта с вызовом не должна иметь Next в выборах");
+
+        if (card.TradeLimit > 0)
+        {
+
+        }
 
 
 

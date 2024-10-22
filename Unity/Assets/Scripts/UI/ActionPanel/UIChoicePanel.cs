@@ -89,7 +89,7 @@ namespace UI.ActionPanel
             icon.gameObject.SetActive(true);
             reward.gameObject.SetActive(true);
 
-            int index = info != null ? info.RewardIndex : 0;
+            bool hasRewardOrCost = info.RewardIndex != -1 || info.CostIndex != -1;
             if (cardMeta.TradeLimit > 0)
             {
                 RewardMeta rr = new RewardMeta();
@@ -107,22 +107,22 @@ namespace UI.ActionPanel
                 costText.gameObject.SetActive(true);
                 rewardText.gameObject.SetActive(true);
             }
-            else if (index != -1)
+            else if (hasRewardOrCost)
             {
-                RewardMeta[] r = cardMeta.Reward != null ? cardMeta.Reward[index].Where(rr => rr.Count > 0).ToArray() : null; ;
-                reward.SetItems(r, null, false);
-                rewardText.gameObject.SetActive(r.GetCountIfNull() > 0);
-                if (cardMeta.Reward != null)
-                    allRewards.AddRange(cardMeta.Reward[index].Select(rr => rr.Id));
+                RewardMeta[] _r = info.RewardIndex != -1 ? cardMeta.Reward[info.RewardIndex].Where(rr => rr.Count > 0).ToArray() : null;
+                reward.SetItems(_r, null, false);
+                rewardText.gameObject.SetActive(_r.GetCountIfNull() > 0);
+                if (info.RewardIndex != -1)
+                    allRewards.AddRange(cardMeta.Reward[info.RewardIndex].Select(rr => rr.Id));
 
 
-                r = cardMeta.Reward != null ? cardMeta.Reward[index].Where(rr => rr.Count < 0).ToArray() : new RewardMeta[] { };
-                var c = cardMeta.Cost != null ? cardMeta.Cost[index].Where(rr => rr.Count > 0).ToArray() : new RewardMeta[] { };
+                var r = info.RewardIndex != -1 ? cardMeta.Reward[info.RewardIndex].Where(rr => rr.Count < 0).ToArray() : new RewardMeta[] { };
+                var c = info.CostIndex != -1 ? cardMeta.Cost[info.CostIndex].Where(rr => rr.Count > 0).ToArray() : new RewardMeta[] { };
                 cost.SetItems(null, r.Concat(c).ToArray(), false);
                 costText.gameObject.SetActive(c.Length > 0);
 
-                if (cardMeta.Cost != null)
-                    allRewards.AddRange(cardMeta.Cost[index].Select(rr => rr.Id));
+                if (info.CostIndex != -1)
+                    allRewards.AddRange(cardMeta.Cost[info.CostIndex].Select(rr => rr.Id));
             }
             else
             {

@@ -193,6 +193,7 @@ class CardMeta {
 	public var RewardText:String;
 	public var RStory:Bool;
 	public var Shure:String;
+	public var OneNext:Bool;
 
 	public var Image:String;
 

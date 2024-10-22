@@ -58,6 +58,10 @@ public class UIReward : MonoBehaviour
         // if (panels[1] != null)
         //     panels[1].SetActive(map.Keys.Count > count);
         //        panels[1].SetActive(sub.Count > 0);
+        var reward = GroupById(rewards);
+        var cost = GroupById(costs);
+
+
 
         //Set(addItems, add, colors[0], animate);
         //Set(subItems, sub, colors[1], animate);
@@ -65,16 +69,16 @@ public class UIReward : MonoBehaviour
         for (int i = 0; i < addItems.Length; i++)
         {
             UIRewardItem item = addItems[i];
-            var rcount = rewards.GetCountIfNull();
+            var rcount = reward.Count;
             if (i < rcount)
             {
                 item.gameObject.SetActive(true);
-                item.SetItem(rewards[i], false);
+                item.SetItem(reward[i], false);
             }
-            else if (i < (rcount + costs.GetCountIfNull()))
+            else if (i < (rcount + cost.Count))
             {
                 item.gameObject.SetActive(true);
-                item.SetItem(costs[i - rcount], true);
+                item.SetItem(cost[i - rcount], true);
             }
             else
             {
@@ -83,6 +87,36 @@ public class UIReward : MonoBehaviour
             }
         }
 
+    }
+
+    private List<RewardMeta> GroupById(RewardMeta[] rewards)
+    {
+        List<RewardMeta> result = new List<RewardMeta>();
+        if (rewards.GetCountIfNull() == 0)
+            return result;
+
+        var rewardIds = rewards.GroupBy(r => r.Id);
+        foreach (var group in rewardIds)
+        {
+            if (group.Count() > 1)
+            {
+                double chance = 1f;
+                int count = 0;
+                foreach (var reward in group)
+                {
+                    chance *= reward.Chance / 100;
+                    count += reward.Count;
+                }
+                RewardMeta r = new RewardMeta();
+                r.Id = group.First().Id;
+                r.Count = count;
+                r.Chance = Math.Round(chance, 2) * 100;
+                result.Add(r);
+            }
+            else
+                result.Add(group.First());
+        }
+        return result;
     }
 
     //     private void Set(UIRewardItem[] uiItems, List<RewardMeta> items, Color32 color, bool animate)

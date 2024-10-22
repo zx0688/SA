@@ -122,6 +122,8 @@ class GameRequest {
 @:nativeGen
 @:strict(SerializableAttribute)
 class GameResponse {
+	public function new() {}
+
 	public var Error:String;
 	public var Profile:ProfileData;
 	public var Events:List_1<GameRequest>;

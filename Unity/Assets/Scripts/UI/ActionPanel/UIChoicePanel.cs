@@ -117,11 +117,11 @@ namespace UI.ActionPanel
 
 
                 var r = info.RewardIndex != -1 ? cardMeta.Reward[info.RewardIndex].Where(rr => rr.Count < 0).ToArray() : new RewardMeta[] { };
-                var c = info.CostIndex != -1 ? cardMeta.Cost[info.CostIndex].Where(rr => rr.Count > 0).ToArray() : new RewardMeta[] { };
+                var c = info.CostIndex != -1 && cardMeta.Cost.HasReward() ? cardMeta.Cost[info.CostIndex].Where(rr => rr.Count > 0).ToArray() : new RewardMeta[] { };
                 cost.SetItems(null, r.Concat(c).ToArray(), false);
                 costText.gameObject.SetActive(c.Length > 0);
 
-                if (info.CostIndex != -1)
+                if (info.CostIndex != -1 && cardMeta.Cost.HasReward())
                     allRewards.AddRange(cardMeta.Cost[info.CostIndex].Select(rr => rr.Id));
             }
             else

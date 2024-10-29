@@ -1,4 +1,5 @@
 // Profile Data
+import haxe.ds.StringMap;
 import haxe.Int64;
 import GameMeta;
 import SL;
@@ -55,6 +56,7 @@ class CardData {
 	public static inline var REWARD:Int = 1;
 	public static inline var CHOICE:Int = 2;
 	public static inline var NOTHING:Int = 3;
+	public static inline var ONLY_ONCE:Int = 4;
 
 	// public static inline var ONLY_ONCE:Int = 4;
 

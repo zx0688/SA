@@ -28,6 +28,9 @@ public class AssetsService
     // }
 
     public Action OnBadConnection;
+
+    public LocalizationData GetLocalizationData() => LocalDic;
+
     public string Localize(string key, LocalizePartEnum part) => part switch
     {
         LocalizePartEnum.GUI => LocalDic.GUI.TryGetValue(key, out string res) ? res : $"[{key}]",

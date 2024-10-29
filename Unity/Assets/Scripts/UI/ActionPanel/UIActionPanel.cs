@@ -86,26 +86,12 @@ namespace UI.ActionPanel
             }
             else if (deckItem.State == CardData.DESCRIPTION)
             {
-                if (data.Card.OnlyOnce.HasTexts())
-                {
-                    if (!profile.Cards.TryGetValue(data.Card.Id, out CardData _card) || _card.CT == 0)
-                        SetDecription(data.Card.OnlyOnce[(data.Card.OnlyOnce.Length - 1) - deckItem.DescIndex]);
-                    else if (data.Card.Descs.HasTexts())
-                    {
-                        if (data.Card.RStory)
-                            SetDecription(data.Card.Descs[Random.Range(0, data.Card.Descs.Length)]);
-                        else
-                            SetDecription(data.Card.Descs[(data.Card.Descs.Length - 1) - deckItem.DescIndex]);
-                    }
-                }
-                else if (data.Card.Descs.HasTexts())
-                {
-                    if (data.Card.RStory)
-                        SetDecription(data.Card.Descs[Random.Range(0, data.Card.Descs.Length)]);
-                    else
-                        SetDecription(data.Card.Descs[(data.Card.Descs.Length - 1) - deckItem.DescIndex]);
-                }
-                else throw new Exception("for this card there must be an description Desc or OnlyOnce");
+                if (data.Card.OnlyOnce != null && (!profile.Cards.TryGetValue(data.Card.Id, out CardData _card) || _card.CT == 0))
+                    SetDecription(data.Card.OnlyOnce[(data.Card.OnlyOnce.Length - 1) - deckItem.DescIndex]);
+                else if (data.Card.RStory)
+                    SetDecription(data.Card.Descs[Random.Range(0, data.Card.Descs.Length)]);
+                else
+                    SetDecription(data.Card.Descs[(data.Card.Descs.Length - 1) - deckItem.DescIndex]);
             }
             else if (deckItem.State == CardData.REWARD)
             {
@@ -119,7 +105,11 @@ namespace UI.ActionPanel
 
                     if (data.Card.RewardText == null)
                         throw new Exception($"Description is needed for reward {data.Card.Id}");
-                    SetDecription(data.Card.RewardText);
+
+                    if (Services.Player.RewardCollected.Exists(r => r.Count > 0) || !data.Card.IfNothing.HasTexts())
+                        SetDecription(data.Card.RewardText);
+                    else
+                        SetDecription(data.Card.IfNothing[0]);
                 }
                 else if (data.Card.Reward == null && data.Card.Cost == null && data.Card.Over != null)
                     SetDecription(data.Card.RewardText);
@@ -176,7 +166,7 @@ namespace UI.ActionPanel
             this.data = data;
             this.swipe = swipe;
 
-            MetaService.ShowUnvalidateCards(data.Card);
+            MetaService.ShowUnvalidateCard(data.Card);
 
 
             OnSet();

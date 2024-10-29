@@ -6,7 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
-
+using Unity.Android.Gradle.Manifest;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -65,8 +65,9 @@ public class MetaService
         //await UniTask.SwitchToThreadPool();
         Game = JSON.Deserialize<GameMeta>(asset);
         //await UniTask.SwitchToMainThread();
-
-        //ShowUnvalidateCards();
+#if UNITY_EDITOR
+        //ShowUnvalidateMetaData();
+#endif
         //Debug.Log(JsonUtility.ToJson(Game.Cards["28440109"]));
     }
 
@@ -89,10 +90,38 @@ public class MetaService
         }
     }
 
-
+#if UNITY_EDITOR
     //------------------
+    private static void ShowUnvalidateMetaData()
+    {
+        var cards = Services.Meta.Game.Cards.Values.ToList();
 
-    public static void ShowUnvalidateCards(CardMeta card)
+
+        foreach (var card in cards)
+        {
+            ShowUnvalidateCard(card);
+        }
+
+        var localizationData = Services.Assets.GetLocalizationData();
+        foreach (var key in localizationData.CardName.Keys)
+        {
+            if (!cards.Exists(c => c.Name == key))
+                DebugMessage($"ключ {key} с именем карты {localizationData.CardName[key]} нет ни в одной карте");
+        }
+        foreach (var key in localizationData.CardDescription.Keys)
+        {
+            if (!cards.Exists(c => (c.Descs.HasTexts() && c.Descs.Contains(key)) || (c.OnlyOnce.HasTexts() && c.OnlyOnce.Contains(key)) || c.RewardText == key))
+                DebugMessage($"ключ {key} с описанием карты {localizationData.CardDescription[key]} нет ни в одной карте");
+        }
+
+    }
+
+    private static void DebugMessage(string text)
+    {
+        Debug.LogError(text);
+    }
+
+    public static void ShowUnvalidateCard(CardMeta card)
     {
         if (!(card.Reward.HasReward() || card.Cost.HasReward()) && card.RewardText.HasText() && card.Over == null)
             CardException(card, "есть текст награды и должна быть задана награда!");
@@ -105,15 +134,24 @@ public class MetaService
             CardException(card, "карта должна содержать карточку подтверждения!");
         if (card.Call && card.Next == null)
             CardException(card, "карта вызываема и должна иметь выбор");
-        if (card.Call && card.Next != null && card.Next.Any(n => n.Next != null))
-            CardException(card, "карта с вызовом не должна иметь Next в выборах");
+        //if (card.Call && card.Next != null && card.Next.Any(n => n.Next != null))
+        //    CardException(card, "карта с вызовом не должна иметь Next в выборах");
 
         if (card.TradeLimit > 0)
         {
 
         }
 
+        var cards = Services.Meta.Game.Cards.Values.ToList();
+        var groups = Services.Meta.Game.Groups.Values.ToList();
+        // if (!groups.Exists(g => Array.Exists(g.Cards, g => g.Id == card.Id) && !cards.Exists(c =>
+        //     Array.Exists(c.Over, o => o.Id == card.Id)
+        //     || Array.Exists(c.Next, n => n.Id == card.Id)
+        //     || Array.Exists(c.IfNot, c => c.Id == card.Id))))
+        //     CardException(card, "Карта нигде не исользуется!");
 
+        if (cards.Exists(c => c.Id == card.Id && c != card))
+            CardException(card, "У карты есть Дубликат!");
 
     }
 
@@ -123,5 +161,6 @@ public class MetaService
         Debug.LogError(m);
         //throw new Exception();
     }
+#endif
 
 }

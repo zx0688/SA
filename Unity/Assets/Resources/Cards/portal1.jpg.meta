@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 5d79ecbae4a454826ac514a83341c830
+guid: ef4fed6038e5545dbac6a2dd0f061972
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1900594578146584705
-    second: evgeny6105_fantasy_game_underground_cave_dungeon_rocks._fantasy_bef14259-090c-41d8-aa20-80f4f8ddd95a_0
+      213: 2900573818660442195
+    second: portal1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: evgeny6105_fantasy_game_underground_cave_dungeon_rocks._fantasy_bef14259-090c-41d8-aa20-80f4f8ddd95a_0
+      name: portal1_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 512
-        height: 512
+        width: 500
+        height: 500
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f771a8b0d4bbf95e0800000000000000
-      internalID: -1900594578146584705
+      spriteID: 350dd0a2588e04820800000000000000
+      internalID: 2900573818660442195
       vertices: []
       indices: 
       edges: []

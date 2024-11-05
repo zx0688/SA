@@ -203,8 +203,8 @@ class CardMeta {
 
 	public var Next:NativeArray<TriggerMeta>;
 	public var Over:NativeArray<TriggerMeta>;
-	public var Under:NativeArray<TriggerMeta>;
 	public var IfNot:NativeArray<TriggerMeta>;
+	public var IfWin:NativeArray<TriggerMeta>;
 
 	public var TradeLimit:Int;
 

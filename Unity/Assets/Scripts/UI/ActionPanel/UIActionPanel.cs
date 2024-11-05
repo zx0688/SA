@@ -166,8 +166,9 @@ namespace UI.ActionPanel
             this.data = data;
             this.swipe = swipe;
 
+#if UNITY_EDITOR
             MetaService.ShowUnvalidateCard(data.Card);
-
+#endif
 
             OnSet();
 

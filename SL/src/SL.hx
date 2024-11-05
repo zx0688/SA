@@ -180,10 +180,7 @@ class SL {
 					return;
 				}
 				var location:CardMeta = meta.Locations.tryGet(request.Hash);
-				// if (!CheckCondition(location.Act.Con, null, profile)) {
-				// 	response.Error = "error loc condition " + request.Value;
-				// 	return;
-				// }
+
 				profile.CurrentLocation = location.Id;
 
 			case TriggerMeta.SWIPE:
@@ -223,42 +220,11 @@ class SL {
 					return;
 				}
 
-				// if (currentDeckItem.State == CardData.NOTHING) {
-				// 	var c:CardMeta = meta.t
-				// 	CreateDeck(nextCard.IfNot[0].Id, null, meta, profile, random, response, requestTimestamp);
-				// }
-
 				SetRandomSeedByTime(request.Timestamp);
 
-				// var swipedCard:CardMeta = meta.Cards.tryGet(request.Hash);
-				// if (profile.CardStates.getCount() > 1) {
-				// 	profile.CardStates.pop();
-				// 	ApplyCardState(swipedCard, nextCardInfo, meta, profile, random, response);
-				// 	return;
-				// }
 				UpdatePlayerData(request, currentDeckItem, choiceInfo, meta, profile, response);
-				// profile.CardStates = profile.CardStates.getCount() > 0 ? new List_1<Int>() : profile.CardStates;
 
 				CreateDeck(request.Id, choiceInfo, meta, profile, random, response, requestTimestamp);
-			// 				if (nextCardInfo != null && nextCardInfo.Next != null) {
-			// 					var nextCard:CardMeta = meta.Cards.tryGet(nextCardInfo.Next);
-			// 					RecursiveCreateDeck(nextCard, meta, profile, random, response);
-			// 				}
-			//
-			// 				if ((profile.Left == null && profile.Right == null && swipedCard.Next != null && swipedCard.IfNot != null)
-			// 					&& (swipedCard.Call == false || (swipedCard.Call == true && profile.Called != null))) {
-			// 					var nextCard:CardMeta = meta.Cards.tryGet(swipedCard.IfNot[0].Id);
-			// 					RecursiveCreateDeck(nextCard, meta, profile, random, response);
-			// 				}
-			//
-
-			// CreateCardStates(currentCard, null, meta, profile, random);
-			// ApplyCardState(currentCard, null, meta, profile, random, response);
-
-			// if (currentCard.Call && profile.Called != currentCard.Id)
-			// 	profile.Called = currentCard.Id;
-			// else if (profile.Called == currentCard.Id)
-			// profile.Called = null;
 
 			case TriggerMeta.REROLL:
 				if (profile.Deck.getCount() > 0) {
@@ -425,6 +391,17 @@ class SL {
 				CreateDeck(c.Id, c, meta, profile, random, response, requestTimestamp);
 			} else if (profile.Choices.getCount() > 2)
 				throw "profile have more then 2 choices";
+
+			// если есть выбор то добавляем карту победы ДО выбора
+			if (nextCard.IfWin != null && profile.Choices.getCount() > 0) {
+				var rem = profile.Deck.findList(d -> d.State == CardData.REWARD && d.Id == nextCard.Id);
+				if (rem != null)
+					profile.Deck.removeItem(rem);
+				CreateDeck(nextCard.IfWin[0].Id, null, meta, profile, random, response, requestTimestamp);
+				if (rem != null)
+					profile.Deck.push(rem);
+				profile.Deck.push(deckInfo);
+			}
 		}
 	}
 
@@ -598,7 +575,7 @@ class SL {
 				return false;
 		}
 
-		if (card.Next != null && card.IfNot == null && card.IfNothing == null && card.Reward == null && card.Cost == null) {
+		if (card.Next != null && card.IfNot == null && card.IfWin == null && card.IfNothing == null && card.Reward == null && card.Cost == null) {
 			if (!IfCardLeftRightAvailable(card.Next, card, meta, profile, random))
 				return false;
 		}

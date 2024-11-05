@@ -6,7 +6,6 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
-using Unity.Android.Gradle.Manifest;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -66,7 +65,7 @@ public class MetaService
         Game = JSON.Deserialize<GameMeta>(asset);
         //await UniTask.SwitchToMainThread();
 #if UNITY_EDITOR
-        //ShowUnvalidateMetaData();
+        ShowUnvalidateMetaData();
 #endif
         //Debug.Log(JsonUtility.ToJson(Game.Cards["28440109"]));
     }
@@ -99,20 +98,21 @@ public class MetaService
 
         foreach (var card in cards)
         {
-            ShowUnvalidateCard(card);
+
+            //ShowUnvalidateCard(card);
         }
 
-        var localizationData = Services.Assets.GetLocalizationData();
-        foreach (var key in localizationData.CardName.Keys)
-        {
-            if (!cards.Exists(c => c.Name == key))
-                DebugMessage($"ключ {key} с именем карты {localizationData.CardName[key]} нет ни в одной карте");
-        }
-        foreach (var key in localizationData.CardDescription.Keys)
-        {
-            if (!cards.Exists(c => (c.Descs.HasTexts() && c.Descs.Contains(key)) || (c.OnlyOnce.HasTexts() && c.OnlyOnce.Contains(key)) || c.RewardText == key))
-                DebugMessage($"ключ {key} с описанием карты {localizationData.CardDescription[key]} нет ни в одной карте");
-        }
+        // var localizationData = Services.Assets.GetLocalizationData();
+        // foreach (var key in localizationData.CardName.Keys)
+        // {
+        //     if (!cards.Exists(c => c.Name == key))
+        //         DebugMessage($"ключ {key} с именем карты {localizationData.CardName[key]} нет ни в одной карте");
+        // }
+        // foreach (var key in localizationData.CardDescription.Keys)
+        // {
+        //     if (!cards.Exists(c => (c.Descs.HasTexts() && c.Descs.Contains(key)) || (c.OnlyOnce.HasTexts() && c.OnlyOnce.Contains(key)) || c.RewardText == key))
+        //         DebugMessage($"ключ {key} с описанием карты {localizationData.CardDescription[key]} нет ни в одной карте");
+        // }
 
     }
 

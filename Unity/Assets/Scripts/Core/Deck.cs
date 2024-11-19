@@ -31,6 +31,8 @@ namespace Core
         [SerializeField] private UIAcceleratePanel accelerate;
         [SerializeField] private AudioSource audioSource;
         [SerializeField] private UICHPanel choicePanel;
+        [SerializeField] private Text name;
+
 
         public States State;
 
@@ -68,25 +70,6 @@ namespace Core
             Loop().Forget();
             //StartCoroutine (TriggerTimer ());
         }
-
-        /*private void OnAccelerated()
-        {
-
-            StopCoroutine(Tick());
-            waitingTrigger = null;
-            int timestamp = GameTime.Current;
-            int timeLeft = GameTime.Left(timestamp, startTimeLeft, waitingTimeLeft);
-            noCardTimer.text = TimeFormat.ONE_CELL_FULLNAME(timeLeft > 0 ? timeLeft : 0);
-
-            if (State == States.WAITING)
-            {
-                startTimeLeft = 0;
-                background.SetActive(false);
-                Services.Player.Trigger(queue,
-                    new TriggerVO(TriggerData.START_GAME, 0, 0, null, null, null, null), new List<RewardData>(), timestamp);
-            }
-        }*/
-
 
         //GAME LOOP
         async UniTaskVoid Loop()
@@ -176,7 +159,10 @@ namespace Core
 
             action.Show(swipeData, currentSwipe);
 
+
             currentCard.FadeIn(() => GC.Collect());
+
+            name.Localize(swipeData.Card.Name, LocalizePartEnum.CardName);
 
             if (swipeData.Card.Sound.TryGetRandom(out string sound))
                 Services.Assets.PlaySound(sound, audioSource).Forget();
@@ -194,7 +180,8 @@ namespace Core
             }
         }
 
-        public string GetName() => "Swipe Adv".Localize(LocalizePartEnum.GUI);
+        public string GetName() => swipeData != null && swipeData.Card != null ?
+            swipeData.Card.Name.Localize(LocalizePartEnum.CardName) : "Swipe.UI".Localize(LocalizePartEnum.GUI);
 
         public GameObject GetGameObject() => gameObject;
 

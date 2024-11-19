@@ -14,12 +14,12 @@ class GameMeta {
 	public var Cards:Dictionary_2<String, CardMeta>;
 	// public var All:NativeArray<CardMeta>;
 	public var Items:Dictionary_2<String, ItemMeta>;
-	public var Heroes:Dictionary_2<String, ItemMeta>;
+	public var Heroes:Dictionary_2<String, HeroMeta>;
 	public var Skills:Dictionary_2<String, SkillMeta>;
 	public var Locations:Dictionary_2<String, CardMeta>;
 	public var Groups:Dictionary_2<String, GroupMeta>;
-	public var Triggers:Dictionary_2<String, CardTriggerMeta>;
-
+	public var Triggers:Dictionary_2<String, TriggerActionMeta>;
+	// public var Buffs:Dictionary_2<String, BuffMeta>;
 	public var Profile:PlayerMeta;
 	public var Config:ConfigMeta;
 	public var Version:Int;
@@ -63,6 +63,13 @@ class SkillMeta extends ItemMeta {
 
 @:nativeGen
 @:strict(SerializableAttribute)
+class HeroMeta extends ItemMeta {
+	public var Cards:NativeArray<TriggerMeta>;
+	public var GenderW:Bool;
+}
+
+@:nativeGen
+@:strict(SerializableAttribute)
 class GroupMeta {
 	public var Id:String;
 	public var Cards:NativeArray<TriggerMeta>;
@@ -102,6 +109,16 @@ class ChoiceMeta {
 
 @:nativeGen
 @:strict(SerializableAttribute)
+class TriggerActionMeta {
+	public var Id:String;
+	public var Reward:NativeArray<NativeArray<RewardMeta>>;
+	public var Cost:NativeArray<NativeArray<RewardMeta>>;
+	public var Next:NativeArray<TriggerMeta>;
+	public var Cards:NativeArray<TriggerMeta>;
+}
+
+@:nativeGen
+@:strict(SerializableAttribute)
 class TriggerMeta {
 	public static inline var CARD:Int = 1;
 	public static inline var ITEM:Int = 2;
@@ -112,6 +129,7 @@ class TriggerMeta {
 	public static inline var EVENT:Int = 13;
 	public static inline var CHANGE_LOCATION:Int = 14;
 	public static inline var REROLL:Int = 15;
+	public static inline var CHOOSE_SELF_HERO:Int = 16;
 
 	public var Id:String;
 	public var Type:Int;
@@ -147,11 +165,14 @@ class ConditionMeta {
 
 @:nativeGen
 @:strict(SerializableAttribute)
-class CardTriggerMeta {
+class BuffMeta {
 	public var Id:String;
 	public var Reward:NativeArray<NativeArray<RewardMeta>>;
+	public var Cost:NativeArray<NativeArray<RewardMeta>>;
+	// public var Cards:NativeArray<TriggerMeta>;
+	// public var ApplyR:NativeArray<NativeArray<RewardMeta>>;
+	// public var ApplyC:NativeArray<NativeArray<RewardMeta>>;
 	public var Con:NativeArray<NativeArray<ConditionMeta>>;
-	public var Next:NativeArray<TriggerMeta>;
 }
 
 @:nativeGen
@@ -206,6 +227,7 @@ class CardMeta {
 	public var IfNot:NativeArray<TriggerMeta>;
 	public var IfWin:NativeArray<TriggerMeta>;
 
+	// public var Triggered:NativeArray<TriggerMeta>;
 	public var TradeLimit:Int;
 
 	public var Pri:Int;

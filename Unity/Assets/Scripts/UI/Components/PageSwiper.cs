@@ -17,18 +17,21 @@ public class PageSwiper : MonoBehaviour, IDragHandler, IEndDragHandler
     public float Easing = 0.5f;
     public float Offset = 0f;
     public bool isDraggingWhenOut = true;
+    public bool showPageButtons = true;
 
     private int _totalPages = 5;
     private int _currentPage = 0;
     private int _prevPage = 0;
     private float _width;
 
-    private Dictionary<GameObject, ISetData<ItemData>[]> _pages;
-    private List<ItemData> _items;
+    private Dictionary<GameObject, ISetData<string>[]> _pages;
+    private List<string> _items;
     [SerializeField] private List<GameObject> _panels;
     private int _countItemsPerPage;
     private Vector3 _panelLocation;
     private Vector3 _pivotStartPoint;
+    private float _pivotY;
+    private float _pivotZ;
 
     [SerializeField] private PagePanel _pagePanel;
 
@@ -36,31 +39,42 @@ public class PageSwiper : MonoBehaviour, IDragHandler, IEndDragHandler
 
     void Awake()
     {
-        RectTransform rectTransform = GetComponent<RectTransform>();
-        //transform.Find("0").gameObject, transform.Find("1").gameObject, transform.Find("2").gameObject
-
-        _width = transform.localToWorldMatrix[0] * rectTransform.rect.width + 40;
-
-        RectTransform _rect = _panels[1].GetComponent<RectTransform>();
-        float width = Screen.width / (2 * _parent.scaleFactor) + 40 + _rect.GetWidth() / 2 + Offset;
-
-        _rect.anchoredPosition = new Vector2(width, 0);
-
-        _width = _panels[1].transform.position.x;
-
-        _rect = _panels[2].GetComponent<RectTransform>();
-        _rect.anchoredPosition = new Vector2(width * 2, 0);
-
-        _pages = new Dictionary<GameObject, ISetData<ItemData>[]>();
-        _pages.Add(_panels[0], _panels[0].GetComponentsInChildren<ISetData<ItemData>>());
-        _pages.Add(_panels[1], _panels[1].GetComponentsInChildren<ISetData<ItemData>>());
-        _pages.Add(_panels[2], _panels[2].GetComponentsInChildren<ISetData<ItemData>>());
+        _pages = new Dictionary<GameObject, ISetData<string>[]>();
+        _pages.Add(_panels[0], _panels[0].GetComponentsInChildren<ISetData<string>>());
+        _pages.Add(_panels[1], _panels[1].GetComponentsInChildren<ISetData<string>>());
+        _pages.Add(_panels[2], _panels[2].GetComponentsInChildren<ISetData<string>>());
 
         _countItemsPerPage = _pages[_panels[0]].Length;
     }
 
+    private void RebuildPositions()
+    {
+        RectTransform rectTransform = GetComponent<RectTransform>();
+        _width = transform.localToWorldMatrix[0] * rectTransform.rect.width + 40;
+
+        RectTransform _rect;
+
+        _rect = _panels[0].GetComponent<RectTransform>();
+        _rect.anchoredPosition = new Vector2(0, 0);
+
+        _rect = _panels[1].GetComponent<RectTransform>();
+
+        float width = Screen.width / (2 * _parent.scaleFactor) + _rect.GetWidth() / 2 + Offset;
+
+        _rect.anchoredPosition = new Vector2(width, 0);
+
+        _width = _panels[1].transform.position.x;
+        _pivotY = _panels[1].transform.position.y;
+        _pivotZ = _panels[1].transform.position.z;
+
+        _rect = _panels[2].GetComponent<RectTransform>();
+        _rect.anchoredPosition = new Vector2(width * 2, 0);
+    }
+
     void OnEnable()
     {
+        if (!showPageButtons)
+            return;
         _pagePanel.ScrollPageLeft += OnScrollPageLeft;
         _pagePanel.ScrollPageRight += OnScrollPageRight;
 
@@ -69,6 +83,9 @@ public class PageSwiper : MonoBehaviour, IDragHandler, IEndDragHandler
 
     void OnDisable()
     {
+        if (!showPageButtons)
+            return;
+
         _pagePanel.ScrollPageLeft -= OnScrollPageLeft;
         _pagePanel.ScrollPageRight -= OnScrollPageRight;
 
@@ -86,8 +103,11 @@ public class PageSwiper : MonoBehaviour, IDragHandler, IEndDragHandler
 
     void Start()
     {
+        RebuildPositions();
         _panelLocation = transform.position;
         _pivotStartPoint = transform.position;
+
+        SetPage(0);
     }
 
     public void OnDrag(PointerEventData data)
@@ -119,8 +139,8 @@ public class PageSwiper : MonoBehaviour, IDragHandler, IEndDragHandler
 
     private void UpdatePositions()
     {
-        Vector3 diff = _panelLocation - transform.position;
-        int page = Mathf.FloorToInt(diff.x / _width);
+        //Vector3 diff = _panelLocation - transform.position;
+        //int page = Mathf.FloorToInt(diff.x / _width);
     }
 
     public void OnEndDrag(PointerEventData data)
@@ -142,7 +162,7 @@ public class PageSwiper : MonoBehaviour, IDragHandler, IEndDragHandler
                     _panels = _panels.OrderBy(p => p.transform.position.x).ToList();
                     GameObject first = _panels.FirstOrDefault();
                     GameObject last = _panels.LastOrDefault();
-                    first.transform.position = new Vector3(last.transform.position.x + _width, first.transform.position.y, first.transform.position.z);
+                    first.transform.position = new Vector3(last.transform.position.x + _width, _pivotY, _pivotZ);
                     ClearPage(first, _currentPage + 1);
 
                 }
@@ -160,7 +180,7 @@ public class PageSwiper : MonoBehaviour, IDragHandler, IEndDragHandler
                     _panels = _panels.OrderBy(p => p.transform.position.x).ToList();
                     GameObject first = _panels.FirstOrDefault();
                     GameObject last = _panels.LastOrDefault();
-                    last.transform.position = new Vector3(first.transform.position.x - _width, last.transform.position.y, last.transform.position.z);
+                    last.transform.position = new Vector3(first.transform.position.x - _width, _pivotY, _pivotZ);
                     ClearPage(last, _currentPage - 1);
 
                 }
@@ -169,7 +189,8 @@ public class PageSwiper : MonoBehaviour, IDragHandler, IEndDragHandler
                 pageChanged?.Invoke();
             }
 
-            _pagePanel.SetTextCounter(_currentPage, _totalPages);
+            if (showPageButtons)
+                _pagePanel.SetTextCounter(_currentPage, _totalPages);
 
             StartCoroutine(SmoothMove(transform.position, newLocation, Easing));
             _panelLocation = newLocation;
@@ -180,19 +201,22 @@ public class PageSwiper : MonoBehaviour, IDragHandler, IEndDragHandler
         }
     }
 
-    public void Clear()
+    public void Hide()
     {
         foreach (GameObject page in _pages.Keys)
         {
-            ISetData<ItemData>[] _items = _pages[page];
-            foreach (ISetData<ItemData> i in _items)
+            ISetData<string>[] _items = _pages[page];
+            foreach (ISetData<string> i in _items)
             {
                 i.Hide();
             }
         }
+
+        StopAllCoroutines();
+        gameObject.SetActive(false);
     }
 
-    public void UpdateData(List<ItemData> items)
+    public void UpdateData(List<string> items)
     {
         _items = items;
 
@@ -220,34 +244,40 @@ public class PageSwiper : MonoBehaviour, IDragHandler, IEndDragHandler
             UpdatePage(_panels[2], _currentPage + 1);
         }
 
-        _pagePanel.SetTextCounter(_currentPage, _totalPages);
+        if (showPageButtons)
+        {
+            _pagePanel.SetTextCounter(_currentPage, _totalPages);
+            if (_totalPages > 1)
+            {
+                _pagePanel.ShowArrow();
+            }
+            else
+            {
+                _pagePanel.HideArrow();
+            }
+        }
 
-        if (_totalPages > 1)
-        {
-            _pagePanel.ShowArrow();
-        }
-        else
-        {
-            _pagePanel.HideArrow();
-        }
     }
 
     private void ClearPage(GameObject page, int pageNumber)
     {
-        ISetData<ItemData>[] items = _pages[page];
-        List<ItemData> range = _items.Where((s, i) => i >= pageNumber *
+        ISetData<string>[] items = _pages[page];
+        List<string> range = _items.Where((s, i) => i >= pageNumber *
         items.Length && i < (pageNumber + 1) * items.Length).ToList();
 
         for (int i = 0; i < items.Length; i++)
         {
-            items[i].Hide();
+            if (i >= range.Count || range[i] == null)
+            {
+                items[i].Hide();
+            }
         }
     }
 
     private void UpdatePage(GameObject page, int pageNumber)
     {
-        ISetData<ItemData>[] items = _pages[page];
-        List<ItemData> range = _items.Where((s, i) => i >= pageNumber *
+        ISetData<string>[] items = _pages[page];
+        List<string> range = _items.Where((s, i) => i >= pageNumber *
          items.Length && i < (pageNumber + 1) * items.Length).ToList();
 
         for (int i = 0; i < items.Length; i++)
@@ -281,8 +311,8 @@ public class PageSwiper : MonoBehaviour, IDragHandler, IEndDragHandler
         _currentPage = page;
         _panelLocation = newLocation;
 
-
-        _pagePanel.SetTextCounter(_currentPage, _totalPages);
+        if (showPageButtons)
+            _pagePanel.SetTextCounter(_currentPage, _totalPages);
 
         UpdateData(_items);
 

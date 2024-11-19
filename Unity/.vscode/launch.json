@@ -4,47 +4,13 @@
         {
             "name": "Unity Editor",
             "type": "unity",
-            "path": "/Users/home/Projects/Git/SA/Library/EditorInstance.json",
+            "path": "/Users/home/Git/SA/Unity/Library/EditorInstance.json",
             "request": "launch"
         },
         {
-            "name": "Windows Player",
+            "name": "Unity Editor",
             "type": "unity",
-            "request": "launch"
-        },
-        {
-            "name": "OSX Player",
-            "type": "unity",
-            "request": "launch"
-        },
-        {
-            "name": "Linux Player",
-            "type": "unity",
-            "request": "launch"
-        },
-        {
-            "name": "iOS Player",
-            "type": "unity",
-            "request": "launch"
-        },
-        {
-            "name": "Android Player",
-            "type": "unity",
-            "request": "launch"
-        },
-        {
-            "name": "Xbox One Player",
-            "type": "unity",
-            "request": "launch"
-        },
-        {
-            "name": "PS4 Player",
-            "type": "unity",
-            "request": "launch"
-        },
-        {
-            "name": "SwitchPlayer",
-            "type": "unity",
+            "path": "/Users/home/Git/SA/Unity/Library/EditorInstance.json",
             "request": "launch"
         },
         {

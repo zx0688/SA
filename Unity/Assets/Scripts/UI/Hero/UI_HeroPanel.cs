@@ -1,47 +1,39 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-
+using UI;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UI_HeroPanel : MonoBehaviour
+public class UI_HeroPanel : MonoBehaviour, ISetData<string>
 {
-    private Image icon;
-    private Text name;
-    private int id;
+    [SerializeField] private Image icon;
+    [SerializeField] private Text description;
+    [SerializeField] private Text name;
+    [SerializeField] private UI_BuffItem buffPanel;
 
-    // Start is called before the first frame update
-    void Start()
-    {
+    private string data;
 
-    }
+    public string Data => data;
 
     public void Hide()
     {
         gameObject.SetActive(false);
     }
 
-    public void Show()
+    public void SetItem(string data)
     {
-        gameObject.SetActive(true);
-    }
+        this.data = data;
 
-    public void SetHero(int id)
-    {
+        var hero = Services.Meta.Game.Heroes[data];
 
-        if (this.id == id)
-            return;
+        Services.Assets.SetSpriteIntoImage(icon, "Heroes/" + data, true).Forget();
+        description.text = hero.Desc.Localize(LocalizePartEnum.CardDescription);
+        name.text = hero.Name.Localize(LocalizePartEnum.CardName);
+        icon.LoadHeroImage(hero.Id);
 
-        this.id = id;
-        ItemMeta heroData = null;//Services.Meta.Game.Items[id.ToString()];
-        //name.text = heroData.name.ToString();
-
-        Services.Assets.SetSpriteIntoImage(icon, "Heroes/" + id + "/icon", true).Forget();
-    }
-
-    void Awake()
-    {
-        name = transform.Find("NameHero").GetComponent<Text>();
-        icon = transform.Find("ImageHero").GetComponent<Image>();
+        if (hero.Cards.HasTriggers())
+            buffPanel.SetItem(Services.Meta.GetCard(hero.Cards[0]));
+        else
+            buffPanel.Hide();
     }
 }

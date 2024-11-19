@@ -21,6 +21,7 @@ public class ClickButton : MonoBehaviour
 
     private Button button;
     private Image image;
+    private Boolean waitIsPocess;
 
     void Awake()
     {
@@ -34,9 +35,10 @@ public class ClickButton : MonoBehaviour
 
     private void OnClicked()
     {
-        if (!gameObject.activeSelf || !button.interactable || isDisabled)
+        if (!gameObject.activeSelf || !button.interactable || isDisabled || waitIsPocess)
             return;
 
+        waitIsPocess = true;
         StopAllCoroutines();
         StartCoroutine(Click());
     }
@@ -94,6 +96,7 @@ public class ClickButton : MonoBehaviour
             image.color = defaultColor;
         }
 
+        waitIsPocess = false;
         OnClick?.Invoke();
     }
 }

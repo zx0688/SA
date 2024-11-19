@@ -60,7 +60,7 @@ public class Services : MonoBehaviour
     {
         Application.targetFrameRate = 60;
         Application.backgroundLoadingPriority = ThreadPriority.Low;
-      
+
         Init().Forget();
     }
 
@@ -110,6 +110,9 @@ public class Services : MonoBehaviour
 
         _state = State.INITED;
         OnInited?.Invoke();
+
+
+
 
         //await UniTask.Delay(1000);
 

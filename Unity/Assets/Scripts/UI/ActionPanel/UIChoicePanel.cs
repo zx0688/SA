@@ -22,6 +22,7 @@ namespace UI.ActionPanel
 
         [SerializeField] private UIReward reward;
         [SerializeField] private UIReward cost;
+        [SerializeField] private GameObject rewardPanel;
         [SerializeField] private Image image;
         [SerializeField] private Image hero;
         [SerializeField] private Text action;
@@ -33,7 +34,7 @@ namespace UI.ActionPanel
         [SerializeField] private TapMechanic tap;
         [SerializeField] private Text rewardText;
         [SerializeField] private Text costText;
-
+        [SerializeField] private Text dialog;
 
         public event Action<UIChoicePanel> OnEndTap;
 
@@ -60,34 +61,29 @@ namespace UI.ActionPanel
             OnEndTap?.Invoke(this);
         }
 
-        private void FadeIn()
+        public void FadeIn()
         {
-            rewardRect.DOScale(new Vector3(1.1f, 1.1f, 1.1f), 0.15f);
-            rect.DOScale(new Vector3(1.1f, 1.1f, 1.1f), 0.2f);
-            bordrer.DOColor(new Color32(180, 180, 180, 255), 0.1f);
+            rect.DOKill();
+            rect.localScale = new Vector3(0.8f, 0.8f, 0.8f);
+            //rewardRect.DOScale(new Vector3(1.1f, 1.1f, 1.1f), 0.15f);
+            rect.DOScale(new Vector3(1f, 1f, 1f), 0.1f);
+            //bordrer.DOColor(new Color32(180, 180, 180, 255), 0.1f);
         }
 
-        private void FadeOut()
+        public void FadeOut()
         {
-            rewardRect.DOScale(new Vector3(1f, 1f, 1f), 0.15f);
+            //rewardRect.DOScale(new Vector3(1f, 1f, 1f), 0.15f);
             rect.DOScale(new Vector3(1f, 1f, 1f), 0.15f);
-            bordrer.DOColor(new Color32(142, 129, 129, 255), 0.1f);
+            //bordrer.DOColor(new Color32(142, 129, 129, 255), 0.1f);
         }
 
         public async void ShowChoice(CardMeta cardMeta, ChoiceInfo info, bool showFollowPrompt, List<string> allRewards)
         {
-            rewardRect.DOKill();
-            rewardRect.localScale = new Vector3(1f, 1f, 1f);
-
-            rect.DOKill();
-            rect.localScale = new Vector3(1f, 1f, 1f);
-
-            bordrer.DOKill();
-            bordrer.color = new Color32(142, 129, 129, 255);
-
-            levels.gameObject.SetActive(true);
+            //levels.gameObject.SetActive(true);
             icon.gameObject.SetActive(true);
             reward.gameObject.SetActive(true);
+            dialog.gameObject.SetActive(false);
+            rewardPanel.SetActive(false);
 
             bool hasRewardOrCost = info.RewardIndex != -1 || info.CostIndex != -1;
             if (cardMeta.TradeLimit > 0)
@@ -106,6 +102,7 @@ namespace UI.ActionPanel
 
                 costText.gameObject.SetActive(true);
                 rewardText.gameObject.SetActive(true);
+                rewardPanel.SetActive(true);
             }
             else if (hasRewardOrCost)
             {
@@ -121,8 +118,19 @@ namespace UI.ActionPanel
                 cost.SetItems(null, r.Concat(c).ToArray(), false);
                 costText.gameObject.SetActive(c.Length > 0);
 
+                rewardPanel.SetActive(true);
                 if (info.CostIndex != -1 && cardMeta.Cost.HasReward())
                     allRewards.AddRange(cardMeta.Cost[info.CostIndex].Select(rr => rr.Id));
+            }
+            else if (cardMeta.RewardText != null)
+            {
+                dialog.gameObject.SetActive(true);
+                dialog.text = cardMeta.RewardText.Localize(LocalizePartEnum.CardDescription);
+
+                rewardText.gameObject.SetActive(false);
+                costText.gameObject.SetActive(false);
+                reward.Hide();
+                cost.Hide();
             }
             else
             {
@@ -135,7 +143,7 @@ namespace UI.ActionPanel
 
             //skipText.text = "Action.Continue".Localize(LocalizePartEnum.GUI);
 
-            levels.SetLevel(cardMeta.Level);
+            //levels.SetLevel(cardMeta.Level);
 
             followPrompt.gameObject.SetActive(showFollowPrompt);
 
@@ -173,6 +181,13 @@ namespace UI.ActionPanel
             image.gameObject.SetActive(false);
             //ero.gameObject.SetActive(false);
             followPrompt.gameObject.SetActive(false);
+            rewardPanel.SetActive(false);
+
+            rewardRect.DOKill();
+            rewardRect.localScale = new Vector3(1f, 1f, 1f);
+
+            rect.DOKill();
+            rect.localScale = new Vector3(1f, 1f, 1f);
 
             gameObject.SetActive(false);
             tap.Disable();

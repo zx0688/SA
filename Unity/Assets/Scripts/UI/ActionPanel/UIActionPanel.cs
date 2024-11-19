@@ -20,7 +20,7 @@ namespace UI.ActionPanel
 {
     public class UIActionPanel : MonoBehaviour
     {
-        [SerializeField] private Text name;
+        //[SerializeField] private Text name;
         [SerializeField] private UIReward needed;
         //[SerializeField] private UIChoicePanel left;
         //[SerializeField] private UIChoicePanel right;
@@ -70,8 +70,6 @@ namespace UI.ActionPanel
         {
             HideAll();
 
-            name.Localize(data.Card.Name, LocalizePartEnum.CardName);
-
             DeckItem deckItem = SL.GetCurrentCard(profile);
             if (deckItem.State == CardData.NOTHING)
             {
@@ -82,16 +80,6 @@ namespace UI.ActionPanel
                     RewardMeta[] cost = cards.SelectMany(c => c.Cost[0]).ToArray();
                     needed.SetItems(null, cost, false);
                 }
-                SetDecription(data.Card.IfNothing[(data.Card.IfNothing.Length - 1) - deckItem.DescIndex]);
-            }
-            else if (deckItem.State == CardData.DESCRIPTION)
-            {
-                if (data.Card.OnlyOnce != null && (!profile.Cards.TryGetValue(data.Card.Id, out CardData _card) || _card.CT == 0))
-                    SetDecription(data.Card.OnlyOnce[(data.Card.OnlyOnce.Length - 1) - deckItem.DescIndex]);
-                else if (data.Card.RStory)
-                    SetDecription(data.Card.Descs[Random.Range(0, data.Card.Descs.Length)]);
-                else
-                    SetDecription(data.Card.Descs[(data.Card.Descs.Length - 1) - deckItem.DescIndex]);
             }
             else if (deckItem.State == CardData.REWARD)
             {
@@ -105,23 +93,11 @@ namespace UI.ActionPanel
 
                     if (data.Card.RewardText == null)
                         throw new Exception($"Description is needed for reward {data.Card.Id}");
-
-                    if (Services.Player.RewardCollected.Exists(r => r.Count > 0) || !data.Card.IfNothing.HasTexts())
-                        SetDecription(data.Card.RewardText);
-                    else
-                        SetDecription(data.Card.IfNothing[0]);
                 }
-                else if (data.Card.Reward == null && data.Card.Cost == null && data.Card.Over != null)
-                    SetDecription(data.Card.RewardText);
-                else if (data.Card.IfNothing != null && data.Card.IfNothing.Length > 0)
-                    SetDecription(data.Card.IfNothing[0]);
-                else
-                    throw new Exception($"card {data.Card.Id} must have no reward message");
             }
-            else
-            {
-                throw new Exception($"Card {data.Card.Id} has no state");
-            }
+
+            if (Services.Player.TryGetCardDescription(data.Card, out string desc))
+                SetDecription(desc);
         }
 
 
@@ -193,9 +169,9 @@ namespace UI.ActionPanel
             description.gameObject.SetActive(true);
             description.text = desc.Localize(LocalizePartEnum.CardDescription);
 
-            if (desc.Contains("ask"))
+            if (desc.EndsWith("ask"))
                 description.color = colors[1];
-            else if (desc.Contains("tell"))
+            else if (desc.EndsWith("tell"))
                 description.color = colors[2];
             else
                 description.color = colors[0];

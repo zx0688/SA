@@ -29,6 +29,8 @@ class ProfileData {
 	public var Accept:Dictionary_2<String, GameRequest>;
 	public var Triggers:Dictionary_2<String, ItemTypeData>;
 
+	public var Hero:String;
+
 	public var ActiveQuests:List_1<String>;
 
 	// public List<SkillVO> Skills;
@@ -44,6 +46,7 @@ class ProfileData {
 	public var Rerolls:Int;
 	public var History:List_1<String>;
 
+	// public var Lok:Int;
 	// EVENTS
 	public var RewardEvents:Dictionary_2<String, ItemData>;
 	public var QuestEvent:String;

@@ -39,8 +39,8 @@ public class UI_InventoryItemUpdate : UIInventoryItem
         if (id == 0 || gameObject.activeInHierarchy == false)
             return;
 
-        ItemData item = null;//Services.Player.itemHandler.GetVO(id, 3);
-        SetItem(item);
+        //ItemData item = null;//Services.Player.itemHandler.GetVO(id, 3);
+        //SetItem(item);
 
     }
 

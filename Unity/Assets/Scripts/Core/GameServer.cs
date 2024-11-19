@@ -213,6 +213,7 @@ namespace GameServer
 
             Debug.Log($"DECK:{JSON.Serialize(profile.Deck)} \nCURRENT {(profile.Deck.Count > 0 ? SL.GetCurrentCard(profile).Id.ColorizeHH("00FF00") : "-")}");
             Debug.Log($"CURRENT ITEM:{(profile.Deck.Count > 0 ? JSON.Serialize(SL.GetCurrentCard(profile)) : "-")}");
+
             if (response.Log != null)
                 Debug.Log($"LOG:{response.Log}");
 

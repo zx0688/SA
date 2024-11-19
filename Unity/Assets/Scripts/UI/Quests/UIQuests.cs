@@ -47,7 +47,7 @@ public class UIQuests : ServiceBehaviour, IPage
         List<ItemData> data = activeQuest.Select(s => new ItemData(s, 0)).ToList();
         empty.gameObject.SetActive(activeQuest.Count == 0);
         swiper.gameObject.SetActive(activeQuest.Count != 0);
-        swiper.UpdateData(data);
+        swiper.UpdateData(data.Select(d => d.Id).ToList());
 
         if (data.Count > 0 && currentQuest != null)
             data[0].Count = 1;

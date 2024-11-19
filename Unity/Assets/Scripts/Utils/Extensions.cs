@@ -56,7 +56,12 @@ public static class Extensions
 
     public static void LoadCardImage(this Image icon, string name, Action callback = null)
     {
-        Services.Assets.SetSpriteIntoImage(icon, ZString.Format("Cards/{0}", name), true, null, callback).Forget();
+        var c = name;
+        if (name.Contains("#") && Services.Player.Profile.Deck.Count > 1)
+        {
+            c = Services.Meta.Game.Cards[Services.Player.Profile.Deck[Services.Player.Profile.Deck.Count - 2].Id].Image;
+        }
+        Services.Assets.SetSpriteIntoImage(icon, ZString.Format("Cards/{0}", c), true, null, callback).Forget();
     }
 
     public static void LoadSkillImage(this Image icon, string name, Action callback = null)

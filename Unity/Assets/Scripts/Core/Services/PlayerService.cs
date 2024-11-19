@@ -11,6 +11,7 @@ using haxe.lang;
 using haxe.root;
 using UnityEngine;
 using UnityEngine.Networking;
+using Random = UnityEngine.Random;
 
 public class PlayerService : IService
 {
@@ -33,6 +34,10 @@ public class PlayerService : IService
     public ProfileData Profile;
     private GameMeta Meta => Services.Meta.Game;
     private GameRequest request = null;
+
+    public ItemData GetItemData(string Id) => Profile.Items[Id];
+
+    public DeckItem DeckItem => Profile.Deck.Count > 0 ? Profile.Deck.Last() : null;
 
     public List<ItemData> RewardCollected => Profile.RewardEvents.Values.ToList().Where(r => !Services.Meta.Game.Items[r.Id].Hidden).ToList();
 
@@ -62,6 +67,49 @@ public class PlayerService : IService
     }
 
 
+    public bool TryGetCardDescription(CardMeta card, out string _text)
+    {
+        string text = null;
+        DeckItem deckItem = SL.GetCurrentCard(Profile);
+        if (deckItem.State == CardData.NOTHING)
+            text = card.IfNothing[(card.IfNothing.Length - 1) - deckItem.DescIndex];
+        else if (deckItem.State == CardData.DESCRIPTION)
+        {
+            if (card.OnlyOnce != null && (!Profile.Cards.TryGetValue(card.Id, out CardData _card) || _card.CT == 0))
+                text = card.OnlyOnce[(card.OnlyOnce.Length - 1) - deckItem.DescIndex];
+            else if (card.RStory)
+                text = card.Descs[Random.Range(0, card.Descs.Length)];
+            else
+                text = card.Descs[(card.Descs.Length - 1) - deckItem.DescIndex];
+        }
+        else if (deckItem.State == CardData.REWARD)
+        {
+            if (Services.Player.RewardCollected.Count > 0)
+            {
+                if (RewardCollected.Exists(r => r.Count > 0) || !card.IfNothing.HasTexts())
+                    text = card.RewardText;
+                else
+                    text = card.IfNothing[0];
+            }
+            else if (card.Reward == null && card.Cost == null && card.Over != null)
+                text = card.RewardText;
+            else if (card.IfNothing != null && card.IfNothing.Length > 0)
+                text = card.IfNothing[0];
+            else
+                throw new Exception($"card {card.Id} must have no reward message");
+        }
+        else if (deckItem.State == CardData.CHOICE)
+        {
+            if (card.OnlyOnce != null && (!Profile.Cards.TryGetValue(card.Id, out CardData _card) || _card.CT == 0))
+                text = card.OnlyOnce[(card.OnlyOnce.Length - 1)];
+            else if (card.RStory)
+                text = card.Descs[Random.Range(0, card.Descs.Length)];
+            else
+                text = card.Descs[(card.Descs.Length - 1)];
+        }
+        _text = text;
+        return text != null;
+    }
 
 
     public bool IsRewardApplicable(List<RewardMeta> reward)
@@ -129,6 +177,13 @@ public class PlayerService : IService
     public void StartGame()
     {
         HttpBatchServer.Change(new GameRequest(TriggerMeta.START_GAME));
+        OnProfileUpdated?.Invoke();
+    }
+
+    public void SelfHeroChoose(string Id)
+    {
+        request = new GameRequest(Type: TriggerMeta.CHOOSE_SELF_HERO, Value: 0, Id: Id);
+        HttpBatchServer.Change(request);
         OnProfileUpdated?.Invoke();
     }
 

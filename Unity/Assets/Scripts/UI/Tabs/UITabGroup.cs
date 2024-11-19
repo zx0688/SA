@@ -9,8 +9,11 @@ using UnityEngine.UI;
 public class UITabGroup : ServiceBehaviour
 {
     [SerializeField] private List<UITabButton> tabs;
+    [SerializeField] private List<GameObject> hiddenPages;
     [SerializeField] private List<GameObject> pages;
     [SerializeField] private Text title;
+    [SerializeField] private GameObject topPanel;
+    [SerializeField] private GameObject titlePanel;
 
     public Action OnPageChanged;
 
@@ -31,7 +34,10 @@ public class UITabGroup : ServiceBehaviour
             pages[i].GetComponent<IPage>().GetGameObject().SetActive(false);
         }
 
+
+        Services.Player.Profile.Hero = "1";
         OnTabSelect(defaultTab);
+        //ShowHiddenTab(0);
     }
 
     public void OnTabSelect(UITabButton tab)
@@ -59,8 +65,35 @@ public class UITabGroup : ServiceBehaviour
                 p.Hide();
             }
         }
+        titlePanel.SetActive(true);
+        topPanel.SetActive(true);
+
+        foreach (var page in hiddenPages)
+            page.GetComponent<IPage>().Hide();
 
         selectedTab.Select();
         OnPageChanged?.Invoke();
+    }
+
+    public void ShowHiddenTab(int tabIndex)
+    {
+        var pageObject = hiddenPages[tabIndex];
+        tabs.ForEach(t => t.Hide());
+        IPage p = pageObject.GetComponent<IPage>();
+        p.Show();
+        topPanel.SetActive(false);
+
+        titlePanel.SetActive(p.GetName() != null);
+        if (p.GetName() != null)
+            title.text = p.GetName();
+
+        OnPageChanged?.Invoke();
+    }
+
+    public void OnTabSelect(int tabIndex)
+    {
+        selectedTab = null;
+        tabs.ForEach(t => t.Show());
+        OnTabSelect(tabs[tabIndex]);
     }
 }

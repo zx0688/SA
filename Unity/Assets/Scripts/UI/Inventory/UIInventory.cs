@@ -35,7 +35,7 @@ public class UIInventory : MonoBehaviour, IPage
 
         //List<ItemData> items = Services.Player.Profile.Items;
 
-        swiper.UpdateData(Services.Player.Profile.Items.Values.Where(i => !Services.Meta.Game.Items[i.Id].Hidden).ToList());
+        swiper.UpdateData(Services.Player.Profile.Items.Values.Where(i => !Services.Meta.Game.Items[i.Id].Hidden).Select(f => f.Id).ToList());
     }
 
     public void Show()

@@ -45,6 +45,8 @@ public class PagePanel : MonoBehaviour
 
     public void ForceHide()
     {
+        gameObject.SetActive(false);
+        _pageCounter.SetActive(false);
         _leftPanel.DOKill();
         _rightPanel.DOKill();
 

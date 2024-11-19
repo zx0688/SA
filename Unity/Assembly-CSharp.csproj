@@ -69,6 +69,7 @@
     <Compile Include="Assets/Scripts/UI/Components/UI_GetRewardAnimationItem.cs" />
     <Compile Include="Assets/Scripts/UI/Tabs/UITabButton.cs" />
     <Compile Include="Assets/Scripts/UI/CheckBox.cs" />
+    <Compile Include="Assets/Scripts/UI/Buff/UI_BuffItem.cs" />
     <Compile Include="Assets/Scripts/UI/UI_TickChildren.cs" />
     <Compile Include="Assets/Scripts/Core/CARD_Quest.cs" />
     <Compile Include="Assets/Scripts/UI/Tabs/UITabGroup.cs" />
@@ -147,6 +148,7 @@
     <Compile Include="Assets/Scripts/UI/Map/UIMapTooltip.cs" />
     <Compile Include="Assets/Scripts/UI/ITick.cs" />
     <Compile Include="Assets/Scripts/UI/Recipes/UI_Recipes.cs" />
+    <Compile Include="Assets/Scripts/UI/Character/UI_ChooseCharacter.cs" />
     <Compile Include="Assets/Scripts/Utils/TimeFormat.cs" />
     <Compile Include="Assets/Scripts/UI/ActionPanel/UIActionPanel.cs" />
     <Compile Include="Assets/Scripts/Core/Deck.cs" />

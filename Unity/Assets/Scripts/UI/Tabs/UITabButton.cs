@@ -33,6 +33,20 @@ public class UITabButton : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    public void Hide()
+    {
+        StopAllCoroutines();
+        gameObject.SetActive(false);
+        this.enabled = false;
+    }
+
+    public void Show()
+    {
+        StopAllCoroutines();
+        gameObject.SetActive(true);
+        this.enabled = true;
+    }
+
 
     IEnumerator DelayMethod()
     {

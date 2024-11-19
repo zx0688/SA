@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UI.Components;
 using Cysharp.Threading.Tasks;
+using haxe.root;
 
 namespace Core
 {
@@ -26,24 +27,20 @@ namespace Core
         [SerializeField] private Text randomValue;
 
         private CardMeta card => data.Card;
-        private string current;
+        //private string current;
         private int ind;
 
 
         void Awake()
         {
-            art.DisableSpriteOptimizations();
+            //art.DisableSpriteOptimizations();
         }
 
         public void OnChangeDeviation(float vvv)
         {
 
             return;
-            if (Math.Abs(vvv) < 0.9f)
-            {
-                ChangeArt(card.Image);
-                return;
-            }
+
 
             // if (data.LastCard)
             // {
@@ -72,9 +69,9 @@ namespace Core
 
         private void ChangeArt(string image)
         {
-            if (current == image)
-                return;
-            current = image;
+            //if (current == image)
+            return;
+            //current = image;
             //art.LoadCardImage(image);
             art.DOKill();
             art.DOColor(new Color(a: 0f, r: 255, g: 255, b: 255), 0.1f).OnComplete(() =>
@@ -87,7 +84,8 @@ namespace Core
 
         public void DropCard()
         {
-            current = card.Image;
+            //current = card.Image;
+            return;
             art.DOKill();
             //art.DOColor(Color.black, 0.2f).OnComplete(() =>
             //{
@@ -134,7 +132,6 @@ namespace Core
 
             if (card.Image != null)
             {
-                current = card.Image;
                 art.LoadCardImage(card.Image);
                 art.gameObject.SetActive(true);
             }
@@ -143,10 +140,27 @@ namespace Core
                 art.gameObject.SetActive(false);
             }
 
+            Services.Player.TryGetCardDescription(data.Card, out string desc);
 
-            if (card.Hero != null && data.Hero != null)
+            if (card.Hero != null && Services.Meta.Game.Heroes.TryGetValue(card.Hero, out var heroData))
             {
-                hero.LoadHeroImage(data.Hero.Id);
+                hero.LoadHeroImage(heroData.Image);
+                hero.gameObject.SetActive(true);
+            }
+            else if (desc != null && SL.HeroInWordPattern.match(desc))
+            {
+                var heroId = SL.HeroInWordPattern.matched(1);
+                if (heroId == "0")
+                {
+                    hero.LoadHeroImage("3");
+                }
+                else
+                    hero.LoadHeroImage(heroId);
+                hero.gameObject.SetActive(true);
+            }
+            else if (desc != null && desc.EndsWith("ask"))
+            {
+                hero.LoadHeroImage(Services.Player.Profile.Hero);
                 hero.gameObject.SetActive(true);
             }
             else

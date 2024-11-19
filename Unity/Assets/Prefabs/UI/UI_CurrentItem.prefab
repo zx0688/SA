@@ -38,7 +38,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 64.8764, y: 5.5917}
-  m_SizeDelta: {x: 220, y: 0}
+  m_SizeDelta: {x: 200, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8289037196235621417
 CanvasRenderer:
@@ -106,10 +106,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: 220
-  m_MinHeight: 220
-  m_PreferredWidth: 220
-  m_PreferredHeight: 220
+  m_MinWidth: 200
+  m_MinHeight: 200
+  m_PreferredWidth: 200
+  m_PreferredHeight: 200
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
@@ -537,7 +537,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -13.663, y: -33.337402}
-  m_SizeDelta: {x: 264.0634, y: 164.08}
+  m_SizeDelta: {x: 261.7, y: 164.08}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &5215713229046921352
 MonoBehaviour:
@@ -567,9 +567,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IgnoreLayout: 0
-  m_MinWidth: -1
+  m_MinWidth: 261.7
   m_MinHeight: 169.66
-  m_PreferredWidth: -1
+  m_PreferredWidth: 261.7
   m_PreferredHeight: 222.2
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1

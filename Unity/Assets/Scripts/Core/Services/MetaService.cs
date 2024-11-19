@@ -25,6 +25,8 @@ public class MetaService
 
     public GameMeta Game;
 
+    public CardMeta GetCard(TriggerMeta t) => Game.Cards[t.Id];
+
     //public Dictionary<List<ConditionMeta>, List<RewardMeta>> Recipes = new Dictionary<List<ConditionMeta>, List<RewardMeta>>();
 
     //public static readonly List<RewardMeta> EMPTY_REWARD = new List<RewardMeta>();
@@ -123,8 +125,6 @@ public class MetaService
 
     public static void ShowUnvalidateCard(CardMeta card)
     {
-        if (!(card.Reward.HasReward() || card.Cost.HasReward()) && card.RewardText.HasText() && card.Over == null)
-            CardException(card, "есть текст награды и должна быть задана награда!");
         if ((card.Reward.HasReward() || card.Cost.HasReward()) && !card.RewardText.HasText())
             CardException(card, "должен быть задан текст награды!");
         if (card.Reward.HasReward() && !card.Reward.ToList().Exists(r => r.ToList().Exists(rr => rr.Chance == 0)) &&

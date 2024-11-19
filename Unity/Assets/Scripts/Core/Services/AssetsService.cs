@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using Cysharp.Text;
 using Cysharp.Threading.Tasks;
+using haxe.root;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Diagnostics;

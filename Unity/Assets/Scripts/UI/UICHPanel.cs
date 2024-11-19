@@ -21,6 +21,8 @@ namespace Core
         [SerializeField] private UIChoicePanel down;
         [SerializeField] private UIChoicePanel up;
 
+        [SerializeField] private Text madeAChoice;
+
         private ProfileData profile => Services.Player.Profile;
 
         void Awake()
@@ -48,11 +50,20 @@ namespace Core
         {
             this.Data = data;
 
+            gameObject.SetActive(true);
+
             if (data.Choices.Count == 0)
                 throw new Exception($"State Choice should have any next card {data.Card.Id}");
 
 
             List<string> allReward = new List<string>();
+
+            up.FadeIn();
+            down.FadeIn();
+
+            madeAChoice.text = data.Choices.Exists(c => c.Reward != null || c.Cost != null) ?
+                "MadeAction.UI".Localize(LocalizePartEnum.GUI) : "MadeChocie.UI".Localize(LocalizePartEnum.GUI);
+
             down.ShowChoice(data.Choices[0], profile.Choices[0], data.FollowPrompt == CardMeta.LEFT, allReward);
             up.ShowChoice(data.Choices[1], profile.Choices[1], data.FollowPrompt == CardMeta.RIGHT, allReward);
 
@@ -65,6 +76,8 @@ namespace Core
             backpack.Hide();
             down.HideAll();
             up.HideAll();
+
+            gameObject.SetActive(false);
         }
 
     }

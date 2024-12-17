@@ -21,6 +21,7 @@ namespace Core
         }
 
         [System.Serializable] public class mEvent : UnityEvent { }
+        [SerializeField] public TutorialSwipeFinger tutorialSwipeFinger;
 
         [HideInInspector] public int CurrentChoice;
         [HideInInspector] public event Action<float> OnChangeDeviation;
@@ -106,13 +107,16 @@ namespace Core
 
         public void Tutor()
         {
-            Vector2 right = new Vector2(_pivotPoint.x + 140, _pivotPoint.y);
-            Vector2 left = new Vector2(_pivotPoint.x - 140, _pivotPoint.y);
+            Vector2 right = new Vector2(_pivotPoint.x + 90, _pivotPoint.y);
+            Vector2 left = new Vector2(_pivotPoint.x - 90, _pivotPoint.y);
 
             _shake = DOTween.Sequence();
             _shake.Append(_rectTransform.DOAnchorPos(right, 0.5f, true).SetEase(Ease.OutExpo).SetLoops(2, LoopType.Yoyo));
             _shake.Append(_rectTransform.DOAnchorPos(left, 0.5f, true).SetEase(Ease.OutExpo).SetLoops(2, LoopType.Yoyo));
             _shake.SetLoops(-1);
+
+            if (tutorialSwipeFinger != null)
+                tutorialSwipeFinger.Animate();
         }
 
         public bool IsDisabled()

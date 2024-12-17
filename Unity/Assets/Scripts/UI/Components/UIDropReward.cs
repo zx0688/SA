@@ -113,7 +113,7 @@ public class UIDropReward : ServiceBehaviour
 
     private async UniTaskVoid ScriptSPECIAL(GameObject item, Vector3 position, int particleNumber)
     {
-        layer.Show(0.1f);
+        layer.Show(0.1f, null);
         item.SetActive(false);
         await UniTask.DelayFrame(10);
         item.SetActive(true);
@@ -130,7 +130,7 @@ public class UIDropReward : ServiceBehaviour
                 item.gameObject.transform.DOKill();
                 CheckWaiting();
 
-                StopParticle(particleNumber - 1, () => { layer.Hide(); });
+                StopParticle(particleNumber - 1, () => { layer.Hide(0f); });
 
             });
 

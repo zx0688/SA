@@ -60,11 +60,22 @@ public class PlayerService : IService
 
         PlayerPrefs.DeleteAll();
 
-        if (Profile.ActiveQuests.Count == 0)
-            FollowQuest = null;
+        //if (Profile.ActiveQuests.Count == 0)
+        //    FollowQuest = null;
 
         OnProfileUpdated?.Invoke();
     }
+
+    public bool IsTutorAvailable(string key) => !Meta.Config.DisableTutorial
+        && (!Profile.Tutorial.TryGetValue(key, out bool swipeTutorial) || !swipeTutorial);
+
+    public void FinishTutor(string key)
+    {
+        request = new GameRequest(Type: TriggerMeta.TUTORIAL, Value: 0, Id: key);
+        HttpBatchServer.Change(request);
+        OnProfileUpdated?.Invoke();
+    }
+
 
 
     public bool TryGetCardDescription(CardMeta card, out string _text)
@@ -199,16 +210,16 @@ public class PlayerService : IService
 
         HttpBatchServer.Change(request);
 
-        if (Profile.ActiveQuests.Count == 0)
+        /*if (Profile.ActiveQuests.Count == 0)
             FollowQuest = null;
         else if (Profile.QuestEvent != null)
         {
-            if (FollowQuest == null || !Profile.ActiveQuests.Contains(FollowQuest))
-                FollowQuest = Profile.ActiveQuests[0];
+            //if (FollowQuest == null || !Profile.ActiveQuests.Contains(FollowQuest))
+            //    FollowQuest = Profile.ActiveQuests[0];
 
             if (Profile.ActiveQuests.Contains(Profile.QuestEvent))
                 OnQuestStart?.Invoke();
-        }
+        }*/
 
         OnCardExecuted?.Invoke(swipe.Card, swipe.Data);
         OnProfileUpdated?.Invoke();

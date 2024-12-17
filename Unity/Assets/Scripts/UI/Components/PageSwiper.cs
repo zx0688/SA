@@ -37,6 +37,9 @@ public class PageSwiper : MonoBehaviour, IDragHandler, IEndDragHandler
 
     [SerializeField] private Canvas _parent;
 
+    [SerializeField] private TutorialSwipeFinger tutorialSwipeFinger;
+    [SerializeField] private string tutorialKey;
+
     void Awake()
     {
         _pages = new Dictionary<GameObject, ISetData<string>[]>();
@@ -255,6 +258,12 @@ public class PageSwiper : MonoBehaviour, IDragHandler, IEndDragHandler
             {
                 _pagePanel.HideArrow();
             }
+        }
+
+        if (tutorialSwipeFinger != null && _totalPages > 1 && Services.Player.IsTutorAvailable(tutorialKey))
+        {
+            tutorialSwipeFinger.Animate();
+            Services.Player.FinishTutor(tutorialKey);
         }
 
     }

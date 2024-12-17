@@ -43,7 +43,16 @@ namespace Core
             {
                 AddListeners();
                 //   GC.Collect();
+
+
                 swipe.WaitSwipe();
+
+                if (Services.Player.IsTutorAvailable("swipe"))
+                {
+                    swipe.Tutor();
+                    Services.Player.FinishTutor("swipe");
+                }
+
                 callback?.Invoke();
             });
         }

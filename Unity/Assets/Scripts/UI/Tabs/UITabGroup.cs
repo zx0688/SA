@@ -32,12 +32,22 @@ public class UITabGroup : ServiceBehaviour
         for (int i = 0; i < pages.Count; i++)
         {
             pages[i].GetComponent<IPage>().GetGameObject().SetActive(false);
+            pages[i].GetComponent<IPage>().Hide();
         }
 
+        if (Services.Meta.Game.Config.DisableTutorial)
+        {
+            Services.Player.SelfHeroChoose("1");
+            OnTabSelect(defaultTab);
+        }
+        else
+        {
+            ShowHiddenTab(0);
+        }
 
-        Services.Player.Profile.Hero = "1";
-        OnTabSelect(defaultTab);
-        //ShowHiddenTab(0);
+        //Services.Player.Profile.Hero = "1";
+        //OnTabSelect(defaultTab);
+
     }
 
     public void OnTabSelect(UITabButton tab)

@@ -37,7 +37,11 @@ public class UICurrent : MonoBehaviour
         //next.GetComponent<RectTransform>().DOScale(1.0f, 0.15f);
     }
 
-    public void Hide() => SetItems(null, null, null);
+    public void Hide()
+    {
+        gameObject.SetActive(false);
+        SetItems(null, null, null);
+    }
 
     public void SetItems(List<ItemData> change, ProfileData profile, GameMeta meta)
     {
@@ -46,7 +50,6 @@ public class UICurrent : MonoBehaviour
             gameObject.SetActive(false);
             return;
         }
-
         //next.gameObject.SetActive(false);
         //next.GetComponent<RectTransform>().localScale = new Vector3(1f, 1f, 1f);
 

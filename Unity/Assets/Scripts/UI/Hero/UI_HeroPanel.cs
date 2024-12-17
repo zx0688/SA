@@ -26,7 +26,7 @@ public class UI_HeroPanel : MonoBehaviour, ISetData<string>
 
         var hero = Services.Meta.Game.Heroes[data];
 
-        Services.Assets.SetSpriteIntoImage(icon, "Heroes/" + data, true).Forget();
+        Services.Assets.SetSpriteIntoImage(icon, "MinHeroes/" + data, true).Forget();
         description.text = hero.Desc.Localize(LocalizePartEnum.CardDescription);
         name.text = hero.Name.Localize(LocalizePartEnum.CardName);
         icon.LoadHeroImage(hero.Id);

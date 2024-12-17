@@ -19,7 +19,7 @@ class GameMeta {
 	public var Locations:Dictionary_2<String, CardMeta>;
 	public var Groups:Dictionary_2<String, GroupMeta>;
 	public var Triggers:Dictionary_2<String, TriggerActionMeta>;
-	// public var Buffs:Dictionary_2<String, BuffMeta>;
+
 	public var Profile:PlayerMeta;
 	public var Config:ConfigMeta;
 	public var Version:Int;
@@ -41,6 +41,8 @@ class ConfigMeta {
 	public var PriceReroll:NativeArray<RewardMeta>;
 	public var StartCard:String;
 	public var GodMode:Bool;
+	public var TutorialCard:String;
+	public var DisableTutorial:Bool;
 }
 
 @:nativeGen
@@ -130,6 +132,7 @@ class TriggerMeta {
 	public static inline var CHANGE_LOCATION:Int = 14;
 	public static inline var REROLL:Int = 15;
 	public static inline var CHOOSE_SELF_HERO:Int = 16;
+	public static inline var TUTORIAL:Int = 17;
 
 	public var Id:String;
 	public var Type:Int;
@@ -215,6 +218,7 @@ class CardMeta {
 	public var RStory:Bool;
 	public var Shure:String;
 	public var OneNext:Bool;
+	public var Quest:Bool;
 
 	public var Image:String;
 

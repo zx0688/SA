@@ -13,10 +13,17 @@ public class UIReward : MonoBehaviour
     //[SerializeField] private UIRewardItem[] subItems;
     //[SerializeField] private GameObject[] panels;
     [SerializeField] private int count = 3;
+    [SerializeField] private GameObject title;
     //[SerializeField] private GameObject[] texts;
 
 
-    public void Hide() => SetItems(null, null);
+    public void Hide()
+    {
+        gameObject.SetActive(false);
+        if (title != null)
+            title.SetActive(false);
+        SetItems(null, null);
+    }
 
     public void SetItems(RewardMeta[] rewards, RewardMeta[] costs, bool animate = false)
     {
@@ -54,6 +61,8 @@ public class UIReward : MonoBehaviour
         //    sub.AddRange(costs);
 
         gameObject.SetActive(true);
+        if (title != null)
+            title.SetActive(true);
         // panels[0].SetActive(map.Keys.Count > 0);
         // if (panels[1] != null)
         //     panels[1].SetActive(map.Keys.Count > count);

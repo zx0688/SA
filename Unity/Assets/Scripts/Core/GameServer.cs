@@ -159,7 +159,7 @@ namespace GameServer
                 GameRequest request = new GameRequest(0);
                 request.Timestamp = GameTime.Get64();
 
-                profile = SL.CreateProfile(request, meta, GameTime.Get(), new GameResponse());
+                profile = SL.CreateProfile(request, meta, new GameResponse());
                 return profile;
             }
 

@@ -19,7 +19,7 @@ public class TooltipBack : MonoBehaviour
 
         gameObject.SetActive(true);
 
-        blackBack.Show(0f);
+        blackBack.Show(0f, null);
 
         yellow.SetActive(false);
         red.SetActive(false);
@@ -50,7 +50,7 @@ public class TooltipBack : MonoBehaviour
     public void Hide()
     {
         gameObject.SetActive(false);
-        blackBack.Hide();
+        blackBack.Hide(0f);
     }
 
 

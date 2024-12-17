@@ -50,21 +50,6 @@ namespace UI.ActionPanel
             //followPrompt.gameObject.SetActive(false);
         }
 
-        //         void AddListeners()
-        //         {
-        //             swipe.OnChangeDeviation += OnChangeDeviation;
-        //             swipe.OnDrop += OnDrop;
-        //             swipe.OnTakeCard += OnTakeCard;
-        //             swipe.OnEndSwipe += Hide;
-        //         }
-        // 
-        //         void RemoveListeners()
-        //         {
-        //             swipe.OnChangeDeviation -= OnChangeDeviation;
-        //             swipe.OnDrop -= OnDrop;
-        //             swipe.OnTakeCard -= OnTakeCard;
-        //             swipe.OnEndSwipe -= Hide;
-        //         }
 
         void OnSet()
         {
@@ -99,42 +84,6 @@ namespace UI.ActionPanel
             if (Services.Player.TryGetCardDescription(data.Card, out string desc))
                 SetDecription(desc);
         }
-
-
-        //         void OnTakeCard()
-        //         {
-        //             if (data.Card == null || data.Card.Type != CardMeta.TYPE_CARD)
-        //                 return;
-        // 
-        //             // if (next.gameObject.activeInHierarchy)
-        //             //     next.GetComponent<RectTransform>().DOScale(1.2f, 0.15f);
-        // 
-        //             //if (backpack.gameObject.activeInHierarchy)
-        //             //    backpack.TakeCard();
-        // 
-        // 
-        // 
-        //             choice = -10;
-        //         }
-
-
-        //         void OnDrop()
-        //         {
-        //             if (data.Card == null || data.Card.Type != CardMeta.TYPE_CARD)
-        //                 return;
-        //             // 
-        //             //             if (next.gameObject.activeInHierarchy)
-        //             //                 next.GetComponent<RectTransform>().DOScale(1.0f, 0.15f);
-        // 
-        //             //if (backpack.gameObject.activeInHierarchy)
-        //             //    backpack.DropCard();
-        // 
-        //             //left.FadeOut();
-        //             //right.FadeOut();
-        // 
-        //             choice = -10;
-        //         }
-
 
 
         public void Show(SwipeData data, Swipe swipe)
@@ -181,7 +130,7 @@ namespace UI.ActionPanel
         {
             randomReward.Hide();
             needed.Hide();
-            backpack.gameObject.SetActive(false);
+            backpack.Hide();
             // next.gameObject.SetActive(false);
             // next.GetComponent<RectTransform>().DOKill();
             description.gameObject.SetActive(false);

@@ -59,7 +59,7 @@
     <UnityVersion>6000.0.25f1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="/Users/home/.vscode/extensions/visualstudiotoolsforunity.vstuc-1.0.4/Analyzers/Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="/Users/home/.vscode/extensions/visualstudiotoolsforunity.vstuc-1.0.5/Analyzers/Microsoft.Unity.Analyzers.dll" />
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.25f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll" />
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.25f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.Properties.SourceGenerator.dll" />
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.25f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll" />
@@ -86,8 +86,8 @@
     <Compile Include="Assets/Scripts/Components/Plugins/UniTask/Runtime/UniTask.Bridge.cs" />
     <Compile Include="Assets/Scripts/Components/Plugins/UniTask/Runtime/UniTask.WhenAny.Generated.cs" />
     <Compile Include="Assets/Scripts/Components/Plugins/UniTask/Runtime/UniTaskExtensions.Shorthand.cs" />
-    <Compile Include="Assets/Scripts/Components/Plugins/UniTask/Runtime/EnumeratorAsyncExtensions.cs" />
     <Compile Include="Assets/Scripts/Components/Plugins/UniTask/Runtime/Internal/Error.cs" />
+    <Compile Include="Assets/Scripts/Components/Plugins/UniTask/Runtime/EnumeratorAsyncExtensions.cs" />
     <Compile Include="Assets/Scripts/Components/Plugins/UniTask/Runtime/UniTask.WaitUntil.cs" />
     <Compile Include="Assets/Scripts/Components/Plugins/UniTask/Runtime/Triggers/MonoBehaviourMessagesTriggers.cs" />
     <Compile Include="Assets/Scripts/Components/Plugins/UniTask/Runtime/UnityAsyncExtensions.cs" />

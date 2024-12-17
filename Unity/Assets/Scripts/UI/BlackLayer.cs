@@ -8,29 +8,26 @@ using System;
 
 public class BlackLayer : MonoBehaviour
 {
+    [SerializeField] private Image _blackBack;
 
-    private Image _blackBack;
-
-    public void Show(float delay)
+    public void Show(float delay, Action callback = null)
     {
         this.gameObject.SetActive(true);
 
         Color c = _blackBack.color;
-        c.a = 0f;
+        c.a = 0;
+
         _blackBack.DOKill();
         _blackBack.color = c;
 
-        _blackBack.DOFade(0.6f, 0.25f).SetDelay(delay);
+        _blackBack.DOColor(new Color(c.r, c.g, c.b, 0.6f), 0.25f).SetDelay(delay).OnComplete(() => callback?.Invoke());
     }
 
-    public void Hide(Action callback = null)
+    public void Hide(float delay, Action callback = null)
     {
-
-        _blackBack.DOFade(0f, 0.25f).OnComplete(() =>
+        Color c = _blackBack.color;
+        _blackBack.DOColor(new Color(c.r, c.g, c.b, 0f), 0.25f).SetDelay(delay).OnComplete(() =>
         {
-            Color c = _blackBack.color;
-            c.a = 0f;
-            _blackBack.color = c;
             _blackBack.DOKill();
             this.gameObject.SetActive(false);
             callback?.Invoke();
@@ -40,7 +37,7 @@ public class BlackLayer : MonoBehaviour
 
     void Awake()
     {
-        _blackBack = GetComponent<Image>();
+        this.gameObject.SetActive(false);
     }
 
 }

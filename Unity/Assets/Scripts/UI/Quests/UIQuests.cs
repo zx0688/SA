@@ -42,9 +42,9 @@ public class UIQuests : ServiceBehaviour, IPage
     void UpdateList()
     {
 
-        List<string> activeQuest = Services.Player.Profile.ActiveQuests;
-        string currentQuest = Services.Player.FollowQuest;
-        List<ItemData> data = activeQuest.Select(s => new ItemData(s, 0)).ToList();
+        //List<string> activeQuest = Services.Player.Profile.ActiveQuests;
+        /*string currentQuest = Services.Player.FollowQuest;
+        //List<ItemData> data = activeQuest.Select(s => new ItemData(s, 0)).ToList();
         empty.gameObject.SetActive(activeQuest.Count == 0);
         swiper.gameObject.SetActive(activeQuest.Count != 0);
         swiper.UpdateData(data.Select(d => d.Id).ToList());
@@ -64,7 +64,7 @@ public class UIQuests : ServiceBehaviour, IPage
             {
                 slot.Hide();
             }
-        }
+        }*/
     }
 
     public void Show()

@@ -63,12 +63,10 @@ namespace Core
                 cards.Add(c.gameObject);
             }
 
-            State = States.IDLE;
-
-            accelerate.Hide();
+            foreach (GameObject c in cards)
+                c.SetActive(false);
 
             Loop().Forget();
-            //StartCoroutine (TriggerTimer ());
         }
 
         //GAME LOOP
@@ -178,6 +176,7 @@ namespace Core
                 action.Hide();
                 accelerate.Show();
             }
+            State = States.IDLE;
         }
 
         public string GetName() => swipeData != null && swipeData.Card != null ?
@@ -187,7 +186,11 @@ namespace Core
 
         public void Hide()
         {
+            State = States.WAITING;
+
+            action.Hide();
             accelerate.Hide();
+            choicePanel.Hide();
         }
     }
 }

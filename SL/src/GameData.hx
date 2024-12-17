@@ -28,10 +28,10 @@ class ProfileData {
 	public var Skills:List_1<String>;
 	public var Accept:Dictionary_2<String, GameRequest>;
 	public var Triggers:Dictionary_2<String, ItemTypeData>;
+	public var Tutorial:Dictionary_2<String, Bool>;
+	public var Quests:Dictionary_2<String, CardData>;
 
 	public var Hero:String;
-
-	public var ActiveQuests:List_1<String>;
 
 	// public List<SkillVO> Skills;
 	public var Sid:Int;

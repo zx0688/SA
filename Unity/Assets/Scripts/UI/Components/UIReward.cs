@@ -10,11 +10,7 @@ using UnityEngine.UI;
 public class UIReward : MonoBehaviour
 {
     [SerializeField] private UIRewardItem[] addItems;
-    //[SerializeField] private UIRewardItem[] subItems;
-    //[SerializeField] private GameObject[] panels;
-    [SerializeField] private int count = 3;
     [SerializeField] private GameObject title;
-    //[SerializeField] private GameObject[] texts;
 
 
     public void Hide()
@@ -22,72 +18,37 @@ public class UIReward : MonoBehaviour
         gameObject.SetActive(false);
         if (title != null)
             title.SetActive(false);
-        SetItems(null, null);
+        foreach (UIRewardItem r in addItems)
+        {
+            r.Clear();
+            r.gameObject.SetActive(false);
+        }
     }
 
-    public void SetItems(RewardMeta[] rewards, RewardMeta[] costs, bool animate = false)
+    public void SetItems(List<RewardMeta> rewards, List<RewardMeta> cost, bool animate = false)
     {
-        if (rewards.GetCountIfNull() == 0 && costs.GetCountIfNull() == 0)
+        if ((rewards == null || rewards.Count == 0) && (cost == null || cost.Count == 0))
         {
-            gameObject.SetActive(false);
+            Hide();
             return;
         }
 
-        // List<RewardMeta> reward = rewards != null ? rewards.Where(r => r.Type == ConditionMeta.ITEM).ToList() : new List<RewardMeta>();
-        //List<RewardMeta> cost = costs != null ? costs.Where(r => r.Type == ConditionMeta.ITEM).ToList() : new List<RewardMeta>();
-
-        // Dictionary<string, RewardMeta> map = new Dictionary<string, >();
-        // reward.ForEach(i =>
-        // {
-        //     if (!map.TryGetValue(i.Id, out ItemData value))
-        //     {
-        //         value = new ItemData(i.Id, 0);
-        //         map[i.Id] = value;
-        //     }
-        //     value.Count += i.Count;
-        // });
-        // cost.ForEach(i =>
-        // {
-        //     if (!map.TryGetValue(i.Id, out ItemData value))
-        //     {
-        //         value = new ItemData(i.Id, 0);
-        //         map[i.Id] = value;
-        //     }
-        //     value.Count -= i.Count;
-        // });
-        //List<RewardMeta> sub = rewards != null ? rewards.Where(r => r.Count < 0 && r.Type == ConditionMeta.ITEM).ToList() : new List<RewardMeta>();
-
-        //if (costs != null)
-        //    sub.AddRange(costs);
-
         gameObject.SetActive(true);
+
         if (title != null)
             title.SetActive(true);
-        // panels[0].SetActive(map.Keys.Count > 0);
-        // if (panels[1] != null)
-        //     panels[1].SetActive(map.Keys.Count > count);
-        //        panels[1].SetActive(sub.Count > 0);
-        var reward = GroupById(rewards);
-        var cost = GroupById(costs);
 
+        var reward = GroupById(rewards, cost);
+        reward = reward.OrderBy(item => int.Parse(item.Id)).ToList();
 
-
-        //Set(addItems, add, colors[0], animate);
-        //Set(subItems, sub, colors[1], animate);
 
         for (int i = 0; i < addItems.Length; i++)
         {
             UIRewardItem item = addItems[i];
-            var rcount = reward.Count;
-            if (i < rcount)
+            if (i < reward.Count)
             {
                 item.gameObject.SetActive(true);
-                item.SetItem(reward[i], false);
-            }
-            else if (i < (rcount + cost.Count))
-            {
-                item.gameObject.SetActive(true);
-                item.SetItem(cost[i - rcount], true);
+                item.SetItem(reward[i]);
             }
             else
             {
@@ -98,13 +59,23 @@ public class UIReward : MonoBehaviour
 
     }
 
-    private List<RewardMeta> GroupById(RewardMeta[] rewards)
+    private List<RewardMeta> GroupById(List<RewardMeta> rewards, List<RewardMeta> cost)
     {
         List<RewardMeta> result = new List<RewardMeta>();
-        if (rewards.GetCountIfNull() == 0)
-            return result;
+        List<RewardMeta> _result = rewards != null ? rewards : new List<RewardMeta>();
+        if (cost != null)
+        {
+            cost.ForEach(c =>
+            {
+                var r = new RewardMeta();
+                r.Id = c.Id;
+                r.Chance = c.Chance;
+                r.Count = -c.Count;
+                _result.Add(r);
+            });
+        }
+        var rewardIds = _result.GroupBy(r => r.Id);
 
-        var rewardIds = rewards.GroupBy(r => r.Id);
         foreach (var group in rewardIds)
         {
             if (group.Count() > 1)
@@ -128,42 +99,5 @@ public class UIReward : MonoBehaviour
         return result;
     }
 
-    //     private void Set(UIRewardItem[] uiItems, List<RewardMeta> items, Color32 color, bool animate)
-    //     {
-    //         Dictionary<string, List<RewardMeta>> map = new Dictionary<string, List<RewardMeta>>();
-    //         items.ForEach(r =>
-    //         {
-    //             if (!map.TryGetValue(r.Id, out List<RewardMeta> value))
-    //             {
-    //                 value = new List<RewardMeta>();
-    //                 map[r.Id] = value;
-    //             }
-    //             value.Add(r);
-    //         });
-    // 
-    // 
-    //         for (int i = 0; i < uiItems.Length; i++)
-    //         {
-    //             UIRewardItem item = uiItems[i];
-    //             if (i < map.Count)
-    //             {
-    //                 item.gameObject.SetActive(true);
-    //                 List<RewardMeta> data = map.ElementAt(i).Value;
-    // 
-    //                 int min = 0;
-    //                 data.Where(r => r.Chance == 0).ToList().ForEach(r => min += Math.Abs(r.Count));
-    //                 int max = min;
-    //                 data.Where(r => r.Chance > 0).ToList().ForEach(r => max += Math.Abs(r.Count));
-    // 
-    //                 ItemData itemData = new ItemData(data[0].Id, min);
-    //                 item.SetItem(itemData, max, color, animate);
-    //             }
-    //             else
-    //             {
-    //                 item.Clear();
-    //                 item.gameObject.SetActive(false);
-    //             }
-    //         }
-    //     }
 
 }

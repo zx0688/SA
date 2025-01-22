@@ -8,6 +8,6 @@
         void DropCard();
         void TakeCard();
         void OnChangeDeviation(float obj);
-        void OnDoubleClick();
+
     }
 }

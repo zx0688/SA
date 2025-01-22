@@ -40,10 +40,10 @@ public class UICurrent : MonoBehaviour
     public void Hide()
     {
         gameObject.SetActive(false);
-        SetItems(null, null, null);
+        SetItems(null, null, null, false);
     }
 
-    public void SetItems(List<ItemData> change, ProfileData profile, GameMeta meta)
+    public void SetItems(List<ItemData> change, ProfileData profile, GameMeta meta, bool animate)
     {
         if (change == null || change.Count == 0)
         {
@@ -55,6 +55,8 @@ public class UICurrent : MonoBehaviour
 
         gameObject.SetActive(true);
 
+        change = change.OrderBy(item => int.Parse(item.Id)).ToList();
+
         for (int i = 0; i < items.Length; i++)
         {
             UICurrentItem item = items[i];
@@ -64,7 +66,7 @@ public class UICurrent : MonoBehaviour
                 profile.Items.TryGetValue(change[i].Id, out ItemData data);
                 meta.Items.TryGetValue(change[i].Id, out ItemMeta m);
 
-                item.SetItem(change[i], data, m);
+                item.SetItem(animate ? change[i] : null, data, m, animate);
             }
             else
             {

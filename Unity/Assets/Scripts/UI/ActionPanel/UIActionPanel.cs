@@ -20,21 +20,20 @@ namespace UI.ActionPanel
 {
     public class UIActionPanel : MonoBehaviour
     {
-        //[SerializeField] private Text name;
         [SerializeField] private UIReward needed;
-        //[SerializeField] private UIChoicePanel left;
-        //[SerializeField] private UIChoicePanel right;
-
         [SerializeField] private UIReward randomReward;
-
         [SerializeField] private Text description;
-        [SerializeField] private GameObject descPanel;
-
-        //[SerializeField] private GameObject delem;
+        [SerializeField] private GameObject choicePanel;
         [SerializeField] private UICurrent backpack;
-        //[SerializeField] private Text next;
-
         [SerializeField] private List<Color32> colors;
+
+        [SerializeField] private UIReward reward;
+
+        [SerializeField] private GameObject choiceTitlePanel;
+        [SerializeField] private Text choiceName;
+        [SerializeField] private GameObject rewardPanel;
+        [SerializeField] private Image nextCard;
+
 
         private Swipe swipe;
 
@@ -51,11 +50,16 @@ namespace UI.ActionPanel
         }
 
 
-        void OnSet()
+        void OnSet(bool staticState)
         {
             HideAll();
 
+            choicePanel.SetActive(true);
+
             DeckItem deckItem = SL.GetCurrentCard(profile);
+            choiceTitlePanel.SetActive(false);
+            nextCard.gameObject.SetActive(false);
+
             if (deckItem.State == CardData.NOTHING)
             {
                 if (data.Card.Next.HasTriggers())
@@ -63,21 +67,22 @@ namespace UI.ActionPanel
                     var cards = new List<CardMeta>();
                     Services.Meta.GetAllRecursiveCardsFromGroup(data.Card.Next, cards);
                     RewardMeta[] cost = cards.SelectMany(c => c.Cost[0]).ToArray();
-                    needed.SetItems(null, cost, false);
+                    needed.SetItems(null, cost.ToList());
                 }
             }
             else if (deckItem.State == CardData.REWARD)
             {
-                if (data.Card.Reward != null)
-                    randomReward.SetItems(data.Card.Reward[0].Where(r => r.Chance > 0).ToArray(), null, false);
+                randomReward.SetItems(
+                    data.Card.Reward.HasReward() ? data.Card.Reward[0].Where(r => r.Chance > 0).ToList() : null,
+                    data.Card.Cost.HasReward() ? data.Card.Cost[0].Where(r => r.Chance > 0).ToList() : null);
 
                 if (Services.Player.RewardCollected.Count > 0)
                 {
                     backpack.gameObject.SetActive(true);
-                    backpack.SetItems(Services.Player.RewardCollected, profile, Services.Meta.Game);
+                    backpack.SetItems(Services.Player.RewardCollected, profile, Services.Meta.Game, staticState);
 
-                    if (data.Card.RewardText == null)
-                        throw new Exception($"Description is needed for reward {data.Card.Id}");
+                    //if (data.Card.RewardText == null)
+                    //    throw new Exception($"Description is needed for reward {data.Card.Id}");
                 }
             }
 
@@ -95,28 +100,33 @@ namespace UI.ActionPanel
             MetaService.ShowUnvalidateCard(data.Card);
 #endif
 
-            OnSet();
+            OnSet(true);
+
+            choicePanel.gameObject.SetActive(true);
+
+            if (data.ChoiceMode)
+                OnSwipeListenerEnable();
 
             gameObject.SetActive(true);
         }
 
         public void Hide()
         {
-            //conditions.Hide();
-            //rewardLeft.Hide();
-            //description.gameObject.SetActive(false);
-            //followPrompt.gameObject.SetActive(false);
+
             HideAll();
+
+            if (swipe)
+                OnSwipeListenerDisable();
 
             gameObject.SetActive(false);
         }
 
-        private void SetDecription(string desc)
+        private void SetDecription(string desc, bool localize = true)
         {
-            descPanel.gameObject.SetActive(true);
+
 
             description.gameObject.SetActive(true);
-            description.text = desc.Localize(LocalizePartEnum.CardDescription);
+            description.text = localize ? desc.Localize(LocalizePartEnum.CardDescription) : desc;
 
             if (desc.EndsWith("ask"))
                 description.color = colors[1];
@@ -131,59 +141,141 @@ namespace UI.ActionPanel
             randomReward.Hide();
             needed.Hide();
             backpack.Hide();
+
             // next.gameObject.SetActive(false);
             // next.GetComponent<RectTransform>().DOKill();
             description.gameObject.SetActive(false);
+            rewardPanel.SetActive(false);
 
             //left.HideAll();
             //right.HideAll();
             //delem.SetActive(false);
 
-            descPanel.gameObject.SetActive(false);
+            choicePanel.gameObject.SetActive(false);
+        }
+        private void OnSwipeListenerDisable()
+        {
+            swipe.OnTakeCard -= OnTakeCard;
+            swipe.OnDrop -= OnDropCard;
+            swipe.OnChangeDirection -= OnChangeDirection;
+            swipe.OnEndSwipe -= OnEndSwipe;
         }
 
-        /*
-        void OnChangeDeviation(float dev)
+        private void OnSwipeListenerEnable()
         {
-            //if (data == null || this.State != Swipe.States.DRAG || choiceble == false) return;
+            swipe.OnTakeCard += OnTakeCard;
+            swipe.OnDrop += OnDropCard;
+            swipe.OnChangeDirection += OnChangeDirection;
+            swipe.OnEndSwipe += OnEndSwipe;
+        }
 
-            if (System.Math.Abs(dev) < threshold)
+        private void OnEndSwipe()
+        {
+            HideAll();
+        }
+
+        private void OnChangeDirection(int obj)
+        {
+            List<string> allReward = new List<string>();
+            var cardMeta = data.Choices[obj];
+            ShowChoice(cardMeta, profile.Choices[obj], false, allReward);
+            //backpack.gameObject.SetActive(allReward.Count > 0);
+
+            //if (allReward.Count > 0)
+            //   backpack.SetItems(allReward.Distinct().Select(s => new ItemData(s, 0)).ToList(), profile, Services.Meta.Game);
+        }
+
+        private void OnDropCard()
+        {
+            OnSet(false);
+        }
+
+        private void OnTakeCard()
+        {
+            needed.Hide();
+            backpack.Hide();
+            description.gameObject.SetActive(false);
+            rewardPanel.SetActive(true);
+
+            OnChangeDirection(0);
+        }
+
+        private void ShowChoice(CardMeta cardMeta, ChoiceInfo info, bool showFollowPrompt, List<string> allRewards)
+        {
+            bool hasRewardOrCost = info.RewardIndex != -1 || info.CostIndex != -1;
+            rewardPanel.SetActive(false);
+
+            choiceTitlePanel.SetActive(true);
+            choiceName.Localize(cardMeta.Name, LocalizePartEnum.CardName);
+
+            nextCard.gameObject.SetActive(true);
+            nextCard.LoadCardImage(cardMeta.Image);
+
+            if (cardMeta.TradeLimit > 0)
             {
-                if (choice == -10)
-                    return;
-                choice = -10;
+                //                 RewardMeta rr = new RewardMeta();
+                //                 rr.Id = cardMeta.Reward[0][info.RewardIndex].Id;
+                //                 rr.Count = SL.GetRewardMinCount(rr.Id, cardMeta, Services.Meta.Game);
+                //                 //reward.SetItems(new RewardMeta[1] { rr }, null, false);
+                //                 allRewards.Add(rr.Id);
+                // 
+                //                 rr = new RewardMeta();
+                //                 rr.Id = cardMeta.Cost[0][info.CostIndex].Id;
+                //                 rr.Count = SL.GetRewardMinCount(rr.Id, cardMeta, Services.Meta.Game);
+                //                 // cost.SetItems(null, new RewardMeta[1] { rr }, false);
+                //                 allRewards.Add(rr.Id);
+
+
+                rewardPanel.SetActive(true);
             }
-            else if (dev < -threshold)
+            else if (hasRewardOrCost)
             {
-                if (choice == CardMeta.LEFT)
-                    return;
-                choice = CardMeta.LEFT;
+                rewardPanel.SetActive(true);
+
+                List<RewardMeta> total = new List<RewardMeta>();
+                if (info.RewardIndex != -1)
+                    total.AddRange(cardMeta.Reward[info.RewardIndex].ToList());
+                if (info.CostIndex != -1 && cardMeta.Cost.HasReward())
+                    total.AddRange(cardMeta.Cost[info.CostIndex].ToList());
+
+                reward.SetItems(
+                    info.RewardIndex != -1 && cardMeta.Reward.HasReward() ? cardMeta.Reward[info.RewardIndex].ToList() : null,
+                    info.CostIndex != -1 && cardMeta.Cost.HasReward() ? cardMeta.Cost[info.CostIndex].ToList() : null);
+
+                allRewards.AddRange(total.Select(r => r.Id));
+
+                //backpack.gameObject.SetActive(true);
+                //backpack.SetItems(total.Select(r => new ItemData(r.Id, 0)).ToList(), profile, Services.Meta.Game, false);
             }
-            else if (dev > threshold)
+            else
             {
-                if (choice == CardMeta.RIGHT)
-                    return;
-                choice = CardMeta.RIGHT;
+                reward.Hide();
             }
 
-            if (choice == -10)
+            //if (cardMeta.RewardText.HasText())
             {
-                // left.FadeOut();
-                // right.FadeOut();
+                //    SetDecription(cardMeta.RewardText);
             }
-            else if (choice == CardMeta.LEFT)
-            {
-                // left.FadeIn();
-                // right.FadeOut();
-            }
-            else if (choice == CardMeta.RIGHT)
-            {
-                // left.FadeOut();
-                // right.FadeIn();
-            }
+            // else if (info.Next == info.Id && cardMeta.TradeLimit == 0)
+            //     SetDecription(cardMeta.Shure.Localize(LocalizePartEnum.CardAction), false);
+            // else if (cardMeta.Act.HasText())
+            //     SetDecription(cardMeta.Act.Localize(LocalizePartEnum.CardAction), false);
+            // else
+            //     SetDecription(cardMeta.Name.Localize(LocalizePartEnum.CardName), false);
 
 
-        } */
+            //followPrompt.gameObject.SetActive(showFollowPrompt);
+
+
+            // if (cardMeta.Hero != null)
+            // {
+            //     hero.LoadHeroImage(cadMeta.Hero);
+            //     hero.gameObject.SetActive(true);
+            // }
+            // else
+            //     hero.gameObject.SetActive(false);
+            //             
+        }
 
     }
 }

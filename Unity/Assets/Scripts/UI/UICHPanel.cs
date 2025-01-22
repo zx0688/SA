@@ -18,8 +18,6 @@ namespace Core
         [HideInInspector] public int C;
 
         [SerializeField] private UICurrent backpack;
-        [SerializeField] private UIChoicePanel down;
-        [SerializeField] private UIChoicePanel up;
 
         [SerializeField] private Text madeAChoice;
 
@@ -27,24 +25,11 @@ namespace Core
 
         void Awake()
         {
-            down.OnEndTap += t =>
-            {
-                up.HideAll();
-            };
-            up.OnEndTap += t =>
-            {
-                down.HideAll();
-            };
+
+
         }
 
-        public int CurrentChoice()
-        {
-            if (down.IsTaped)
-                return CardMeta.LEFT;
-            if (up.IsTaped)
-                return CardMeta.RIGHT;
-            return -1;
-        }
+
 
         public void Show(SwipeData data)
         {
@@ -56,26 +41,26 @@ namespace Core
                 throw new Exception($"State Choice should have any next card {data.Card.Id}");
 
 
-            List<string> allReward = new List<string>();
-
-            up.FadeIn();
-            down.FadeIn();
-
-            madeAChoice.text = data.Choices.Exists(c => c.Reward != null || c.Cost != null) ?
-                "MadeAction.UI".Localize(LocalizePartEnum.GUI) : "MadeChocie.UI".Localize(LocalizePartEnum.GUI);
-
-            down.ShowChoice(data.Choices[0], profile.Choices[0], data.FollowPrompt == CardMeta.LEFT, allReward);
-            up.ShowChoice(data.Choices[1], profile.Choices[1], data.FollowPrompt == CardMeta.RIGHT, allReward);
-
-            backpack.SetItems(allReward.Distinct().Select(s => new ItemData(s, 0)).ToList(), profile, Services.Meta.Game);
+            //             List<string> allReward = new List<string>();
+            // 
+            //             up.FadeIn();
+            //             down.FadeIn();
+            // 
+            //             madeAChoice.text = data.Choices.Exists(c => c.Reward != null || c.Cost != null) ?
+            //                 "MadeAction.UI".Localize(LocalizePartEnum.GUI) : "MadeChocie.UI".Localize(LocalizePartEnum.GUI);
+            // 
+            //             down.ShowChoice(data.Choices[0], profile.Choices[0], data.FollowPrompt == CardMeta.LEFT, allReward);
+            //             up.ShowChoice(data.Choices[1], profile.Choices[1], data.FollowPrompt == CardMeta.RIGHT, allReward);
+            // 
+            //             backpack.SetItems(allReward.Distinct().Select(s => new ItemData(s, 0)).ToList(), profile, Services.Meta.Game);
 
         }
 
         public void Hide()
         {
             backpack.Hide();
-            down.HideAll();
-            up.HideAll();
+            // down.HideAll();
+            // up.HideAll();
 
             gameObject.SetActive(false);
         }

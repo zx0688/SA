@@ -10,6 +10,7 @@ using UnityEngine.UI;
 using UI.Components;
 using Cysharp.Threading.Tasks;
 using haxe.root;
+using Unity.Android.Gradle.Manifest;
 
 namespace Core
 {
@@ -19,12 +20,13 @@ namespace Core
 
         [SerializeField] private Image art;
         [SerializeField] private Image hero;
-        //[SerializeField] private Text name;
+
         [SerializeField] private GameObject eventIcon;
         [SerializeField] private Text description;
 
         [SerializeField] private GameObject random;
         [SerializeField] private Text randomValue;
+
 
         private CardMeta card => data.Card;
         //private string current;
@@ -62,92 +64,49 @@ namespace Core
 
         public void ChangeDirection(int i)
         {
-            int ind = i;
-
-
-        }
-
-        private void ChangeArt(string image)
-        {
-            //if (current == image)
             return;
-            //current = image;
-            //art.LoadCardImage(image);
-            art.DOKill();
-            art.DOColor(new Color(a: 0f, r: 255, g: 255, b: 255), 0.1f).OnComplete(() =>
+            if (!data.ChoiceMode)
+                return;
+
+            // var cardMeta = data.Choices[i];
+            // var info = Services.Player.Profile.Choices[i];
+            // if (info.Next == info.Id && cardMeta.TradeLimit == 0)
+            //     name.Localize(cardMeta.Shure, LocalizePartEnum.CardAction);
+            // else if (cardMeta.Act.HasText())
+            //     name.Localize(cardMeta.Act, LocalizePartEnum.CardAction);
+            // else
+            //     name.Localize(cardMeta.Name, LocalizePartEnum.CardName);
+
+            var card = data.Choices[i];
+            var prev = hero.gameObject.activeInHierarchy;
+
+            SetHero(card, card.RewardText);
+
+            if (hero.gameObject.activeInHierarchy == true && prev == false)
             {
-                art.LoadCardImage(image);
-                art.DOColor(new Color(a: 1f, r: 255, g: 255, b: 255), 0.1f);
-            });
-        }
-
-
-        public void DropCard()
-        {
-            //current = card.Image;
-            return;
-            art.DOKill();
-            //art.DOColor(Color.black, 0.2f).OnComplete(() =>
-            //{
-            art.LoadCardImage(card.Image);
-
-            //    art.DOColor(Color.white, 0.2f);
-            //});
-
-            // current = card.Image;
-            // art.LoadCardImage(card.Image);
-            //ChangeArt(card.Image);
-        }
-
-        public void SetActive(bool enable)
-        {
-            gameObject.SetActive(enable);
-        }
-
-        public void TakeCard()
-        {
-            ChangeDirection(CardMeta.LEFT);
-            //art.DOKill();
-            //art.DOColor(Color.black, 0.2f).OnComplete(() =>
-            // {
-            //ChangeDirection(CardMeta.LEFT);
-            //    art.DOColor(Color.white, 0.2f);
-            //});
-
-            //ChangeDirection(CardMeta.LEFT);
-        }
-
-        public void UpdateData(SwipeData data)
-        {
-            this.data = data;
-
-            /*if (data.Card.Hero == null)
-            {
-                name.Localize(data.Card.Name, LocalizePartEnum.CardName);
+                hero.DOKill();
+                hero.color = new Color(a: 0f, r: 255, g: 255, b: 255);
+                hero.DOColor(new Color(a: 1f, r: 255, g: 255, b: 255), 0.1f);
             }
-            else
-            {
-                name.Localize(data.Hero.Name, LocalizePartEnum.CardName);
-            }*/
 
-            if (card.Image != null)
+            if (data.Choices[0].Image != data.Choices[1].Image)
             {
-                art.LoadCardImage(card.Image);
+                var image = card.Image;
                 art.gameObject.SetActive(true);
-            }
-            else
-            {
-                art.gameObject.SetActive(false);
-            }
 
-            Services.Player.TryGetCardDescription(data.Card, out string desc);
-
-            if (card.Hero != null && Services.Meta.Game.Heroes.TryGetValue(card.Hero, out var heroData))
-            {
-                hero.LoadHeroImage(heroData.Image);
-                hero.gameObject.SetActive(true);
+                art.DOKill();
+                art.DOColor(new Color(a: 0f, r: 255, g: 255, b: 255), 0.2f).OnComplete(() =>
+                {
+                    art.LoadCardImage(image);
+                    art.DOColor(new Color(a: 1f, r: 255, g: 255, b: 255), 0.2f);
+                });
             }
-            else if (desc != null && SL.HeroInWordPattern.match(desc))
+        }
+
+
+        private void SetHero(CardMeta card, string desc)
+        {
+            if (desc != null && SL.HeroInWordPattern.match(desc))
             {
                 var heroId = SL.HeroInWordPattern.matched(1);
                 if (heroId == "0")
@@ -167,6 +126,113 @@ namespace Core
             {
                 hero.gameObject.SetActive(false);
             }
+        }
+
+        public void DropCard()
+        {
+            return;
+            if (!data.ChoiceMode)
+                return;
+
+
+            var prev = hero.gameObject.activeInHierarchy;
+            Services.Player.TryGetCardDescription(data.Card, out string desc);
+
+            if (card.Hero != null && Services.Meta.Game.Heroes.TryGetValue(card.Hero, out var heroData))
+            {
+                hero.LoadHeroImage(heroData.Image);
+                hero.gameObject.SetActive(true);
+            }
+            else
+            {
+                SetHero(card, desc);
+            }
+
+            if (hero.gameObject.activeInHierarchy == false && prev == true)
+            {
+                hero.gameObject.SetActive(true);
+                hero.DOKill();
+                hero.DOColor(new Color(a: 0f, r: 255, g: 255, b: 255), 0.1f).OnComplete(() =>
+                {
+                    hero.gameObject.SetActive(false);
+                    hero.color = new Color(a: 1f, r: 255, g: 255, b: 255);
+                });
+            }
+
+            if (data.Choices[0].Image != data.Choices[1].Image)
+            {
+                art.DOKill();
+                art.DOColor(new Color(a: 0f, r: 255, g: 255, b: 255), 0.2f).OnComplete(() =>
+                {
+                    art.LoadCardImage(card.Image);
+                    art.DOColor(new Color(a: 1f, r: 255, g: 255, b: 255), 0.2f);
+                });
+            }
+
+        }
+
+        public void SetActive(bool enable)
+        {
+            gameObject.SetActive(enable);
+        }
+
+        public void TakeCard()
+        {
+            return;
+            if (!data.ChoiceMode)
+                return;
+
+
+            ChangeDirection(CardMeta.LEFT);
+            //art.DOKill();
+            //art.DOColor(Color.black, 0.2f).OnComplete(() =>
+            // {
+            //ChangeDirection(CardMeta.LEFT);
+            //    art.DOColor(Color.white, 0.2f);
+            //});
+
+            //ChangeDirection(CardMeta.LEFT);
+        }
+
+        public void UpdateData(SwipeData data)
+        {
+            this.data = data;
+            art.DOKill();
+
+            /*if (data.Card.Hero == null)
+            {
+                name.Localize(data.Card.Name, LocalizePartEnum.CardName);
+            }
+            else
+            {
+                name.Localize(data.Hero.Name, LocalizePartEnum.CardName);
+            }*/
+
+
+
+            if (card.Image != null)
+            {
+                art.LoadCardImage(card.Image);
+                art.gameObject.SetActive(true);
+            }
+            else
+            {
+                art.gameObject.SetActive(false);
+            }
+
+            Services.Player.TryGetCardDescription(data.Card, out string desc);
+
+            hero.DOKill();
+            hero.color = new Color(a: 1f, r: 255, g: 255, b: 255);
+            if (card.Hero != null && Services.Meta.Game.Heroes.TryGetValue(card.Hero, out var heroData))
+            {
+                hero.LoadHeroImage(heroData.Image);
+                hero.gameObject.SetActive(true);
+            }
+            else
+            {
+                SetHero(card, desc);
+            }
 
             random.SetActive(card.Chance > 0);
             randomValue.text = $"{card.Chance}%";
@@ -174,46 +240,6 @@ namespace Core
 
         }
 
-        public void OnDoubleClick()
-        {
-            //             if (!data.Card.Descs.HasTexts())
-            //                 return;
-            // 
-            //             if (groupDescription.gameObject.activeInHierarchy)
-            //                 DescriptionFadeOut();
-            //             else
-            //                 DescriptionFadeIn();
-        }
-
-        //         private void DescriptionFadeIn()
-        //         {
-        //             string desc = data.Card.Descs.GetCurrentDescription();
-        //             if (desc.HasText())
-        //             {
-        //                 //this.transform.DORotate(new Vector3(0f, 180f, 0f), 0.7f, RotateMode.Fast);
-        //                 groupDescription.gameObject.SetActive(true);
-        //                 groupDescription.alpha = 0f;
-        //                 description.gameObject.SetActive(true);
-        //                 description.text = desc.Localize(LocalizePartEnum.CardDescription);
-        //                 groupDescription.DOKill();
-        //                 groupDescription.DOFade(1f, 0.15f).OnComplete(() =>
-        //                 {
-        //                     //description.gameObject.SetActive(true);
-        //                     description.text = desc.Localize(LocalizePartEnum.CardDescription);
-        //                 });
-        //             }
-        //         }
-        // 
-        //         private void DescriptionFadeOut()
-        //         {
-        //             //this.transform.DORotate(new Vector3(0f, 0f, 0f), 0.7f, RotateMode.Fast);
-        //             groupDescription.DOKill();
-        //             groupDescription.DOFade(0f, 0.15f).OnComplete(() =>
-        //             {
-        //                 description.gameObject.SetActive(false);
-        //                 groupDescription.gameObject.SetActive(false);
-        //             });
-        //         }
 
     }
 

@@ -57,7 +57,6 @@ class ProfileData {
 class CardData {
 	public static inline var DESCRIPTION:Int = 0;
 	public static inline var REWARD:Int = 1;
-	public static inline var CHOICE:Int = 2;
 	public static inline var NOTHING:Int = 3;
 	public static inline var ONLY_ONCE:Int = 4;
 
@@ -165,10 +164,11 @@ class DeckItem {
 		this.Id = Id;
 		this.State = State;
 		this.DescIndex = DescIndex;
+		this.Choice = false;
 	}
 
 	public var DescIndex:Int;
-
+	public var Choice:Bool;
 	public var Id:String;
 	public var State:Int;
 }

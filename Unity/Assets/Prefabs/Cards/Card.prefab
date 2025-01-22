@@ -73,6 +73,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2277f5a777b254eaf950ea4dde6f74a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tutorialSwipeFinger: {fileID: 0}
   CurrentChoice: 0
   Deviation: 0
   Vector: {x: 0, y: 0}
@@ -1012,12 +1013,12 @@ PrefabInstance:
     - target: {fileID: 846980141634243085, guid: 6177237296425434aacba87d667a9924,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 1050
+      value: 1007.2
       objectReference: {fileID: 0}
     - target: {fileID: 846980141634243085, guid: 6177237296425434aacba87d667a9924,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 1050
+      value: 1014.9
       objectReference: {fileID: 0}
     - target: {fileID: 846980141634243085, guid: 6177237296425434aacba87d667a9924,
         type: 3}
@@ -1084,6 +1085,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: CARD_Simple
       objectReference: {fileID: 0}
+    - target: {fileID: 3731893011799163802, guid: 6177237296425434aacba87d667a9924,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -2.1683655
+      objectReference: {fileID: 0}
     - target: {fileID: 5792297262566947297, guid: 6177237296425434aacba87d667a9924,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -1108,6 +1114,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7060968795230417131, guid: 6177237296425434aacba87d667a9924,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -2.1683655
       objectReference: {fileID: 0}
     - target: {fileID: 7742626933396066608, guid: 6177237296425434aacba87d667a9924,
         type: 3}

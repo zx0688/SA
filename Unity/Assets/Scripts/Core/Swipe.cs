@@ -47,7 +47,7 @@ namespace Core
         private Canvas _parent;
 
         private float _fMovingSpeed = 50;
-        private float _swipeDetectionLimit_LR = 150f;
+        private float _swipeDetectionLimit_LR = 280f;
         private float _fRotation = -0.01f;//-0.005f;
         private float _fScale = 1f;
         private bool returnCardBack = false;
@@ -225,7 +225,7 @@ namespace Core
                 card.OnEndDrag();
             }
 
-            OnDrop?.Invoke();
+
 
             Vector2 distance = _rectTransform.anchoredPosition - _pivotPoint;
 
@@ -258,6 +258,7 @@ namespace Core
             }
             else
             {
+                OnDrop?.Invoke();
                 State = States.IDLE;
                 returnCardBack = true;
             }

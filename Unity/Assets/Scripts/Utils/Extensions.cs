@@ -41,6 +41,10 @@ public static class Extensions
     public static bool Check(this ConditionMeta condition) => SL.CheckCondition(new ConditionMeta[] { condition }, Services.Meta.Game, Services.Player.Profile, null);
     public static bool Check(this ConditionMeta[] conditions) => SL.CheckCondition(conditions, Services.Meta.Game, Services.Player.Profile, null);
 
+    public static bool IfAsking(this string ask) => ask.EndsWith("ask");
+    public static bool IfTelling(this string tell) => tell.EndsWith("tell");
+
+
     public static T Find<T>(this T[] array, Predicate<T> match) where T : class
     {
         foreach (T i in array)

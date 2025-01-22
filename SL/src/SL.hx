@@ -117,8 +117,10 @@ class SL {
 
 		profile.RewardEvents = new Dictionary_2<String, ItemData>();
 		profile.QuestEvent = null;
-		setStartCard(meta.Config.TutorialCard, profile, meta, random, requestTimestamp);
-
+		if (!meta.Config.DisableTutorial)
+			setStartCard(meta.Config.TutorialCard, profile, meta, random, requestTimestamp, response);
+		else
+			setStartCard(meta.Config.StartCard, profile, meta, random, requestTimestamp, response);
 		return profile;
 	}
 
@@ -184,10 +186,6 @@ class SL {
 				}
 				var countChoices:Int = profile.Choices.getCount();
 
-				if (countChoices == 1) {
-					response.Error = "choices should be only two or zero";
-					return;
-				}
 				if (request.Id == null && countChoices > 0) {
 					response.Error = "id should not be empty ";
 					return;
@@ -244,7 +242,7 @@ class SL {
 				profile.History = new List_1();
 
 				SetRandomSeedByTime(request.Timestamp);
-				setStartCard(meta.Config.StartCard, profile, meta, random, requestTimestamp);
+				setStartCard(meta.Config.StartCard, profile, meta, random, requestTimestamp, response);
 
 			case TriggerMeta.START_GAME:
 			case TriggerMeta.EVENT:
@@ -273,9 +271,9 @@ class SL {
 		profile.Rid += 1;
 	}
 
-	private static function setStartCard(startCard:String, profile:ProfileData, meta:GameMeta, random:Random, timeStamp:Int) {
+	private static function setStartCard(startCard:String, profile:ProfileData, meta:GameMeta, random:Random, timeStamp:Int, response:GameResponse) {
 		profile.Deck = new List_1();
-		CreateDeck(startCard, null, meta, profile, random, new GameResponse(), timeStamp, null);
+		CreateDeck(startCard, null, meta, profile, random, response, timeStamp, null);
 	}
 
 	private static function UpdatePlayerData(request:GameRequest, currentDeckItem:DeckItem, choice:ChoiceInfo, meta:GameMeta, profile:ProfileData,
@@ -286,7 +284,7 @@ class SL {
 		var card:CardData = profile.Cards.getOrCreate(request.Hash, f -> new CardData(request.Hash));
 
 		if ((currentDeckItem.State == CardData.REWARD && cardMeta.Next == null)
-			|| (currentDeckItem.State == CardData.CHOICE && cardMeta.IfNothing == null)
+			|| (currentDeckItem.Choice == true && cardMeta.IfNothing == null)
 			|| (currentDeckItem.State == CardData.NOTHING)
 			|| (currentDeckItem.State == CardData.DESCRIPTION
 				&& cardMeta.Next == null
@@ -298,10 +296,10 @@ class SL {
 				profile.History.push(card.Id);
 		}
 
-		if (currentDeckItem.State == CardData.CHOICE) {
-			// card.Choice = request.Id;
-			profile.Choices = new List_1();
-		}
+		// if (currentDeckItem.Choice == true) {
+		// card.Choice = request.Id;
+		profile.Choices = new List_1();
+		// }
 	}
 
 	private static function CreateDeck(nextCardId:String, choice:ChoiceInfo, meta:GameMeta, profile:ProfileData, random:Random, response:GameResponse,
@@ -349,18 +347,27 @@ class SL {
 			if (nextCard.TradeLimit > 0)
 				ApplyTrade(nextCard, choice, meta, profile, random);
 			else
-				ApplyReward(nextCard, choice, meta, profile, random);
-		} else if (deckInfo.State == CardData.CHOICE) {
+				ApplyReward(nextCard, choice, meta, profile, random, response);
+		}
+
+		response.Debug += "DECK ITEM " + Json.stringify(deckInfo);
+
+		if (deckInfo.Choice) {
 			nextCard = meta.Cards.tryGet(deckInfo.Id);
-			response.Debug += "sddddd " + nextCard.Id;
 			CreateLeftRight(nextCard, meta, profile, random, response);
+
+			response.Debug += "choices " + profile.Choices.getCount();
 			if (profile.Choices.getCount() == 0) {
+				deckInfo.Choice = false;
 				var rem = profile.Deck.findList(d -> d.State == CardData.REWARD && d.Id == deckInfo.Id);
 				if (rem != null)
 					profile.Deck.removeItem(rem);
+
 				if (nextCard.IfNothing != null) {
-					deckInfo.DescIndex = 0;
-					deckInfo.State = CardData.NOTHING;
+					profile.Deck.removeItem(deckInfo);
+					profile.Deck.push(new DeckItem(deckInfo.Id, CardData.NOTHING, 0));
+					profile.Deck.push(deckInfo);
+
 					if (nextCard.IfNot != null) {
 						CreateDeck(nextCard.IfNot[0].Id, null, meta, profile, random, response, requestTimestamp, null);
 						profile.Deck.push(deckInfo);
@@ -370,10 +377,12 @@ class SL {
 				else
 					throw deckInfo.Id + " all choices are unavaiable. there is mush be nothing card or text";
 			} else if (profile.Choices.getCount() == 1) {
-				var c = profile.Choices[0];
-				response.Debug += "sdfsdf " + Json.stringify(c);
-				profile.Choices = new List_1();
-				CreateDeck(c.Id, c, meta, profile, random, response, requestTimestamp, null);
+				// var c = profile.Choices[0];
+				// profile.Deck.removeItem(deckInfo);
+				// CreateDeck(c.Id, c, meta, profile, random, response, requestTimestamp, null);
+				// profile.Choices = new List_1();
+				deckInfo.Choice = false;
+				// profile.Deck.push(deckInfo);
 			} else if (profile.Choices.getCount() > 2)
 				throw "profile have more then 2 choices";
 			// если есть выбор то добавляем карту победы ДО выбора
@@ -389,6 +398,32 @@ class SL {
 		}
 	}
 
+	// private static function FixChoice(deckInfo:DeckItem, meta:GameMeta, profile:ProfileData, random:Random, requestTimestamp:Int, response:GameResponse) {
+	// 	var nextCard:CardMeta = meta.Cards.tryGet(deckInfo.Id);
+	// 	if (profile.Choices.getCount() == 0) {
+	// 		var rem = profile.Deck.findList(d -> d.State == CardData.REWARD && d.Id == deckInfo.Id);
+	// 		if (rem != null)
+	// 			profile.Deck.removeItem(rem);
+	// 		if (nextCard.IfNothing != null) {
+	// 			deckInfo.DescIndex = 0;
+	// 			deckInfo.State = CardData.NOTHING;
+	// 			if (nextCard.IfNot != null) {
+	// 				CreateDeck(nextCard.IfNot[0].Id, null, meta, profile, random, response, requestTimestamp, null);
+	// 				profile.Deck.push(deckInfo);
+	// 			}
+	// 		} else if (nextCard.IfNot != null)
+	// 			CreateDeck(nextCard.IfNot[0].Id, null, meta, profile, random, response, requestTimestamp, null);
+	// 		else
+	// 			throw deckInfo.Id + " all choices are unavaiable. there is mush be nothing card or text";
+	// 	} else if (profile.Choices.getCount() == 1) {
+	// 		var c = profile.Choices[0];
+	// 		response.Debug += "sdfsdf " + Json.stringify(c);
+	// 		profile.Choices = new List_1();
+	// 		deckInfo.Choice = false;
+	// 		CreateDeck(c.Id, c, meta, profile, random, response, requestTimestamp, null);
+	// 	} else if (profile.Choices.getCount() > 2)
+	// 		throw "profile have more then 2 choices";
+	// }
 	private static function CheckAndClearDeck(meta:GameMeta, profile:ProfileData, random:Random, response:GameResponse) {
 		var currentCard:CardMeta = null;
 		while (profile.Deck.getCount() > 0) {
@@ -445,7 +480,7 @@ class SL {
 		}
 
 		if (nextCard.Next != null || nextCard.TradeLimit > 0) {
-			profile.Deck.push(new DeckItem(nextCard.Id, CardData.CHOICE, 0));
+			//	profile.Deck.push(new DeckItem(nextCard.Id, CardData.CHOICE, 0));
 		}
 
 		if (!nextCard.Call && nextCard.TradeLimit == 0 && (nextCard.Reward != null || nextCard.Cost != null)) {
@@ -503,9 +538,11 @@ class SL {
 				AddDescriptionToDeck(nextCard.IfNothing, nextCard.Id, CardData.NOTHING, profile);
 		}
 
-		if (nextCard.Next != null || nextCard.TradeLimit > 0) {
-			profile.Deck.push(new DeckItem(nextCard.Id, CardData.CHOICE, 0));
-		}
+		var choiceIndex = profile.Deck.getCount();
+
+		// if ((nextCard.Next != null && nextCard.Next.c|| nextCard.TradeLimit > 0)) {
+		// 	profile.Deck[choiceIndex].Choice = true;
+		// }
 
 		RecursiveCreateCards(nextCard.Over, nextCard.Shake, meta, profile, random, response);
 
@@ -526,6 +563,10 @@ class SL {
 					profile.Deck.push(new DeckItem(nextCard.Id, CardData.DESCRIPTION, i));
 			else
 				AddDescriptionToDeck(nextCard.Descs, nextCard.Id, CardData.DESCRIPTION, profile);
+		}
+
+		if (profile.Deck.getCount() > 0 && (nextCard.Next != null || nextCard.TradeLimit > 0)) {
+			profile.Deck[choiceIndex].Choice = true;
 		}
 	}
 
@@ -822,7 +863,8 @@ class SL {
 		return -1;
 	}
 
-	private static function ApplyReward(card:CardMeta, info:ChoiceInfo, meta:GameMeta, profile:ProfileData, random:Random):Void {
+	private static function ApplyReward(card:CardMeta, info:ChoiceInfo, meta:GameMeta, profile:ProfileData, random:Random, response:GameResponse):Void {
+		response.Debug += "info " + (info != null ? Json.stringify(info) : "3333");
 		var costIndex = info != null ? info.CostIndex : GetCostIndex(card, meta, profile, random);
 		var rewardIndex = info != null ? info.RewardIndex : GetRewardIndex(card, costIndex, meta, profile, random);
 
@@ -840,6 +882,7 @@ class SL {
 						var m:SkillMeta = meta.Skills.tryGet(r.Id);
 						profile.Skills[cast m.Slot] = r.Id;
 				}
+
 				profile.RewardEvents.getOrCreate(r.Id, f -> new ItemData(r.Id, 0)).Count += r.Count;
 			}
 
@@ -1028,6 +1071,7 @@ class SL {
 
 	private static function CreateTriggeredCardsEvents(profile:ProfileData, meta:GameMeta):List_1<String> {
 		var triggeredRewardCardEvent:List_1<String> = new List_1<String>();
+		return triggeredRewardCardEvent;
 
 		for (rewardEvent in profile.RewardEvents.GetValues()) {
 			// quest

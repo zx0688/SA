@@ -20,7 +20,7 @@ public class UI_BuffItem : MonoBehaviour
             icon.LoadCardImage(card.Image);
         }
 
-        reward.SetItems(card.Reward != null ? card.Reward[0] : new RewardMeta[0], new RewardMeta[0], false);
+        // reward.SetItems(card.Reward != null ? card.Reward[0] : new RewardMeta[0], new RewardMeta[0], false);
     }
 
     public void Hide()

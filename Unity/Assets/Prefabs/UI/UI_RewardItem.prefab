@@ -124,7 +124,7 @@ GameObject:
   - component: {fileID: 7794237202104960971}
   - component: {fileID: 1909697325010350644}
   - component: {fileID: 3708283271217478693}
-  - component: {fileID: 8407986536988528591}
+  - component: {fileID: 8618185860368696744}
   m_Layer: 0
   m_Name: Value
   m_TagString: Untagged
@@ -148,8 +148,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 29, y: -75}
-  m_SizeDelta: {x: 58, y: 0}
+  m_AnchoredPosition: {x: 14.541885, y: -103.09595}
+  m_SizeDelta: {x: 29, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7794237202104960971
 CanvasRenderer:
@@ -192,9 +192,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: '11
-
-'
+  m_Text: 1
 --- !u!114 &3708283271217478693
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -210,7 +208,7 @@ MonoBehaviour:
   m_EffectColor: {r: 0, g: 0, b: 0, a: 0.5}
   m_EffectDistance: {x: 4, y: 4}
   m_UseGraphicAlpha: 1
---- !u!114 &8407986536988528591
+--- !u!114 &8618185860368696744
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -371,7 +369,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 138, y: -75}
+  m_AnchoredPosition: {x: 114.891884, y: -103.09595}
   m_SizeDelta: {x: 160, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6314336817950771961
@@ -478,7 +476,7 @@ MonoBehaviour:
   chanceValue: {fileID: 7169141974902872349}
   colors:
   - serializedVersion: 2
-    rgba: 4292476882
+    rgba: 4285595477
   - serializedVersion: 2
     rgba: 4278912765
 --- !u!114 &487375382188701574
@@ -499,7 +497,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_Spacing: 0
+  m_Spacing: 5.85
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 0

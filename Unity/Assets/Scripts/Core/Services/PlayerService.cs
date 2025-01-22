@@ -109,7 +109,7 @@ public class PlayerService : IService
             else
                 throw new Exception($"card {card.Id} must have no reward message");
         }
-        else if (deckItem.State == CardData.CHOICE)
+        else if (deckItem.Choice == true)
         {
             if (card.OnlyOnce != null && (!Profile.Cards.TryGetValue(card.Id, out CardData _card) || _card.CT == 0))
                 text = card.OnlyOnce[(card.OnlyOnce.Length - 1)];
@@ -202,11 +202,24 @@ public class PlayerService : IService
     {
         request.Hash = swipe.Card.Id;
         request.Type = TriggerMeta.SWIPE;
-        request.Value = swipe.CurrentChoice;
 
-        //if (swipe.Card.Next.HasTriggers() && swipe.Card.Descs.HasTexts() && Profile.DialogIndex < swipe.Card.Descs.Length)
-        //    request.Id = null;
-        request.Id = swipe.ChoiceMode ? (swipe.CurrentChoice == CardMeta.LEFT ? swipe.Choices[0].Id : swipe.Choices[1].Id) : null;
+        if (swipe.Choices.Count == 1 && swipe.ChoiceMode == false)
+        {
+            request.Value = 0;
+            request.Id = swipe.Choices[0].Id;
+        }
+        else if (swipe.ChoiceMode == true)
+        {
+            request.Value = swipe.CurrentChoice;
+            request.Id = swipe.CurrentChoice == CardMeta.LEFT ? swipe.Choices[0].Id : swipe.Choices[1].Id;
+        }
+        else
+        {
+            request.Value = 0;
+            request.Id = null;
+        }
+
+
 
         HttpBatchServer.Change(request);
 
@@ -276,6 +289,7 @@ public class PlayerService : IService
         string nextCardId = ditem.Id;
         swipeData.Data = Profile.Cards.GetValueOrDefault(nextCardId);
         swipeData.Card = Meta.Cards.GetValueOrDefault(nextCardId);
+        swipeData.ChoiceMode = ditem.Choice;
         swipeData.Choices = Profile.Choices.Select(c => Meta.Cards[c.Id]).ToList(); //Profile.Left != null ? Meta.Cards[Profile.Left.Id] : null;
         //swipeData.Down = null; //Profile.Right != null ? Meta.Cards[Profile.Right.Id] : swipeData.Up;
 
@@ -317,7 +331,7 @@ public class PlayerService : IService
         //             swipeData.FollowPrompt = left ? CardMeta.LEFT : (right ? CardMeta.RIGHT : -1);
         //         }
 
-        swipeData.ChoiceMode = SL.GetCurrentCard(Profile).State == CardData.CHOICE;
+
     }
 
     private void RecursiveFindAllGroupCardTriggers(TriggerMeta trigger, List<TriggerMeta> ts)

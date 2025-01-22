@@ -16,7 +16,7 @@ public class UIRewardItem : MonoBehaviour
 
     private bool isEmpty;
 
-    public void SetItem(RewardMeta item, bool asCost)
+    public void SetItem(RewardMeta item)
     {
         if (item == null)
         {
@@ -35,8 +35,11 @@ public class UIRewardItem : MonoBehaviour
         // {
         //     value.text = max == item.Count ? $"{item.Count}" : $"{item.Count}-{max}";
         // }
-        value.text = $"{Math.Abs(item.Count)}";
-        value.color = asCost || item.Count < 0 ? colors[1] : colors[0];
+
+        value.text = item.Count < 0 ? $"-{Math.Abs(item.Count)}" : $"+{Math.Abs(item.Count)}";
+
+
+        value.color = item.Count < 0 ? colors[1] : colors[0];
 
         chanceValue.gameObject.SetActive(item.Chance > 0);
         if (item.Chance != 0)

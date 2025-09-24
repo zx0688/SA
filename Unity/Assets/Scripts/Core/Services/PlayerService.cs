@@ -98,18 +98,20 @@ public class PlayerService : IService
             if (Services.Player.RewardCollected.Count > 0)
             {
                 if (RewardCollected.Exists(r => r.Count > 0) || !card.IfNothing.HasTexts())
-                    text = card.RewardText;
+                    text = card.RewardText[0];
                 else
                     text = card.IfNothing[0];
             }
             else if (card.Reward == null && card.Cost == null && card.Over != null)
-                text = card.RewardText;
+                text = card.RewardText[0];
             else if (card.IfNothing != null && card.IfNothing.Length > 0)
                 text = card.IfNothing[0];
+            else if (deckItem.DescIndex > 0 && card.RewardText != null)
+                text = card.RewardText[deckItem.DescIndex];
             else
                 throw new Exception($"card {card.Id} must have no reward message");
         }
-        else if (deckItem.Choice == true)
+        else if (deckItem.State == CardData.CHOICE)
         {
             if (card.OnlyOnce != null && (!Profile.Cards.TryGetValue(card.Id, out CardData _card) || _card.CT == 0))
                 text = card.OnlyOnce[(card.OnlyOnce.Length - 1)];
@@ -203,12 +205,7 @@ public class PlayerService : IService
         request.Hash = swipe.Card.Id;
         request.Type = TriggerMeta.SWIPE;
 
-        if (swipe.Choices.Count == 1 && swipe.ChoiceMode == false)
-        {
-            request.Value = 0;
-            request.Id = swipe.Choices[0].Id;
-        }
-        else if (swipe.ChoiceMode == true)
+        if (swipe.Item.State == CardData.CHOICE)
         {
             request.Value = swipe.CurrentChoice;
             request.Id = swipe.CurrentChoice == CardMeta.LEFT ? swipe.Choices[0].Id : swipe.Choices[1].Id;
@@ -218,8 +215,6 @@ public class PlayerService : IService
             request.Value = 0;
             request.Id = null;
         }
-
-
 
         HttpBatchServer.Change(request);
 
@@ -287,10 +282,10 @@ public class PlayerService : IService
         //default card
         DeckItem ditem = Profile.Deck[Profile.Deck.Count - 1];
         string nextCardId = ditem.Id;
+        swipeData.Item = ditem;
         swipeData.Data = Profile.Cards.GetValueOrDefault(nextCardId);
         swipeData.Card = Meta.Cards.GetValueOrDefault(nextCardId);
-        swipeData.ChoiceMode = ditem.Choice;
-        swipeData.Choices = Profile.Choices.Select(c => Meta.Cards[c.Id]).ToList(); //Profile.Left != null ? Meta.Cards[Profile.Left.Id] : null;
+        swipeData.Choices = ditem.State == CardData.CHOICE ? ditem.Choices.Select(c => Meta.Cards[c.Id]).ToList() : new List<CardMeta>(); //Profile.Left != null ? Meta.Cards[Profile.Left.Id] : null;
         //swipeData.Down = null; //Profile.Right != null ? Meta.Cards[Profile.Right.Id] : swipeData.Up;
 
 

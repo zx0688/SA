@@ -17,7 +17,7 @@ namespace Core
         [HideInInspector] public SwipeData Data;
         [HideInInspector] public int C;
 
-        [SerializeField] private UICurrent backpack;
+        //[SerializeField] private UICurrent backpack;
 
         [SerializeField] private Text madeAChoice;
 
@@ -26,15 +26,18 @@ namespace Core
         void Awake()
         {
 
-
         }
 
-
+        public void State(int i)
+        {
+            this.madeAChoice.gameObject.SetActive(i == 1);
+        }
 
         public void Show(SwipeData data)
         {
             this.Data = data;
 
+            this.madeAChoice.gameObject.SetActive(true);
             gameObject.SetActive(true);
 
             if (data.Choices.Count == 0)
@@ -58,9 +61,10 @@ namespace Core
 
         public void Hide()
         {
-            backpack.Hide();
+            //backpack.Hide();
             // down.HideAll();
             // up.HideAll();
+            this.madeAChoice.gameObject.SetActive(false);
 
             gameObject.SetActive(false);
         }

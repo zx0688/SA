@@ -4,13 +4,13 @@ namespace Core
 {
     public class SwipeData
     {
-        public bool ChoiceMode;
         public CardMeta Card;
 
         public List<CardMeta> Choices;
         public ItemMeta Hero;
         public bool LastCard;
         public int FollowPrompt;
+        public DeckItem Item;
 
 
         public CardData Data;

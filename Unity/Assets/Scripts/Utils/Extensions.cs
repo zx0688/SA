@@ -102,6 +102,16 @@ public static class Extensions
     public static bool HasText(this string text) => text != null && text.Length > 0;
     public static bool HasReward(this RewardMeta[][] reward) => reward != null && reward.Length > 0;
 
+    public static RewardMeta[] ToReward(this IEnumerable<ItemData> items) => items.Select(i =>
+    {
+        var r = new RewardMeta();
+        r.Id = i.Id;
+        r.Count = i.Count;
+        r.Chance = 0;
+        return r;
+    }).ToArray();
+
+
     public static bool TryGetRandom<T>(this IEnumerable<T> source, out T value) where T : class
     {
         value = null;

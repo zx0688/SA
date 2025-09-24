@@ -17,7 +17,6 @@ class ProfileData {
 
 	public var SwipeCount:Int;
 	public var Deck:List_1<DeckItem>;
-	public var Choices:List_1<ChoiceInfo>;
 
 	// public var Left:CardNextInfo;
 	// public var Right:CardNextInfo;
@@ -59,6 +58,7 @@ class CardData {
 	public static inline var REWARD:Int = 1;
 	public static inline var NOTHING:Int = 3;
 	public static inline var ONLY_ONCE:Int = 4;
+	public static inline var CHOICE:Int = 5;
 
 	// public static inline var ONLY_ONCE:Int = 4;
 
@@ -145,16 +145,16 @@ class ChoiceInfo {
 	public function new(Id:String, Next:String, RewardIndex:Int, Base:String, CostIndex:Int) {
 		this.Id = Id;
 		this.Next = Next;
-		this.RewardIndex = RewardIndex;
+		this.RI = RewardIndex;
 		this.Base = Base;
-		this.CostIndex = CostIndex;
+		this.CI = CostIndex;
 	}
 
-	public var RewardIndex:Int;
+	public var RI:Int;
 	public var Id:String;
 	public var Next:String;
 	public var Base:String;
-	public var CostIndex:Int;
+	public var CI:Int;
 }
 
 @:nativeGen
@@ -164,11 +164,11 @@ class DeckItem {
 		this.Id = Id;
 		this.State = State;
 		this.DescIndex = DescIndex;
-		this.Choice = false;
+		this.Choices = new List_1();
 	}
 
+	public var Choices:List_1<ChoiceInfo>;
 	public var DescIndex:Int;
-	public var Choice:Bool;
 	public var Id:String;
 	public var State:Int;
 }

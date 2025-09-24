@@ -214,7 +214,7 @@ class CardMeta {
 	public var Descs:NativeArray<String>;
 	public var IfNothing:NativeArray<String>;
 	public var OnlyOnce:NativeArray<String>;
-	public var RewardText:String;
+	public var RewardText:NativeArray<String>;
 	public var RStory:Bool;
 	public var Shure:String;
 	public var OneNext:Bool;

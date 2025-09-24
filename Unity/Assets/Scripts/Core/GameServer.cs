@@ -220,7 +220,7 @@ namespace GameServer
             if (response.Log != null)
                 Debug.Log($"LOG:{response.Log}");
 
-            profile.Choices.ForEach(c => Debug.Log($"LEFT NEXT:{JSON.Serialize(c)}"));
+            //d.Choices.ForEach(c => Debug.Log($"LEFT NEXT:{JSON.Serialize(c)}"));
             //Debug.Log($"LEFT NEXT:{(profile.Left != null ? profile.Left.Next : "no")} RIGHT NEXT:{(profile.Right != null ? profile.Right.Next : "no")}");
             //Debug.Log($"CARD STATES:{JSON.Serialize(profile.CardStates)}");
 

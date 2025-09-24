@@ -65,7 +65,7 @@ namespace Core
         public void ChangeDirection(int i)
         {
             return;
-            if (!data.ChoiceMode)
+            if (data.Item.State != CardData.CHOICE)
                 return;
 
             // var cardMeta = data.Choices[i];
@@ -80,7 +80,7 @@ namespace Core
             var card = data.Choices[i];
             var prev = hero.gameObject.activeInHierarchy;
 
-            SetHero(card, card.RewardText);
+            SetHero(card, card.RewardText[0]);
 
             if (hero.gameObject.activeInHierarchy == true && prev == false)
             {
@@ -117,7 +117,7 @@ namespace Core
                     hero.LoadHeroImage(heroId);
                 hero.gameObject.SetActive(true);
             }
-            else if (desc != null && desc.EndsWith("ask"))
+            else if ((desc != null && desc.EndsWith("ask")) || data.Item.State == CardData.CHOICE)
             {
                 hero.LoadHeroImage(Services.Player.Profile.Hero);
                 hero.gameObject.SetActive(true);
@@ -131,7 +131,7 @@ namespace Core
         public void DropCard()
         {
             return;
-            if (!data.ChoiceMode)
+            if (data.Item.State != CardData.CHOICE)
                 return;
 
 
@@ -179,7 +179,7 @@ namespace Core
         public void TakeCard()
         {
             return;
-            if (!data.ChoiceMode)
+            if (data.Item.State != CardData.CHOICE)
                 return;
 
 
@@ -207,8 +207,6 @@ namespace Core
             {
                 name.Localize(data.Hero.Name, LocalizePartEnum.CardName);
             }*/
-
-
 
             if (card.Image != null)
             {

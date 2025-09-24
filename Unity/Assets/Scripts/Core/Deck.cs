@@ -112,6 +112,7 @@ namespace Core
         {
             Services.Player.CreateSwipeData(swipeData);
 
+            name.Localize(swipeData.Card.Name, LocalizePartEnum.CardName);
             int i = currentCardObject != null ? cards.IndexOf(currentCardObject) + 1 : 0;
             i = i >= cards.Count ? 0 : i;
 
@@ -119,6 +120,8 @@ namespace Core
             currentCardObject.SetActive(true);
             currentCardObject.GetComponent<RectTransform>().SetAsFirstSibling();
             action.GetComponent<RectTransform>().SetAsFirstSibling();
+
+
 
             currentSwipe.ConstructNewSwipe();
             currentCard.UpdateData(swipeData);
@@ -129,7 +132,7 @@ namespace Core
 
             currentCard.FadeIn(() => GC.Collect());
 
-            name.Localize(swipeData.Card.Name, LocalizePartEnum.CardName);
+
 
             if (swipeData.Card.Sound.TryGetRandom(out string sound))
                 Services.Assets.PlaySound(sound, audioSource).Forget();

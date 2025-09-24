@@ -123,7 +123,7 @@ public class MetaService
     public static void ShowUnvalidateCard(CardMeta card)
     {
         return;
-        if ((card.Reward.HasReward() || card.Cost.HasReward()) && !card.RewardText.HasText())
+        if ((card.Reward.HasReward() || card.Cost.HasReward()) && card.RewardText == null)
             CardException(card, "должен быть задан текст награды!");
         if (card.Reward.HasReward() && !card.Reward.ToList().Exists(r => r.ToList().Exists(rr => rr.Chance == 0)) &&
             !card.IfNothing.HasTexts())

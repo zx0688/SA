@@ -81,7 +81,7 @@ public class PlayerService : IService
     public bool TryGetCardDescription(CardMeta card, out string _text)
     {
         string text = null;
-        DeckItem deckItem = SL.GetCurrentCard(Profile);
+        DeckItem deckItem = SL.TryGetCurrentCard(Profile);
         if (deckItem.State == CardData.NOTHING)
             text = card.IfNothing[(card.IfNothing.Length - 1) - deckItem.DescIndex];
         else if (deckItem.State == CardData.DESCRIPTION)
@@ -111,7 +111,7 @@ public class PlayerService : IService
             else
                 throw new Exception($"card {card.Id} must have no reward message");
         }
-        else if (deckItem.State == CardData.CHOICE)
+        else if (deckItem.IsChoice && card.Descs != null)
         {
             if (card.OnlyOnce != null && (!Profile.Cards.TryGetValue(card.Id, out CardData _card) || _card.CT == 0))
                 text = card.OnlyOnce[(card.OnlyOnce.Length - 1)];
@@ -205,7 +205,7 @@ public class PlayerService : IService
         request.Hash = swipe.Card.Id;
         request.Type = TriggerMeta.SWIPE;
 
-        if (swipe.Item.State == CardData.CHOICE)
+        if (swipe.Item.IsChoice)
         {
             request.Value = swipe.CurrentChoice;
             request.Id = swipe.CurrentChoice == CardMeta.LEFT ? swipe.Choices[0].Id : swipe.Choices[1].Id;
@@ -285,7 +285,7 @@ public class PlayerService : IService
         swipeData.Item = ditem;
         swipeData.Data = Profile.Cards.GetValueOrDefault(nextCardId);
         swipeData.Card = Meta.Cards.GetValueOrDefault(nextCardId);
-        swipeData.Choices = ditem.State == CardData.CHOICE ? ditem.Choices.Select(c => Meta.Cards[c.Id]).ToList() : new List<CardMeta>(); //Profile.Left != null ? Meta.Cards[Profile.Left.Id] : null;
+        swipeData.Choices = ditem.IsChoice ? ditem.Choices.Select(c => Meta.Cards[c.Id]).ToList() : new List<CardMeta>(); //Profile.Left != null ? Meta.Cards[Profile.Left.Id] : null;
         //swipeData.Down = null; //Profile.Right != null ? Meta.Cards[Profile.Right.Id] : swipeData.Up;
 
 

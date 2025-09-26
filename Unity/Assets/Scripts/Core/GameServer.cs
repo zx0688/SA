@@ -206,19 +206,25 @@ namespace GameServer
             else
                 Debug.Log($"HASH:{request.Hash}");
 
-            SL.Change(request, meta, profile, GameTime.Get(), response);
+            try
+            {
+                SL.Change(request, meta, profile, GameTime.Get(), response);
+            }
+            catch (Exception e)
+            {
+                if (response.Error != null)
+                    throw new Exception(response.Error);
 
-            if (response.Debug != null)
-                Debug.LogWarning($"DebugMessage:{response.Debug}");
-
-            if (response.Error != null)
-                throw new Exception(response.Error);
-
-            Debug.Log($"DECK:{JSON.Serialize(profile.Deck)} \nCURRENT {(profile.Deck.Count > 0 ? SL.GetCurrentCard(profile).Id.ColorizeHH("00FF00") : "-")}");
-            Debug.Log($"CURRENT ITEM:{(profile.Deck.Count > 0 ? JSON.Serialize(SL.GetCurrentCard(profile)) : "-")}");
-
-            if (response.Log != null)
+                Debug.LogError(e.StackTrace);
                 Debug.Log($"LOG:{response.Log}");
+                Debug.Log($"DebugMessage:{response.Debug}");
+            }
+
+
+            Debug.Log($"DECK:{JSON.Serialize(profile.Deck)} \nCURRENT {(profile.Deck.Count > 0 ? SL.TryGetCurrentCard(profile).Id.ColorizeHH("00FF00") : "-")}");
+            Debug.Log($"CURRENT ITEM:{(profile.Deck.Count > 0 ? JSON.Serialize(SL.TryGetCurrentCard(profile)) : "-")}");
+
+
 
             //d.Choices.ForEach(c => Debug.Log($"LEFT NEXT:{JSON.Serialize(c)}"));
             //Debug.Log($"LEFT NEXT:{(profile.Left != null ? profile.Left.Next : "no")} RIGHT NEXT:{(profile.Right != null ? profile.Right.Next : "no")}");

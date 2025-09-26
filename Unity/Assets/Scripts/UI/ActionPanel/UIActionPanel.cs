@@ -28,7 +28,7 @@ namespace UI.ActionPanel
 
         [SerializeField] private Text description;
         [SerializeField] private Text descChoice;
-        //[SerializeField] private UICurrent backpack;
+        [SerializeField] private UICurrent backpack;
         [SerializeField] private List<Color32> colors;
 
         [SerializeField] private UIReward reward;
@@ -39,10 +39,14 @@ namespace UI.ActionPanel
         [SerializeField] private Image nextCardImage;
         [SerializeField] private Text title;
 
+        //[SerializeField] private UIChoicePanel leftChoice;
+        //[SerializeField] private UIChoicePanel rightChoice;
+        private List<ItemData> totalChangeItems;
 
         private Swipe swipe;
 
         private ProfileData profile => Services.Player.Profile;
+        private string descriptionText;
 
 
         private SwipeData data;
@@ -59,11 +63,15 @@ namespace UI.ActionPanel
 
             DeckItem deckItem = data.Item;
 
-            if (deckItem.State == CardData.CHOICE)
+            if (deckItem.IsChoice)
             {
-                title.Localize("MadeChocie.UI", LocalizePartEnum.GUI);
+                //title.Localize(data.Card.Name, LocalizePartEnum.CardName);
+                //backpack.gameObject.SetActive(totalChangeItems.Count > 0);
+                //backpack.SetItems(totalChangeItems, profile, Services.Meta.Game, false);
+
             }
-            else if (deckItem.State == CardData.NOTHING)
+
+            if (deckItem.State == CardData.NOTHING)
             {
                 if (data.Card.Next.HasTriggers())
                 {
@@ -83,12 +91,12 @@ namespace UI.ActionPanel
 
                 var addr = data.Card.Reward.HasReward() ? data.Card.Reward[0].Where(r => r.Chance > 0).ToList() : null;
                 var subr = data.Card.Cost.HasReward() ? data.Card.Cost[0].Where(r => r.Chance > 0).ToList() : null;
-                randomPanel.SetActive(addr != null || subr != null);
+                randomPanel.SetActive((addr != null && addr.Count > 0) || (subr != null && subr.Count > 0));
                 randomReward.SetItems(addr, subr);
             }
 
-            if (deckItem.State != CardData.CHOICE && Services.Player.TryGetCardDescription(data.Card, out string desc))
-                SetDecription(desc, description);
+            SetDecription(descriptionText, description);
+
         }
 
 
@@ -101,11 +109,16 @@ namespace UI.ActionPanel
             MetaService.ShowUnvalidateCard(data.Card);
 #endif
 
-            OnSet();
+            descriptionText = Services.Player.TryGetCardDescription(data.Card, out string desc) ?
+                desc : "";
 
-            if (data.Item.State == CardData.CHOICE)
+            if (data.Item.IsChoice)
+            {
+                //createBackpack();
                 OnSwipeListenerEnable();
+            }
 
+            OnSet();
             gameObject.SetActive(true);
         }
 
@@ -140,7 +153,7 @@ namespace UI.ActionPanel
             randomReward.Hide();
             descChoice.gameObject.SetActive(false);
             //needed.Hide();
-            //backpack.Hide();
+            backpack.Hide();
 
 
             randomPanel.SetActive(false);
@@ -178,13 +191,8 @@ namespace UI.ActionPanel
 
         private void OnChangeDirection(int obj)
         {
-            List<string> allReward = new List<string>();
             var cardMeta = data.Choices[obj];
-            ShowChoice(cardMeta, data.Item.Choices[obj], false, allReward);
-            //backpack.gameObject.SetActive(allReward.Count > 0);
-
-            //if (allReward.Count > 0)
-            //   backpack.SetItems(allReward.Distinct().Select(s => new ItemData(s, 0)).ToList(), profile, Services.Meta.Game);
+            ShowChoice(cardMeta, data.Item.Choices[obj], false);
         }
 
         private void OnDropCard()
@@ -195,11 +203,15 @@ namespace UI.ActionPanel
         private void OnTakeCard()
         {
             //needed.Hide();
-            //backpack.Hide();
             description.gameObject.SetActive(false);
 
-            if (data.Item.State == CardData.CHOICE)
+            if (data.Item.IsChoice)
             {
+                //leftChoice.Hide();
+                //rightChoice.Hide();
+                backpack.Hide();
+
+
                 //madeChoicePanel.gameObject.SetActive(false);
                 OnChangeDirection(0);
             }
@@ -207,7 +219,7 @@ namespace UI.ActionPanel
 
         }
 
-        private void ShowChoice(CardMeta cardMeta, ChoiceInfo info, bool showFollowPrompt, List<string> allRewards)
+        private void ShowChoice(CardMeta cardMeta, ChoiceInfo info, bool showFollowPrompt)
         {
             bool hasRewardOrCost = info.RI != -1 || info.CI != -1;
             rewardPanel.SetActive(false);
@@ -216,8 +228,59 @@ namespace UI.ActionPanel
             nextCardImage.LoadCardImage(cardMeta.Image);
             title.Localize(cardMeta.Name, LocalizePartEnum.CardName);
 
-            string text = cardMeta.Act != null ? cardMeta.Act : Services.Assets.Localize("learn1", LocalizePartEnum.CardAction);
-            SetDecription(text, descChoice, cardMeta.Act != null);
+            string text = "";
+            if (cardMeta.Act != null)
+            {
+                if (cardMeta.Act.EndsWith("ask") || cardMeta.Act.EndsWith("tell"))
+                {
+                    SetDecription(cardMeta.Act, descChoice, true);
+                    return;
+                }
+                else
+                    text = cardMeta.Act.Localize(LocalizePartEnum.CardAction);
+
+            }
+            else if (cardMeta.Cost.HasReward())
+            {
+                text = Services.Assets.Localize("spend1", LocalizePartEnum.CardAction);
+            }
+            else if (cardMeta.Reward.HasReward())
+            {
+                text = Services.Assets.Localize("learn1", LocalizePartEnum.CardAction);
+            }
+            else
+            {
+                text = cardMeta.Name.Localize(LocalizePartEnum.CardName);
+            }
+
+            SetDecription(text, descChoice, false);
+        }
+
+        private void createBackpack()
+        {
+            List<string> total = new List<string>();
+
+            if (data.Choices[0].Reward != null)
+                total.AddRange(data.Choices[0].Reward
+                    .SelectMany(row => row)
+                    .Select(r => r.Id)
+                    .ToList());
+            if (data.Choices[0].Cost != null)
+                total.AddRange(data.Choices[0].Cost
+                    .SelectMany(row => row)
+                    .Select(r => r.Id)
+                    .ToList());
+            if (data.Choices[1].Reward != null)
+                total.AddRange(data.Choices[1].Reward
+                    .SelectMany(row => row)
+                    .Select(r => r.Id)
+                    .ToList());
+            if (data.Choices[1].Cost != null)
+                total.AddRange(data.Choices[1].Cost
+                    .SelectMany(row => row)
+                    .Select(r => r.Id)
+                    .ToList());
+            totalChangeItems = total.Distinct().Select(id => new ItemData(id, 0)).ToList();
         }
 
     }

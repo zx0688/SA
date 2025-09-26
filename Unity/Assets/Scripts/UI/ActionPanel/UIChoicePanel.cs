@@ -26,8 +26,31 @@ namespace UI.ActionPanel
         public async void ShowChoice(CardMeta cardMeta)
         {
             this.gameObject.SetActive(true);
-            string text =
-            actionText.Localize(cardMeta.Name, LocalizePartEnum.CardName);
+
+
+
+            string text = "";
+            if (cardMeta.Act != null)
+            {
+                text = cardMeta.Act.Localize(LocalizePartEnum.CardAction);
+
+                if (cardMeta.Act.EndsWith("ask") || cardMeta.Act.EndsWith("tell"))
+                    text = Services.Assets.Localize("ask1", LocalizePartEnum.CardAction);
+            }
+            else if (cardMeta.Cost.HasReward())
+            {
+                text = Services.Assets.Localize("spend1", LocalizePartEnum.CardAction);
+            }
+            else if (cardMeta.Reward.HasReward())
+            {
+                text = Services.Assets.Localize("learn1", LocalizePartEnum.CardAction);
+            }
+            else
+            {
+                text = cardMeta.Name.Localize(LocalizePartEnum.CardName);
+            }
+
+            actionText.text = text;
             nextCard.gameObject.SetActive(true);
             nextCard.LoadCardImage(cardMeta.Image);
 
@@ -77,7 +100,6 @@ namespace UI.ActionPanel
         public void Hide()
         {
             this.gameObject.SetActive(false);
-            choiceTitlePanel.SetActive(false);
             nextCard.gameObject.SetActive(false);
         }
 

@@ -65,7 +65,7 @@ namespace Core
         public void ChangeDirection(int i)
         {
             return;
-            if (data.Item.State != CardData.CHOICE)
+            if (data.Item.IsChoice == false)
                 return;
 
             // var cardMeta = data.Choices[i];
@@ -117,7 +117,7 @@ namespace Core
                     hero.LoadHeroImage(heroId);
                 hero.gameObject.SetActive(true);
             }
-            else if ((desc != null && desc.EndsWith("ask")) || data.Item.State == CardData.CHOICE)
+            else if (desc != null && desc.EndsWith("ask"))
             {
                 hero.LoadHeroImage(Services.Player.Profile.Hero);
                 hero.gameObject.SetActive(true);
@@ -131,8 +131,8 @@ namespace Core
         public void DropCard()
         {
             return;
-            if (data.Item.State != CardData.CHOICE)
-                return;
+            // if (data.Item.State != CardData.CHOICE)
+            //     return;
 
 
             var prev = hero.gameObject.activeInHierarchy;
@@ -179,8 +179,6 @@ namespace Core
         public void TakeCard()
         {
             return;
-            if (data.Item.State != CardData.CHOICE)
-                return;
 
 
             ChangeDirection(CardMeta.LEFT);
@@ -218,7 +216,7 @@ namespace Core
                 art.gameObject.SetActive(false);
             }
 
-            Services.Player.TryGetCardDescription(data.Card, out string desc);
+
 
             hero.DOKill();
             hero.color = new Color(a: 1f, r: 255, g: 255, b: 255);
@@ -227,7 +225,7 @@ namespace Core
                 hero.LoadHeroImage(heroData.Image);
                 hero.gameObject.SetActive(true);
             }
-            else
+            else if (Services.Player.TryGetCardDescription(data.Card, out string desc))
             {
                 SetHero(card, desc);
             }

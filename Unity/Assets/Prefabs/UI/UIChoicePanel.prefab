@@ -18,7 +18,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 2147483647
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &824591216404840769
 RectTransform:
   m_ObjectHideFlags: 0
@@ -268,7 +268,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 5.73
+  m_PixelsPerUnitMultiplier: 3.28
 --- !u!1 &6915563212579157486
 GameObject:
   m_ObjectHideFlags: 0
@@ -305,8 +305,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -292.03043, y: 680.99}
-  m_SizeDelta: {x: 584.0608, y: 724.01}
+  m_AnchoredPosition: {x: -332.02026, y: 680.99}
+  m_SizeDelta: {x: 504.0811, y: 724.01}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6437031438488667772
 CanvasRenderer:
@@ -328,9 +328,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf9e3d0666dbf40409af9f6e05de2015, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  choiceTitlePanel: {fileID: 0}
-  choiceName: {fileID: 0}
-  nextCard: {fileID: 0}
+  actionText: {fileID: 7250676657940501598}
+  nextCard: {fileID: 6663341410869655646}
 --- !u!1 &8098562448021777595
 GameObject:
   m_ObjectHideFlags: 0

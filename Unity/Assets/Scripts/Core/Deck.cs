@@ -121,8 +121,6 @@ namespace Core
             currentCardObject.GetComponent<RectTransform>().SetAsFirstSibling();
             action.GetComponent<RectTransform>().SetAsFirstSibling();
 
-
-
             currentSwipe.ConstructNewSwipe();
             currentCard.UpdateData(swipeData);
 

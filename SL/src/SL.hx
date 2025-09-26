@@ -1,3 +1,4 @@
+import haxe.macro.Expr.Catch;
 import haxe.rtti.CType.CTypeTools;
 import haxe.rtti.Meta;
 import haxe.macro.Expr.Error;
@@ -178,7 +179,7 @@ class SL {
 					response.Error = "error deck is empty " + request.Hash;
 					return;
 				}
-				var currentDeckItem:DeckItem = GetCurrentCard(profile);
+				var currentDeckItem:DeckItem = TryGetCurrentCard(profile);
 				if (currentDeckItem.Id != request.Hash) {
 					response.Error = "error current card " + request.Hash;
 					return;
@@ -339,36 +340,37 @@ class SL {
 			return;
 		}
 
-		var deckInfo:DeckItem = GetCurrentCard(profile);
+		var deckInfo:DeckItem = TryGetCurrentCard(profile);
 		var currentCard = meta.Cards.tryGet(deckInfo.Id);
 
-		switch (deckInfo.State) {
-			case CardData.REWARD:
-				if (deckInfo.DescIndex > 0)
-					return;
-
-				if (nextCard.TradeLimit > 0)
+		if (deckInfo.State == CardData.REWARD) {
+			if (deckInfo.DescIndex == 0) {
+				if (nextCard != null && nextCard.TradeLimit > 0)
 					ApplyTrade(currentCard, choice, meta, profile, random);
 				else
 					ApplyReward(currentCard, choice, meta, profile, random, response);
+			}
+		}
 
-			case CardData.CHOICE:
-				CreateLeftRight(currentCard, deckInfo, meta, profile, random, response);
+		if (deckInfo.IsChoice) {
+			CreateLeftRight(currentCard, deckInfo, meta, profile, random, response);
 
-				if (deckInfo.Choices.getCount() == 0) {
+			if (deckInfo.Choices.getCount() == 0) {
+				deckInfo.IsChoice = false;
+				if (nextCard != null) {
 					profile.Deck.removeItem(deckInfo);
-
 					if (nextCard.IfNot != null)
 						CreateDeck(nextCard.IfNot[0].Id, null, meta, profile, random, response, requestTimestamp, null);
 
 					if (nextCard.IfNothing != null) {
 						profile.Deck.push(new DeckItem(deckInfo.Id, CardData.NOTHING, 0));
 					}
-				} else if (deckInfo.Choices.getCount() == 1) {
-					profile.Deck.removeItem(deckInfo);
-					CreateDeck(deckInfo.Choices[0].Id, null, meta, profile, random, response, requestTimestamp, null);
-				} else if (deckInfo.Choices.getCount() > 2)
-					throw "profile have more then 2 choices";
+				}
+			} else if (deckInfo.Choices.getCount() == 1) {
+				profile.Deck.removeItem(deckInfo);
+				CreateDeck(deckInfo.Choices[0].Id, null, meta, profile, random, response, requestTimestamp, null);
+			} else if (deckInfo.Choices.getCount() > 2)
+				throw "profile have more then 2 choices";
 		}
 	}
 
@@ -415,7 +417,7 @@ class SL {
 	private static function CheckAndClearDeck(meta:GameMeta, profile:ProfileData, random:Random, response:GameResponse) {
 		var currentCard:CardMeta = null;
 		while (profile.Deck.getCount() > 0) {
-			var deckItem = GetCurrentCard(profile);
+			var deckItem = TryGetCurrentCard(profile);
 			currentCard = meta.Cards.tryGet(deckItem.Id);
 			if (!CheckCard(currentCard, meta, profile, random, response)) {
 				profile.Deck.RemoveAt(profile.Deck.getCount() - 1);
@@ -527,9 +529,14 @@ class SL {
 		}
 
 		// var choiceIndex = profile.Deck.getCount();
-
+		var insertChoiceIndex = -1;
 		if (nextCard.Next != null || nextCard.TradeLimit > 0) {
-			profile.Deck.push(new DeckItem(nextCard.Id, CardData.CHOICE, 0));
+			insertChoiceIndex = profile.Deck.getCount();
+
+			// var currentItem = TryGetCurrentCard(profile);
+			// if (currentItem != null)
+			//	currentItem.IsChoice = true;
+			// profile.Deck.push(new DeckItem(nextCard.Id, CardData.CHOICE, 0));
 		}
 
 		RecursiveCreateCards(nextCard.Over, nextCard.Shake, meta, profile, random, response);
@@ -551,6 +558,12 @@ class SL {
 					profile.Deck.push(new DeckItem(nextCard.Id, CardData.DESCRIPTION, i));
 			else
 				AddDescriptionToDeck(nextCard.Descs, nextCard.Id, CardData.DESCRIPTION, profile);
+		}
+
+		if (insertChoiceIndex != -1 && insertChoiceIndex + 1 <= profile.Deck.getCount()) {
+			response.Log = profile.Deck.getCount() + " " + insertChoiceIndex;
+			var item:DeckItem = profile.Deck[insertChoiceIndex];
+			item.IsChoice = true;
 		}
 	}
 
@@ -884,8 +897,9 @@ class SL {
 			}
 	}
 
-	public static function GetCurrentCard(profile:ProfileData):DeckItem {
-		return profile.Deck[profile.Deck.getCount() - 1];
+	public static function TryGetCurrentCard(profile:ProfileData):DeckItem {
+		var count = profile.Deck.getCount();
+		return count > 0 ? profile.Deck[count - 1] : null;
 	}
 
 	private static function RecursiveGroupLeftRight(candidates:Array<CardMeta>, nextDict:Dictionary_2<String, String>, nextCard:String,

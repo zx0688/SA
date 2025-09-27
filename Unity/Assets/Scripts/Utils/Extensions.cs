@@ -101,6 +101,7 @@ public static class Extensions
 
     public static bool HasText(this string text) => text != null && text.Length > 0;
     public static bool HasReward(this RewardMeta[][] reward) => reward != null && reward.Length > 0;
+    public static List<RewardMeta> GetReward(this RewardMeta[][] reward) => reward.HasReward() ? reward[0].ToList() : null;
 
     public static RewardMeta[] ToReward(this IEnumerable<ItemData> items) => items.Select(i =>
     {

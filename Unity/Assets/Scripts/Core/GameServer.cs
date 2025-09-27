@@ -209,6 +209,7 @@ namespace GameServer
             try
             {
                 SL.Change(request, meta, profile, GameTime.Get(), response);
+                Debug.Log($"LOG:{response.Log}");
             }
             catch (Exception e)
             {

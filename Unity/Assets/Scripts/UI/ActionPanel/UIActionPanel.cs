@@ -38,7 +38,8 @@ namespace UI.ActionPanel
         [SerializeField] private GameObject rewardPanel;
         [SerializeField] private Image nextCardImage;
         [SerializeField] private Text title;
-
+        [SerializeField] private Image heroImage;
+        [SerializeField] private Text rewardText;
         //[SerializeField] private UIChoicePanel leftChoice;
         //[SerializeField] private UIChoicePanel rightChoice;
         private List<ItemData> totalChangeItems;
@@ -62,8 +63,9 @@ namespace UI.ActionPanel
             HideAll();
 
             DeckItem deckItem = data.Item;
+            rewardText.Localize("Card.Reward", LocalizePartEnum.GUI);
 
-            if (deckItem.IsChoice)
+            //if (deckItem.ChoiceId != null)
             {
                 //title.Localize(data.Card.Name, LocalizePartEnum.CardName);
                 //backpack.gameObject.SetActive(totalChangeItems.Count > 0);
@@ -112,7 +114,7 @@ namespace UI.ActionPanel
             descriptionText = Services.Player.TryGetCardDescription(data.Card, out string desc) ?
                 desc : "";
 
-            if (data.Item.IsChoice)
+            if (data.Item.Choices.Count > 0)
             {
                 //createBackpack();
                 OnSwipeListenerEnable();
@@ -154,7 +156,7 @@ namespace UI.ActionPanel
             descChoice.gameObject.SetActive(false);
             //needed.Hide();
             backpack.Hide();
-
+            heroImage.gameObject.SetActive(false);
 
             randomPanel.SetActive(false);
 
@@ -205,7 +207,7 @@ namespace UI.ActionPanel
             //needed.Hide();
             description.gameObject.SetActive(false);
 
-            if (data.Item.IsChoice)
+            if (data.Item.Choices.Count > 0)
             {
                 //leftChoice.Hide();
                 //rightChoice.Hide();
@@ -219,6 +221,20 @@ namespace UI.ActionPanel
 
         }
 
+
+        private void SetHero(CardMeta card, string text)
+        {
+            if (text != null && text.EndsWith("ask"))
+            {
+                heroImage.LoadHeroImage(Services.Player.Profile.Hero);
+                heroImage.gameObject.SetActive(true);
+            }
+            else
+            {
+                heroImage.gameObject.SetActive(false);
+            }
+        }
+
         private void ShowChoice(CardMeta cardMeta, ChoiceInfo info, bool showFollowPrompt)
         {
             bool hasRewardOrCost = info.RI != -1 || info.CI != -1;
@@ -226,11 +242,14 @@ namespace UI.ActionPanel
 
             nextCardImage.gameObject.SetActive(true);
             nextCardImage.LoadCardImage(cardMeta.Image);
+
             title.Localize(cardMeta.Name, LocalizePartEnum.CardName);
 
             string text = "";
             if (cardMeta.Act != null)
             {
+                SetHero(cardMeta, cardMeta.Act);
+
                 if (cardMeta.Act.EndsWith("ask") || cardMeta.Act.EndsWith("tell"))
                 {
                     SetDecription(cardMeta.Act, descChoice, true);
@@ -251,6 +270,13 @@ namespace UI.ActionPanel
             else
             {
                 text = cardMeta.Name.Localize(LocalizePartEnum.CardName);
+            }
+
+            reward.SetItems(cardMeta.Reward.GetReward(), cardMeta.Cost.GetReward());
+            if (reward.HasReward)
+            {
+                rewardPanel.SetActive(true);
+                rewardText.Localize("Choose", LocalizePartEnum.GUI);
             }
 
             SetDecription(text, descChoice, false);

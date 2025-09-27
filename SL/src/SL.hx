@@ -202,10 +202,6 @@ class SL {
 					response.Error = "wrong choice. id should match with choice" + request.Id;
 					return;
 				}
-				if (currentDeckItem.State == CardData.DESCRIPTION && currentDeckItem.DescIndex > 0) {
-					profile.Deck.pop();
-					return;
-				}
 
 				SetRandomSeedByTime(request.Timestamp);
 				UpdatePlayerData(request, currentDeckItem, choiceInfo, meta, profile, response);
@@ -333,15 +329,46 @@ class SL {
 			}
 		}
 
-		// CheckAndClearDeck(meta, profile, random, response);
+		var deckInfo:DeckItem = null;
+		var choiceItem:DeckItem = null;
+		while (choiceItem == null && profile.Deck.getCount() > 0) {
+			if (profile.Deck.getCount() > 1) {
+				var d = profile.Deck[profile.Deck.getCount() - 2];
+				choiceItem = d.State == CardData.CHOICE ? d : null;
+			}
+			if (choiceItem == null)
+				break;
+
+			profile.Deck.removeItem(choiceItem);
+			var ch = meta.Cards.tryGet(choiceItem.Id);
+			deckInfo = TryGetCurrentCard(profile);
+
+			if (deckInfo == null) {
+				var cardData:CardData = profile.Cards.getOrCreate(ch.Id, f -> new CardData(ch.Id));
+				RecursiveCreateDeck(ch, cardData, meta, profile, random, response);
+				continue;
+			}
+
+			CreateLeftRight(ch, deckInfo, meta, profile, random, response);
+
+			if (deckInfo.Choices.getCount() == 0) {
+				response.Log += "next " + nextCard.Id;
+				// 				if (ch.IfNot != null)
+				// 					CreateDeck(ch.IfNot[0].Id, null, meta, profile, random, response, requestTimestamp, null);
+				//
+				// 				if (currentCard.IfNothing != null) {
+				// 					profile.Deck.push(new DeckItem(deckInfo.Id, CardData.NOTHING, 0));
+				// 				}
+			}
+		}
 
 		if (profile.Deck.getCount() == 0) {
 			profile.Cooldown = requestTimestamp;
 			return;
 		}
 
-		var deckInfo:DeckItem = TryGetCurrentCard(profile);
 		var currentCard = meta.Cards.tryGet(deckInfo.Id);
+		deckInfo = TryGetCurrentCard(profile);
 
 		if (deckInfo.State == CardData.REWARD) {
 			if (deckInfo.DescIndex == 0) {
@@ -350,27 +377,6 @@ class SL {
 				else
 					ApplyReward(currentCard, choice, meta, profile, random, response);
 			}
-		}
-
-		if (deckInfo.IsChoice) {
-			CreateLeftRight(currentCard, deckInfo, meta, profile, random, response);
-
-			if (deckInfo.Choices.getCount() == 0) {
-				deckInfo.IsChoice = false;
-				if (nextCard != null) {
-					profile.Deck.removeItem(deckInfo);
-					if (nextCard.IfNot != null)
-						CreateDeck(nextCard.IfNot[0].Id, null, meta, profile, random, response, requestTimestamp, null);
-
-					if (nextCard.IfNothing != null) {
-						profile.Deck.push(new DeckItem(deckInfo.Id, CardData.NOTHING, 0));
-					}
-				}
-			} else if (deckInfo.Choices.getCount() == 1) {
-				profile.Deck.removeItem(deckInfo);
-				CreateDeck(deckInfo.Choices[0].Id, null, meta, profile, random, response, requestTimestamp, null);
-			} else if (deckInfo.Choices.getCount() > 2)
-				throw "profile have more then 2 choices";
 		}
 	}
 
@@ -528,15 +534,8 @@ class SL {
 				AddDescriptionToDeck(nextCard.IfNothing, nextCard.Id, CardData.NOTHING, profile);
 		}
 
-		// var choiceIndex = profile.Deck.getCount();
-		var insertChoiceIndex = -1;
 		if (nextCard.Next != null || nextCard.TradeLimit > 0) {
-			insertChoiceIndex = profile.Deck.getCount();
-
-			// var currentItem = TryGetCurrentCard(profile);
-			// if (currentItem != null)
-			//	currentItem.IsChoice = true;
-			// profile.Deck.push(new DeckItem(nextCard.Id, CardData.CHOICE, 0));
+			profile.Deck.push(new DeckItem(nextCard.Id, CardData.CHOICE, 0));
 		}
 
 		RecursiveCreateCards(nextCard.Over, nextCard.Shake, meta, profile, random, response);
@@ -558,12 +557,6 @@ class SL {
 					profile.Deck.push(new DeckItem(nextCard.Id, CardData.DESCRIPTION, i));
 			else
 				AddDescriptionToDeck(nextCard.Descs, nextCard.Id, CardData.DESCRIPTION, profile);
-		}
-
-		if (insertChoiceIndex != -1 && insertChoiceIndex + 1 <= profile.Deck.getCount()) {
-			response.Log = profile.Deck.getCount() + " " + insertChoiceIndex;
-			var item:DeckItem = profile.Deck[insertChoiceIndex];
-			item.IsChoice = true;
 		}
 	}
 
@@ -1006,8 +999,6 @@ class SL {
 			candidates[0].push(current);
 			nextDict.set(current.Id, current.Id);
 		}
-
-		deckItem.Choices = new List_1();
 
 		if (candidates.length == 1 && candidates[0].length == 0) {
 			return;

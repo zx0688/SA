@@ -65,7 +65,7 @@ namespace Core
         public void ChangeDirection(int i)
         {
             return;
-            if (data.Item.IsChoice == false)
+            if (data.Item.Choices.Count == 0)
                 return;
 
             // var cardMeta = data.Choices[i];

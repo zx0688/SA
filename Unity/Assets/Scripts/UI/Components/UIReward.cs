@@ -12,9 +12,12 @@ public class UIReward : MonoBehaviour
     [SerializeField] private UIRewardItem[] addItems;
     [SerializeField] private GameObject title;
 
+    public bool HasReward = false;
+
 
     public void Hide()
     {
+        HasReward = false;
         gameObject.SetActive(false);
         if (title != null)
             title.SetActive(false);
@@ -40,7 +43,7 @@ public class UIReward : MonoBehaviour
 
         var reward = GroupById(rewards, cost);
         reward = reward.OrderBy(item => int.Parse(item.Id)).ToList();
-
+        HasReward = true;
 
         for (int i = 0; i < addItems.Length; i++)
         {

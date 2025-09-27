@@ -111,7 +111,7 @@ public class PlayerService : IService
             else
                 throw new Exception($"card {card.Id} must have no reward message");
         }
-        else if (deckItem.IsChoice && card.Descs != null)
+        else if (deckItem.Choices.Count > 0 && card.Descs != null)
         {
             if (card.OnlyOnce != null && (!Profile.Cards.TryGetValue(card.Id, out CardData _card) || _card.CT == 0))
                 text = card.OnlyOnce[(card.OnlyOnce.Length - 1)];
@@ -205,10 +205,15 @@ public class PlayerService : IService
         request.Hash = swipe.Card.Id;
         request.Type = TriggerMeta.SWIPE;
 
-        if (swipe.Item.IsChoice)
+        if (swipe.Item.Choices.Count > 0)
         {
             request.Value = swipe.CurrentChoice;
             request.Id = swipe.CurrentChoice == CardMeta.LEFT ? swipe.Choices[0].Id : swipe.Choices[1].Id;
+        }
+        else if (swipe.Item.Choices.Count == 1)
+        {
+            request.Value = 0;
+            request.Id = swipe.Item.Choices[0].Id;
         }
         else
         {
@@ -285,7 +290,7 @@ public class PlayerService : IService
         swipeData.Item = ditem;
         swipeData.Data = Profile.Cards.GetValueOrDefault(nextCardId);
         swipeData.Card = Meta.Cards.GetValueOrDefault(nextCardId);
-        swipeData.Choices = ditem.IsChoice ? ditem.Choices.Select(c => Meta.Cards[c.Id]).ToList() : new List<CardMeta>(); //Profile.Left != null ? Meta.Cards[Profile.Left.Id] : null;
+        swipeData.Choices = ditem.Choices.Count > 0 ? ditem.Choices.Select(c => Meta.Cards[c.Id]).ToList() : new List<CardMeta>(); //Profile.Left != null ? Meta.Cards[Profile.Left.Id] : null;
         //swipeData.Down = null; //Profile.Right != null ? Meta.Cards[Profile.Right.Id] : swipeData.Up;
 
 

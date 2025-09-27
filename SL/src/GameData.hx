@@ -58,8 +58,8 @@ class CardData {
 	public static inline var REWARD:Int = 1;
 	public static inline var NOTHING:Int = 3;
 	public static inline var ONLY_ONCE:Int = 4;
+	public static inline var CHOICE:Int = 5;
 
-	// public static inline var CHOICE:Int = 5;
 	// public static inline var ONLY_ONCE:Int = 4;
 
 	public function new(Id:String) {
@@ -165,12 +165,10 @@ class DeckItem {
 		this.State = State;
 		this.DescIndex = DescIndex;
 		this.Choices = new List_1();
-		this.IsChoice = false;
 	}
 
 	public var Choices:List_1<ChoiceInfo>;
 	public var DescIndex:Int;
 	public var Id:String;
 	public var State:Int;
-	public var IsChoice:Bool;
 }

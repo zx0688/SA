@@ -216,6 +216,7 @@ namespace GameServer
                 if (response.Error != null)
                     throw new Exception(response.Error);
 
+                Debug.LogError(e.Message);
                 Debug.LogError(e.StackTrace);
                 Debug.Log($"LOG:{response.Log}");
                 Debug.Log($"DebugMessage:{response.Debug}");

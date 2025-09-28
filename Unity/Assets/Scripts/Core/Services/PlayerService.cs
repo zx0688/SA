@@ -82,18 +82,18 @@ public class PlayerService : IService
     {
         string text = null;
         DeckItem deckItem = SL.TryGetCurrentCard(Profile);
-        if (deckItem.State == CardData.NOTHING)
-            text = card.IfNothing[(card.IfNothing.Length - 1) - deckItem.DescIndex];
-        else if (deckItem.State == CardData.DESCRIPTION)
+        if (deckItem.S == CardData.NOTHING)
+            text = card.IfNothing[(card.IfNothing.Length - 1) - deckItem.DI];
+        else if (deckItem.S == CardData.DESCRIPTION)
         {
             if (card.OnlyOnce != null && (!Profile.Cards.TryGetValue(card.Id, out CardData _card) || _card.CT == 0))
-                text = card.OnlyOnce[(card.OnlyOnce.Length - 1) - deckItem.DescIndex];
+                text = card.OnlyOnce[(card.OnlyOnce.Length - 1) - deckItem.DI];
             else if (card.RStory)
                 text = card.Descs[Random.Range(0, card.Descs.Length)];
             else
-                text = card.Descs[(card.Descs.Length - 1) - deckItem.DescIndex];
+                text = card.Descs[(card.Descs.Length - 1) - deckItem.DI];
         }
-        else if (deckItem.State == CardData.REWARD)
+        else if (deckItem.S == CardData.REWARD)
         {
             if (Services.Player.RewardCollected.Count > 0)
             {
@@ -106,12 +106,12 @@ public class PlayerService : IService
                 text = card.RewardText[0];
             else if (card.IfNothing != null && card.IfNothing.Length > 0)
                 text = card.IfNothing[0];
-            else if (deckItem.DescIndex > 0 && card.RewardText != null)
-                text = card.RewardText[deckItem.DescIndex];
+            else if (deckItem.DI > 0 && card.RewardText != null)
+                text = card.RewardText[deckItem.DI];
             else
                 throw new Exception($"card {card.Id} must have no reward message");
         }
-        else if (deckItem.Choices.Count > 0 && card.Descs != null)
+        else if (deckItem.Ch.Count > 0 && card.Descs != null)
         {
             if (card.OnlyOnce != null && (!Profile.Cards.TryGetValue(card.Id, out CardData _card) || _card.CT == 0))
                 text = card.OnlyOnce[(card.OnlyOnce.Length - 1)];
@@ -205,15 +205,15 @@ public class PlayerService : IService
         request.Hash = swipe.Card.Id;
         request.Type = TriggerMeta.SWIPE;
 
-        if (swipe.Item.Choices.Count > 0)
+        if (swipe.Item.Ch.Count > 1)
         {
             request.Value = swipe.CurrentChoice;
             request.Id = swipe.CurrentChoice == CardMeta.LEFT ? swipe.Choices[0].Id : swipe.Choices[1].Id;
         }
-        else if (swipe.Item.Choices.Count == 1)
+        else if (swipe.Item.Ch.Count == 1)
         {
             request.Value = 0;
-            request.Id = swipe.Item.Choices[0].Id;
+            request.Id = swipe.Item.Ch[0].Id;
         }
         else
         {
@@ -290,7 +290,7 @@ public class PlayerService : IService
         swipeData.Item = ditem;
         swipeData.Data = Profile.Cards.GetValueOrDefault(nextCardId);
         swipeData.Card = Meta.Cards.GetValueOrDefault(nextCardId);
-        swipeData.Choices = ditem.Choices.Count > 0 ? ditem.Choices.Select(c => Meta.Cards[c.Id]).ToList() : new List<CardMeta>(); //Profile.Left != null ? Meta.Cards[Profile.Left.Id] : null;
+        swipeData.Choices = ditem.Ch.Count > 0 ? ditem.Ch.Select(c => Meta.Cards[c.Id]).ToList() : new List<CardMeta>(); //Profile.Left != null ? Meta.Cards[Profile.Left.Id] : null;
         //swipeData.Down = null; //Profile.Right != null ? Meta.Cards[Profile.Right.Id] : swipeData.Up;
 
 

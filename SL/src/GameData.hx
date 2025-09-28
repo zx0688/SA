@@ -162,13 +162,13 @@ class ChoiceInfo {
 class DeckItem {
 	public function new(Id:String, State:Int, DescIndex:Int) {
 		this.Id = Id;
-		this.State = State;
-		this.DescIndex = DescIndex;
-		this.Choices = new List_1();
+		this.S = State;
+		this.DI = DescIndex;
+		this.Ch = new List_1();
 	}
 
-	public var Choices:List_1<ChoiceInfo>;
-	public var DescIndex:Int;
+	public var Ch:List_1<ChoiceInfo>;
+	public var DI:Int;
 	public var Id:String;
-	public var State:Int;
+	public var S:Int;
 }

@@ -73,7 +73,7 @@ namespace UI.ActionPanel
 
             }
 
-            if (deckItem.State == CardData.NOTHING)
+            if (deckItem.S == CardData.NOTHING)
             {
                 if (data.Card.Next.HasTriggers())
                 {
@@ -83,7 +83,7 @@ namespace UI.ActionPanel
                     //needed.SetItems(null, cost.ToList());
                 }
             }
-            else if (deckItem.State == CardData.REWARD && Services.Player.RewardCollected.Count > 0)
+            else if (deckItem.S == CardData.REWARD && Services.Player.RewardCollected.Count > 0)
             {
                 rewardPanel.SetActive(true);
                 var add = Services.Player.RewardCollected.Where(r => r.Count > 0).ToReward().ToList();
@@ -114,7 +114,7 @@ namespace UI.ActionPanel
             descriptionText = Services.Player.TryGetCardDescription(data.Card, out string desc) ?
                 desc : "";
 
-            if (data.Item.Choices.Count > 0)
+            if (data.Item.Ch.Count > 1)
             {
                 //createBackpack();
                 OnSwipeListenerEnable();
@@ -194,7 +194,7 @@ namespace UI.ActionPanel
         private void OnChangeDirection(int obj)
         {
             var cardMeta = data.Choices[obj];
-            ShowChoice(cardMeta, data.Item.Choices[obj], false);
+            ShowChoice(cardMeta, data.Item.Ch[obj], false);
         }
 
         private void OnDropCard()
@@ -207,7 +207,7 @@ namespace UI.ActionPanel
             //needed.Hide();
             description.gameObject.SetActive(false);
 
-            if (data.Item.Choices.Count > 0)
+            if (data.Item.Ch.Count > 0)
             {
                 //leftChoice.Hide();
                 //rightChoice.Hide();

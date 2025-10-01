@@ -22,6 +22,7 @@ public class MetaService
 
     public GameMeta Game;
 
+    public SkillMeta GetSkillItemBySlot(int index) => Game.Skills.Values.FirstOrDefault(s => s.Slot == index);
     public CardMeta GetCard(TriggerMeta t) => Game.Cards[t.Id];
 
     //public Dictionary<List<ConditionMeta>, List<RewardMeta>> Recipes = new Dictionary<List<ConditionMeta>, List<RewardMeta>>();

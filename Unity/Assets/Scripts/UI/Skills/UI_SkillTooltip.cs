@@ -8,58 +8,43 @@ using UnityEngine.UI;
 
 public class UI_SkillTooltip : MonoBehaviour
 {
-    [SerializeField] private TooltipBack _background;
-    [SerializeField] private Text _description;
-    [SerializeField] private Image _icon;
-    [SerializeField] private Text _type;
+    [SerializeField] private TooltipBack background;
+    [SerializeField] private Text description;
+    [SerializeField] private Image icon;
+    [SerializeField] private Text type;
+    [SerializeField] private Text effect;
 
-    private UI_SKillBilder _skillBilder;
-    //private SkillMeta _meta;
-    private ItemData data;
-
-    void Awake()
+    private SkillEffectBuilder _effectBuilder;
+    private SkillEffectBuilder effectBuilder
     {
-        _skillBilder = GetComponent<UI_SKillBilder>();
+        get
+        {
+            if (_effectBuilder == null)
+                _effectBuilder = new SkillEffectBuilder();
+            return _effectBuilder;
+        }
     }
+    //private  _skillBilder;
+
+    private ItemData data;
 
     public void HideTooltip()
     {
-        _background.Hide();
-        _background.gameObject.SetActive(false);
+        background.Hide();
+        background.gameObject.SetActive(false);
         gameObject.SetActive(false);
     }
 
-    public void ShowTooltip(SkillMeta meta, ItemData data)
+    public void ShowTooltip(SkillMeta meta, SkillItem data)
     {
-        /*
-        _background.Show("pink", meta.Name);
-        _background.gameObject.SetActive(true);
+        background.Show("pink", meta.Name);
+        background.gameObject.SetActive(true);
+        type.Localize($"SkillType{meta.Slot}.UI", LocalizePartEnum.GUI);
+        icon.LoadSkillImage(data.Level == 2 ? meta.Image : meta.Icon);
 
-        switch (meta.Type)
-        {
-            case 1:
-                _type.text = "Предмет";
-                break;
-            case 2:
-                _type.text = "Репутация";
-                break;
-            case 3:
-                _type.text = "Навык";
-                break;
-            case 4:
-                _type.text = "Помощник";
-                break;
-        }
-
+        description.Localize(meta.Descs[data.Level == 2 ? 1 : 0], LocalizePartEnum.CardDescription);
+        effect.text = effectBuilder.Apply(meta, data);
         gameObject.SetActive(true);
-        _meta = meta;
-        _vo = vo;
-
-        _skillBilder.Build(meta, vo);
-        //_description.text = "";LocalizationManager.Localize(this._meta.Des);
-*/
-        //Services.Assets.SetSpriteIntoImage(_icon, "Skills/" + meta. + "/icon", true).Forget();
-        //   UpdateTime();
     }
 
     void Update()

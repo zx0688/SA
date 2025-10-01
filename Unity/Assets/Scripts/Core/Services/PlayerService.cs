@@ -38,6 +38,7 @@ public class PlayerService : IService
     public ItemData GetItemData(string Id) => Profile.Items[Id];
 
     public DeckItem DeckItem => Profile.Deck.Count > 0 ? Profile.Deck.Last() : null;
+    public SkillItem GetSkillItemBySlot(int index) => Profile.Skills.Values.FirstOrDefault(s => s.Slot == index);
 
     public List<ItemData> RewardCollected => Profile.RewardEvents.Values.ToList().Where(r => !Services.Meta.Game.Items[r.Id].Hidden).ToList();
 
@@ -82,7 +83,11 @@ public class PlayerService : IService
     {
         string text = null;
         DeckItem deckItem = SL.TryGetCurrentCard(Profile);
-        if (deckItem.S == CardData.NOTHING)
+        if (deckItem.S == CardData.CHOICE)
+        {
+            text = "MadeAction.UI".Localize(LocalizePartEnum.GUI);
+        }
+        else if (deckItem.S == CardData.NOTHING)
             text = card.IfNothing[(card.IfNothing.Length - 1) - deckItem.DI];
         else if (deckItem.S == CardData.DESCRIPTION)
         {

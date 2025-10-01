@@ -38,8 +38,8 @@ public static class Extensions
 
     public static bool Exists<T>(this T[] value) => value != null && value.Length > 0;
 
-    public static bool Check(this ConditionMeta condition) => SL.CheckCondition(new ConditionMeta[] { condition }, Services.Meta.Game, Services.Player.Profile, null);
-    public static bool Check(this ConditionMeta[] conditions) => SL.CheckCondition(conditions, Services.Meta.Game, Services.Player.Profile, null);
+    public static bool Check(this ConditionMeta condition) => SL.CheckCondition(new ConditionMeta[] { condition }, Services.Meta.Game, Services.Player.Profile, null, null);
+    public static bool Check(this ConditionMeta[] conditions) => SL.CheckCondition(conditions, Services.Meta.Game, Services.Player.Profile, null, null);
 
     public static bool IfAsking(this string ask) => ask.EndsWith("ask");
     public static bool IfTelling(this string tell) => tell.EndsWith("tell");
@@ -101,7 +101,7 @@ public static class Extensions
 
     public static bool HasText(this string text) => text != null && text.Length > 0;
     public static bool HasReward(this RewardMeta[][] reward) => reward != null && reward.Length > 0;
-    public static List<RewardMeta> GetReward(this RewardMeta[][] reward) => reward.HasReward() ? reward[0].ToList() : null;
+    public static List<RewardMeta> GetReward(this RewardMeta[][] reward) => reward.HasReward() ? reward[0].ToList() : new List<RewardMeta>();
 
     public static RewardMeta[] ToReward(this IEnumerable<ItemData> items) => items.Select(i =>
     {

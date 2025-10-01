@@ -24,7 +24,7 @@ class ProfileData {
 	// public var Called:String;
 	public var Cards:Dictionary_2<String, CardData>;
 	public var Items:Dictionary_2<String, ItemData>;
-	public var Skills:List_1<String>;
+	public var Skills:Dictionary_2<String, SkillItem>;
 	public var Accept:Dictionary_2<String, GameRequest>;
 	public var Triggers:Dictionary_2<String, ItemTypeData>;
 	public var Tutorial:Dictionary_2<String, Bool>;
@@ -171,4 +171,22 @@ class DeckItem {
 	public var DI:Int;
 	public var Id:String;
 	public var S:Int;
+}
+
+@:nativeGen
+@:strict(SerializableAttribute)
+class SkillItem {
+	public static inline var WEAPON:Int = 0;
+	public static inline var SKILL:Int = 1;
+	public static inline var RELATIONSHIP:Int = 3;
+
+	public function new(Id:String, Level:Int, Slot:Int) {
+		this.Id = Id;
+		this.Level = Level;
+		this.Slot = Slot;
+	}
+
+	public var Level:Int;
+	public var Id:String;
+	public var Slot:Int;
 }

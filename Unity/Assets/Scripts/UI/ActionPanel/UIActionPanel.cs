@@ -47,6 +47,7 @@ namespace UI.ActionPanel
         private Swipe swipe;
 
         private ProfileData profile => Services.Player.Profile;
+        private GameMeta meta => Services.Meta.Game;
         private string descriptionText;
 
 
@@ -65,32 +66,18 @@ namespace UI.ActionPanel
             DeckItem deckItem = data.Item;
             rewardText.Localize("Card.Reward", LocalizePartEnum.GUI);
 
-            //if (deckItem.ChoiceId != null)
-            {
-                //title.Localize(data.Card.Name, LocalizePartEnum.CardName);
-                //backpack.gameObject.SetActive(totalChangeItems.Count > 0);
-                //backpack.SetItems(totalChangeItems, profile, Services.Meta.Game, false);
 
-            }
-
-            if (deckItem.S == CardData.NOTHING)
-            {
-                if (data.Card.Next.HasTriggers())
-                {
-                    var cards = new List<CardMeta>();
-                    //Services.Meta.GetAllRecursiveCardsFromGroup(data.Card.Next, cards);
-                    //RewardMeta[] cost = cards.SelectMany(c => c.Cost[0]).ToArray();
-                    //needed.SetItems(null, cost.ToList());
-                }
-            }
-            else if (deckItem.S == CardData.REWARD && Services.Player.RewardCollected.Count > 0)
+            if (deckItem.S == CardData.REWARD && Services.Player.RewardCollected.Count > 0)
             {
                 rewardPanel.SetActive(true);
                 var add = Services.Player.RewardCollected.Where(r => r.Count > 0).ToReward().ToList();
                 var sub = Services.Player.RewardCollected.Where(r => r.Count < 0).ToReward()
                     .Select(r => { r.Count = -r.Count; return r; }).ToList();
                 reward.SetItems(add, sub);
+            }
 
+            if (deckItem.S == CardData.REWARD || deckItem.S == CardData.NOTHING)
+            {
                 var addr = data.Card.Reward.HasReward() ? data.Card.Reward[0].Where(r => r.Chance > 0).ToList() : null;
                 var subr = data.Card.Cost.HasReward() ? data.Card.Cost[0].Where(r => r.Chance > 0).ToList() : null;
                 randomPanel.SetActive((addr != null && addr.Count > 0) || (subr != null && subr.Count > 0));
@@ -246,7 +233,12 @@ namespace UI.ActionPanel
             title.Localize(cardMeta.Name, LocalizePartEnum.CardName);
 
             string text = "";
-            if (cardMeta.Act != null)
+
+            if (cardMeta.Shure != null && this.data.Card.Id == cardMeta.Id)
+            {
+                text = cardMeta.Shure.Localize(LocalizePartEnum.CardAction);
+            }
+            else if (cardMeta.Act != null)
             {
                 SetHero(cardMeta, cardMeta.Act);
 
@@ -272,7 +264,33 @@ namespace UI.ActionPanel
                 text = cardMeta.Name.Localize(LocalizePartEnum.CardName);
             }
 
-            reward.SetItems(cardMeta.Reward.GetReward(), cardMeta.Cost.GetReward());
+            List<RewardMeta> _reward = null;
+            List<RewardMeta> _cost = null;
+            if (data.Card.TradeLimit > 0)
+            {
+                var tradeSkill = SL.GetSkillValue("1", profile, meta, -5);
+                RewardMeta rr = new RewardMeta();
+                rr.Id = cardMeta.Reward[0][info.RI].Id;
+                rr.Count = SL.GetRewardMinCount(rr.Id, cardMeta, profile, meta, tradeSkill);
+                _reward = new List<RewardMeta> { rr };
+
+                rr = new RewardMeta();
+                rr.Id = cardMeta.Cost[0][info.CI].Id;
+                rr.Count = SL.GetCostMinCount(rr.Id, cardMeta, profile, meta, tradeSkill);
+                _cost = new List<RewardMeta> { rr };
+            }
+            else
+            {
+                _reward = cardMeta.Reward.GetReward().Where(r => r.Chance == 0).ToList();
+                _cost = cardMeta.Cost.GetReward().Where(c => c.Chance == 0).ToList();
+            }
+
+            reward.SetItems(_reward, _cost);
+            randomReward.SetItems(
+                cardMeta.Reward.GetReward().Where(r => r.Chance > 0).ToList(),
+                cardMeta.Cost.GetReward().Where(c => c.Chance > 0).ToList());
+            randomPanel.SetActive(randomReward.HasReward);
+
             if (reward.HasReward)
             {
                 rewardPanel.SetActive(true);

@@ -67,7 +67,7 @@ namespace UI.Map
             {
                 textYouHere.gameObject.SetActive(true);
             }
-            else if (SL.CheckCondition(meta.Con[0], Services.Meta.Game, Services.Player.Profile, null))
+            else if (SL.CheckCondition(meta.Con[0], Services.Meta.Game, Services.Player.Profile, null, null))
             {
                 button.gameObject.SetActive(true);
                 button.interactable = true;//SetActiveButton(true);

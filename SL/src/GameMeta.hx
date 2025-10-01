@@ -61,6 +61,9 @@ class RewardMeta {
 @:strict(SerializableAttribute)
 class SkillMeta extends ItemMeta {
 	public var Slot:Int;
+	public var Values:NativeArray<Int>;
+	public var Descs:NativeArray<String>;
+	public var Icon:String;
 }
 
 @:nativeGen

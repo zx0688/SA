@@ -15,16 +15,12 @@ public class UICharacter : ServiceBehaviour, IPage
     [SerializeField] private Image energyIcon;
 
 
-    //     void Awake()
-    //     {
-    //         // foreach (UI_SkillItem item in skills)
-    //         // {
-    //         //     item.SetTooltip(tooltip);
-    //         // }
-    // 
-    //         //        gameObject.SetActive(false);
-    //         //      tooltip.HideTooltip();
-    //     }
+    void Awake()
+    {
+        foreach (UISkillItem item in skills)
+            item.SetTooltip(tooltip);
+        tooltip.HideTooltip();
+    }
 
     //     protected override void OnServicesInited()
     //     {
@@ -40,16 +36,7 @@ public class UICharacter : ServiceBehaviour, IPage
         energyIcon.LoadItemIcon("6");
         swipeCount.text = Services.Player.Profile.SwipeCount.ToString();
 
-        for (int i = 0; i < skills.Length; i++)
-        {
-            UISkillItem item = skills[i];
-            string id = Services.Player.Profile.Skills[item.Slot];
-
-            if (id != null && Services.Meta.Game.Skills.TryGetValue(id, out SkillMeta meta))
-                item.SetItem(meta);
-            else
-                item.SetItem(null);
-        }
+        skills.ToList().ForEach(s => s.UpdateItem(s.Slot));
     }
 
     public void Show()

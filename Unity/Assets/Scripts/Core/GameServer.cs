@@ -200,16 +200,17 @@ namespace GameServer
             //local profile changing
             response.Error = null;
             response.Debug = null;
+            string message = "";
             //Debug.Log($"REQUEST:{JSON.Serialize(request)}");
             if (request.Id != null)
-                Debug.Log($"HASH:{request.Hash} ID {request.Id}");
+                message += $"HASH:{request.Hash} ID {request.Id} \n";
             else
-                Debug.Log($"HASH:{request.Hash}");
+                message += $"HASH:{request.Hash} \n";
 
             try
             {
                 SL.Change(request, meta, profile, GameTime.Get(), response);
-                Debug.Log($"LOG:{response.Log}");
+                message += $"LOG:{response.Log} \n";
             }
             catch (Exception e)
             {
@@ -218,13 +219,22 @@ namespace GameServer
 
                 Debug.LogError(e.Message);
                 Debug.LogError(e.StackTrace);
-                Debug.Log($"LOG:{response.Log}");
-                Debug.Log($"DebugMessage:{response.Debug}");
+                message += $"LOG:{response.Log} \n";
+                message += $"DebugMessage:{response.Debug} \n";
             }
 
+            Debug.Log(message);
+            string deck = "";
+            for (var i = profile.Deck.Count; i > 0; i--)
+            {
+                if (i == profile.Deck.Count)
+                    deck += JSON.Serialize(profile.Deck[i - 1]).ColorizeHH("FF0000") + "\n";
+                else
+                    deck += JSON.Serialize(profile.Deck[i - 1]) + "\n";
+            }
 
-            Debug.Log($"DECK:{JSON.Serialize(profile.Deck)} \nCURRENT {(profile.Deck.Count > 0 ? SL.TryGetCurrentCard(profile).Id.ColorizeHH("00FF00") : "-")}");
-            Debug.Log($"CURRENT ITEM:{(profile.Deck.Count > 0 ? JSON.Serialize(SL.TryGetCurrentCard(profile)) : "-")}");
+            Debug.Log($"CURRENT {(profile.Deck.Count > 0 ? SL.TryGetCurrentCard(profile).Id.ColorizeHH("00FF00") : "-")}\n{deck}");
+            //Debug.Log($"CURRENT ITEM:{(profile.Deck.Count > 0 ? JSON.Serialize(SL.TryGetCurrentCard(profile)) : "-")}");
 
 
 

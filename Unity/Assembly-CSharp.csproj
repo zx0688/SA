@@ -104,6 +104,7 @@
     <Compile Include="Assets/Scripts/Components/Plugins/Gradient/UIGradientUtils.cs" />
     <Compile Include="Assets/Scripts/UI/Components/UI_GetRewardAnimationList.cs" />
     <Compile Include="Assets/Scripts/Core/Services/ServiceBehaviour.cs" />
+    <Compile Include="Assets/Scripts/UI/Skills/SkillEffectBuilder.cs" />
     <Compile Include="Assets/Scripts/UI/Achivement/UI_AchivmentTooltip.cs" />
     <Compile Include="Assets/Scripts/UI/Skills/UISkillItem.cs" />
     <Compile Include="Assets/Scripts/UI/IUpdate.cs" />

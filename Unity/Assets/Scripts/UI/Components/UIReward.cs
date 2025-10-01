@@ -42,7 +42,11 @@ public class UIReward : MonoBehaviour
             title.SetActive(true);
 
         var reward = GroupById(rewards, cost);
-        reward = reward.OrderBy(item => int.Parse(item.Id)).ToList();
+        reward = reward
+            .OrderBy(item => item.Count >= 0)
+            .ThenBy(item => int.Parse(item.Id))
+            .ToList();
+
         HasReward = true;
 
         for (int i = 0; i < addItems.Length; i++)

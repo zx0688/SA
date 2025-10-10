@@ -70,7 +70,7 @@ public static class Extensions
 
     public static void LoadSkillImage(this Image icon, string name, Action callback = null)
     {
-        Services.Assets.SetSpriteIntoImage(icon, ZString.Format("Skills/{0}", name), true, null, callback).Forget();
+        Services.Assets.SetSpriteIntoImage(icon, ZString.Format("Cards/{0}", name), true, null, callback).Forget();
     }
 
     public static void LoadHeroImage(this Image icon, string name, Action callback = null)
@@ -101,7 +101,7 @@ public static class Extensions
 
     public static bool HasText(this string text) => text != null && text.Length > 0;
     public static bool HasReward(this RewardMeta[][] reward) => reward != null && reward.Length > 0;
-    public static List<RewardMeta> GetReward(this RewardMeta[][] reward) => reward.HasReward() ? reward[0].ToList() : new List<RewardMeta>();
+    public static List<RewardMeta> GetReward(this RewardMeta[][] reward, int index) => reward.HasReward() ? reward[index].ToList() : new List<RewardMeta>();
 
     public static RewardMeta[] ToReward(this IEnumerable<ItemData> items) => items.Select(i =>
     {

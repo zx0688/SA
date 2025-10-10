@@ -164,7 +164,7 @@ class DeckItem {
 		this.Id = Id;
 		this.S = State;
 		this.DI = DescIndex;
-		this.Ch = new List_1();
+		this.Ch = null;
 	}
 
 	public var Ch:List_1<ChoiceInfo>;
@@ -180,13 +180,15 @@ class SkillItem {
 	public static inline var SKILL:Int = 1;
 	public static inline var RELATIONSHIP:Int = 3;
 
-	public function new(Id:String, Level:Int, Slot:Int) {
+	public function new(Id:String, Level:Int, Slot:Int, Type:Int) {
 		this.Id = Id;
 		this.Level = Level;
 		this.Slot = Slot;
+		this.Type = Type;
 	}
 
 	public var Level:Int;
 	public var Id:String;
 	public var Slot:Int;
+	public var Type:Int;
 }

@@ -1427,6 +1427,8 @@ namespace UnityJSON
 
 			if (node.IsObject)
 			{
+				KeyValuePair<string, JSONNode> p = default;
+				Dictionary<string, List<MemberInfo>> m = default;
 				try
 				{
 					Type type = obj.GetType();
@@ -1436,6 +1438,7 @@ namespace UnityJSON
 					Dictionary<string, object> extras = new Dictionary<string, object>();
 
 					var members = _GetDeserializedClassMembers(type, out extrasMember, out extrasAttribute);
+					m = members;
 					IEnumerator enumerator = (node as JSONObject).GetEnumerator();
 
 					var extrasTypeAttribute = extrasMember == null
@@ -1448,6 +1451,7 @@ namespace UnityJSON
 					while (enumerator.MoveNext())
 					{
 						var pair = (KeyValuePair<string, JSONNode>)enumerator.Current;
+						p = pair;
 						if (ignoredKeys.Contains(pair.Key))
 						{
 							continue;
@@ -1497,6 +1501,7 @@ namespace UnityJSON
 					{
 						listener.OnDeserializationFailed(this);
 					}
+					throw new Exception("Ошибка распаковки " + p.Key + " значение ");
 					throw exception;
 				}
 			}

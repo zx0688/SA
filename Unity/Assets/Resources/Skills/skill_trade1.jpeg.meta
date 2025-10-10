@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 66a239a433f1c4dd08c77bf8f5d04efc
+guid: 9249b2cbbf1fa41b69516eb331faf892
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3233680440359091791
-    second: trade1_0
+      213: -5572994428799311418
+    second: skill_trade1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: trade1_0
+      name: skill_trade1_0
       rect:
         serializedVersion: 2
         x: 0
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f4e7bbc4a3750ec20800000000000000
-      internalID: 3233680440359091791
+      spriteID: 6c1af20181fb8a2b0800000000000000
+      internalID: -5572994428799311418
       vertices: []
       indices: 
       edges: []

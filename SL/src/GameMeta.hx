@@ -18,7 +18,8 @@ class GameMeta {
 	public var Skills:Dictionary_2<String, SkillMeta>;
 	public var Locations:Dictionary_2<String, CardMeta>;
 	public var Groups:Dictionary_2<String, GroupMeta>;
-	public var Triggers:Dictionary_2<String, TriggerActionMeta>;
+	public var TriggerEvents:Dictionary_2<String, TriggerEventMeta>;
+	public var TriggerCards:Dictionary_2<String, TriggerEventMeta>;
 
 	public var Profile:PlayerMeta;
 	public var Config:ConfigMeta;
@@ -60,10 +61,19 @@ class RewardMeta {
 @:nativeGen
 @:strict(SerializableAttribute)
 class SkillMeta extends ItemMeta {
+	public static inline var TRADE:Int = 0;
+	public static inline var CHANCE:Int = 1;
+	public static inline var CHANCE_MULTIPLE:Int = 2;
+	public static inline var REWARD:Int = 3;
+	public static inline var DEFAULT = 1000;
+
 	public var Slot:Int;
 	public var Values:NativeArray<Int>;
 	public var Descs:NativeArray<String>;
 	public var Icon:String;
+	public var Reward:NativeArray<NativeArray<RewardMeta>>;
+	public var Cost:NativeArray<NativeArray<RewardMeta>>;
+	public var Cards:NativeArray<TriggerMeta>;
 }
 
 @:nativeGen
@@ -114,12 +124,15 @@ class ChoiceMeta {
 
 @:nativeGen
 @:strict(SerializableAttribute)
-class TriggerActionMeta {
+class TriggerEventMeta {
+	public static inline var LAST_CARD:String = "18";
+	public static inline var CARD_IS_NOT_TRIGGERED:String = "19";
+	public static inline var CARD_IS_TRIGGERED:String = "20";
+	public static inline var EVERY_CARD:String = "21";
+
 	public var Id:String;
-	public var Reward:NativeArray<NativeArray<RewardMeta>>;
-	public var Cost:NativeArray<NativeArray<RewardMeta>>;
-	public var Next:NativeArray<TriggerMeta>;
 	public var Cards:NativeArray<TriggerMeta>;
+	// public var Con:NativeArray<NativeArray<ConditionMeta>>;
 }
 
 @:nativeGen
@@ -127,7 +140,7 @@ class TriggerActionMeta {
 class TriggerMeta {
 	public static inline var CARD:Int = 1;
 	public static inline var ITEM:Int = 2;
-
+	public static inline var SKILL:Int = 5;
 	public static inline var ALWAYS:Int = 10;
 	public static inline var SWIPE:Int = 11;
 	public static inline var START_GAME:Int = 12;
@@ -146,6 +159,7 @@ class TriggerMeta {
 	public var Next:String;
 	public var IfNot:String;
 	public var Over:String;
+	public var Skill:String;
 }
 
 @:nativeGen
@@ -233,6 +247,7 @@ class CardMeta {
 	public var Over:NativeArray<TriggerMeta>;
 	public var IfNot:NativeArray<TriggerMeta>;
 	public var IfWin:NativeArray<TriggerMeta>;
+	public var Skills:NativeArray<TriggerMeta>;
 
 	// public var Triggered:NativeArray<TriggerMeta>;
 	public var TradeLimit:Int;
@@ -240,6 +255,8 @@ class CardMeta {
 	public var Pri:Int;
 	public var Con:NativeArray<NativeArray<ConditionMeta>>;
 	public var Text:String;
+
+	public var Tags:NativeArray<String>;
 
 	public var Sound:NativeArray<String>;
 }

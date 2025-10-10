@@ -56,10 +56,10 @@ public class PlayerService : IService
     public async UniTask Init(IProgress<float> progress = null)
     {
         request = new GameRequest(Type: 0, Value: 0, Id: "");
-
+        PlayerPrefs.DeleteAll();
         Profile = await HttpBatchServer.GetProfile(progress: progress);
 
-        PlayerPrefs.DeleteAll();
+
 
         //if (Profile.ActiveQuests.Count == 0)
         //    FollowQuest = null;
@@ -116,7 +116,7 @@ public class PlayerService : IService
             else
                 throw new Exception($"card {card.Id} must have no reward message");
         }
-        else if (deckItem.Ch.Count > 0 && card.Descs != null)
+        else if (deckItem.Ch != null && deckItem.Ch.Count > 0 && card.Descs != null)
         {
             if (card.OnlyOnce != null && (!Profile.Cards.TryGetValue(card.Id, out CardData _card) || _card.CT == 0))
                 text = card.OnlyOnce[(card.OnlyOnce.Length - 1)];
@@ -210,12 +210,12 @@ public class PlayerService : IService
         request.Hash = swipe.Card.Id;
         request.Type = TriggerMeta.SWIPE;
 
-        if (swipe.Item.Ch.Count > 1)
+        if (swipe.Choices.Count > 1)
         {
             request.Value = swipe.CurrentChoice;
             request.Id = swipe.CurrentChoice == CardMeta.LEFT ? swipe.Choices[0].Id : swipe.Choices[1].Id;
         }
-        else if (swipe.Item.Ch.Count == 1)
+        else if (swipe.Choices.Count == 1)
         {
             request.Value = 0;
             request.Id = swipe.Item.Ch[0].Id;
@@ -295,7 +295,7 @@ public class PlayerService : IService
         swipeData.Item = ditem;
         swipeData.Data = Profile.Cards.GetValueOrDefault(nextCardId);
         swipeData.Card = Meta.Cards.GetValueOrDefault(nextCardId);
-        swipeData.Choices = ditem.Ch.Count > 0 ? ditem.Ch.Select(c => Meta.Cards[c.Id]).ToList() : new List<CardMeta>(); //Profile.Left != null ? Meta.Cards[Profile.Left.Id] : null;
+        swipeData.Choices = ditem.Ch != null && ditem.Ch.Count > 0 ? ditem.Ch.Select(c => Meta.Cards[c.Id]).ToList() : new List<CardMeta>(); //Profile.Left != null ? Meta.Cards[Profile.Left.Id] : null;
         //swipeData.Down = null; //Profile.Right != null ? Meta.Cards[Profile.Right.Id] : swipeData.Up;
 
 

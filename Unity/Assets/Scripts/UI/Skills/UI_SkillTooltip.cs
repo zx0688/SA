@@ -13,6 +13,7 @@ public class UI_SkillTooltip : MonoBehaviour
     [SerializeField] private Image icon;
     [SerializeField] private Text type;
     [SerializeField] private Text effect;
+    [SerializeField] private UIReward reward;
 
     private SkillEffectBuilder _effectBuilder;
     private SkillEffectBuilder effectBuilder
@@ -30,6 +31,7 @@ public class UI_SkillTooltip : MonoBehaviour
 
     public void HideTooltip()
     {
+        reward.Hide();
         background.Hide();
         background.gameObject.SetActive(false);
         gameObject.SetActive(false);
@@ -37,13 +39,20 @@ public class UI_SkillTooltip : MonoBehaviour
 
     public void ShowTooltip(SkillMeta meta, SkillItem data)
     {
-        background.Show("pink", meta.Name);
+
+        background.Show("pink", meta.Name.Localize(LocalizePartEnum.CardName));
         background.gameObject.SetActive(true);
         type.Localize($"SkillType{meta.Slot}.UI", LocalizePartEnum.GUI);
         icon.LoadSkillImage(data.Level == 2 ? meta.Image : meta.Icon);
 
         description.Localize(meta.Descs[data.Level == 2 ? 1 : 0], LocalizePartEnum.CardDescription);
         effect.text = effectBuilder.Apply(meta, data);
+
+        if (meta.Reward != null || meta.Cost != null)
+        {
+            reward.SetItems(meta.Reward.GetReward(data.Level), meta.Cost.GetReward(data.Level), false);
+        }
+
         gameObject.SetActive(true);
     }
 

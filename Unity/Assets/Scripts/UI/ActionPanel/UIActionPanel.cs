@@ -101,7 +101,7 @@ namespace UI.ActionPanel
             descriptionText = Services.Player.TryGetCardDescription(data.Card, out string desc) ?
                 desc : "";
 
-            if (data.Item.Ch.Count > 1)
+            if (data.Choices.Count > 1)
             {
                 //createBackpack();
                 OnSwipeListenerEnable();
@@ -194,7 +194,7 @@ namespace UI.ActionPanel
             //needed.Hide();
             description.gameObject.SetActive(false);
 
-            if (data.Item.Ch.Count > 0)
+            if (data.Choices.Count > 0)
             {
                 //leftChoice.Hide();
                 //rightChoice.Hide();
@@ -266,9 +266,9 @@ namespace UI.ActionPanel
 
             List<RewardMeta> _reward = null;
             List<RewardMeta> _cost = null;
-            if (data.Card.TradeLimit > 0)
+            if (cardMeta.TradeLimit > 0)
             {
-                var tradeSkill = SL.GetSkillValue("1", profile, meta, -5);
+                var tradeSkill = SkillHelper.GetSkillValue("1", null, profile, meta, SkillMeta.DEFAULT, -5);
                 RewardMeta rr = new RewardMeta();
                 rr.Id = cardMeta.Reward[0][info.RI].Id;
                 rr.Count = SL.GetRewardMinCount(rr.Id, cardMeta, profile, meta, tradeSkill);
@@ -281,14 +281,14 @@ namespace UI.ActionPanel
             }
             else
             {
-                _reward = cardMeta.Reward.GetReward().Where(r => r.Chance == 0).ToList();
-                _cost = cardMeta.Cost.GetReward().Where(c => c.Chance == 0).ToList();
+                _reward = cardMeta.Reward.GetReward(0).Where(r => r.Chance == 0).ToList();
+                _cost = cardMeta.Cost.GetReward(0).Where(c => c.Chance == 0).ToList();
             }
 
             reward.SetItems(_reward, _cost);
             randomReward.SetItems(
-                cardMeta.Reward.GetReward().Where(r => r.Chance > 0).ToList(),
-                cardMeta.Cost.GetReward().Where(c => c.Chance > 0).ToList());
+                cardMeta.Reward.GetReward(0).Where(r => r.Chance > 0).ToList(),
+                cardMeta.Cost.GetReward(0).Where(c => c.Chance > 0).ToList());
             randomPanel.SetActive(randomReward.HasReward);
 
             if (reward.HasReward)

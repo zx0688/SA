@@ -160,9 +160,19 @@ namespace GameServer
                 request.Timestamp = GameTime.Get64();
 
                 var response = new GameResponse();
-                profile = SL.CreateProfile(request, meta, response);
+                try
+                {
+                    profile = SL.CreateProfile(request, meta, response);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
+                }
+
                 if (response.Debug != null)
-                    Debug.LogWarning($"DebugMessage:{response.Debug}");
+                    Debug.Log($"DebugMessage:{response.Debug}");
+                if (response.Log != null)
+                    Debug.Log($"Log:{response.Log}");
                 return profile;
             }
 
@@ -233,7 +243,8 @@ namespace GameServer
                     deck += JSON.Serialize(profile.Deck[i - 1]) + "\n";
             }
 
-            Debug.Log($"CURRENT {(profile.Deck.Count > 0 ? SL.TryGetCurrentCard(profile).Id.ColorizeHH("00FF00") : "-")}\n{deck}");
+            Debug.Log($"DECK {(profile.Deck.Count > 0 ? SL.TryGetCurrentCard(profile).Id.ColorizeHH("00FF00") : "-")}\n{deck}");
+            Debug.Log($"REWARD:{JSON.Serialize(profile.RewardEvents)}");
             //Debug.Log($"CURRENT ITEM:{(profile.Deck.Count > 0 ? JSON.Serialize(SL.TryGetCurrentCard(profile)) : "-")}");
 
 
